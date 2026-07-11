@@ -89,7 +89,8 @@ function openAuthModal(mode) {
     },
   });
 
-  form.append(
+  // Note: Node.append() stringifies null to the text "null", so filter nulls out.
+  [
     el('label', {}, 'Email'),
     emailInput,
     mode === 'signup' ? el('label', {}, 'Username') : null,
@@ -107,8 +108,8 @@ function openAuthModal(mode) {
           openAuthModal(mode === 'signup' ? 'login' : 'signup');
         },
       }, mode === 'signup' ? 'Have an account? Sign in' : 'New here? Sign up'),
-    ])
-  );
+    ]),
+  ].filter(Boolean).forEach((child) => form.append(child));
 
   const close = openModal(el('div', {}, [title, form]));
 }
