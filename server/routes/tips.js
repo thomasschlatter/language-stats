@@ -13,15 +13,22 @@ router.get('/', (req, res) => {
   res.json({ tips: listTips(language.id) });
 });
 
-// POST /api/tips  { languageCode, title, body }
+// POST /api/tips  { languageCode, bodyLanguageCode?, title, body }
 router.post('/', requireAuth, (req, res) => {
-  const { languageCode, title, body } = req.body ?? {};
+  const { languageCode, bodyLanguageCode, title, body } = req.body ?? {};
   if (!languageCode || !title || !body) {
     return res.status(400).json({ error: 'languageCode, title and body are required' });
   }
   const language = getLanguageByCode(languageCode);
   if (!language) return res.status(404).json({ error: 'unknown language' });
-  const tip = createTip({ languageId: language.id, userId: req.user.id, title, body });
+  const bodyLang = bodyLanguageCode ? getLanguageByCode(bodyLanguageCode) : null;
+  const tip = createTip({
+    languageId: language.id,
+    bodyLangId: bodyLang?.id,
+    userId: req.user.id,
+    title,
+    body,
+  });
   res.status(201).json({ tip });
 });
 

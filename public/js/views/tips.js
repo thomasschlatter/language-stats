@@ -1,9 +1,11 @@
-// Tips view: community language-learning advice for a language. Signed-in
-// users can post a tip.
+// Tips view: community language-learning advice. Tip bodies are prose, so —
+// like everything else on the site — every word is clickable and rendered in
+// the locale the tip was written in.
 
 import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
+import { renderText, tokenizeTree } from '../render.js';
 import { languageTabs } from './tabs.js';
 
 export async function renderTips(langCode) {
@@ -32,30 +34,43 @@ export async function renderTips(langCode) {
   clear(list);
   if (!tips.length) {
     list.append(el('p', { class: 'muted' }, 'No tips yet. Be the first to share one!'));
+    tokenizeTree(view);
     return;
   }
   for (const t of tips) {
+    const bodyLang = t.body_lang || store.nativeLang;
     list.append(
       el('div', { class: 'card' }, [
-        el('h3', {}, t.title),
-        el('div', { html: escapeHtml(t.body).replace(/\n/g, '<br>') }),
-        el('div', { class: 'meta', style: 'margin-top:0.5rem' }, `by @${t.author} · ${t.created_at}`),
+        el('h3', {}, renderText(t.title, bodyLang)),
+        el('div', { class: 'tip-body', lang: bodyLang }, renderText(t.body, bodyLang)),
+        el('div', { class: 'meta', style: 'margin-top:0.5rem' }, `by @${t.author} · written in ${bodyLang} · ${t.created_at}`),
       ])
     );
   }
+  tokenizeTree(view);
 }
 
 function openAddTip(language, onDone) {
   const err = el('div', { class: 'error' });
   const title = el('input', { type: 'text', placeholder: 'short title' });
   const body = el('textarea', { placeholder: 'Share your trick for learning…' });
+  const writtenIn = el('select', {},
+    store.languages.map((l) =>
+      el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)
+    )
+  );
 
   const form = el('form', {
     onsubmit: async (e) => {
       e.preventDefault();
       err.textContent = '';
       try {
-        await api.createTip({ languageCode: language.code, title: title.value, body: body.value });
+        await api.createTip({
+          languageCode: language.code,
+          bodyLanguageCode: writtenIn.value,
+          title: title.value,
+          body: body.value,
+        });
         close();
         onDone();
       } catch (ex) {
@@ -67,6 +82,8 @@ function openAddTip(language, onDone) {
     title,
     el('label', {}, 'Your tip'),
     body,
+    el('label', {}, 'Written in'),
+    writtenIn,
     err,
     el('div', { class: 'row', style: 'margin-top:1rem' }, [
       el('button', { class: 'btn', type: 'submit' }, 'Post tip'),
@@ -74,10 +91,4 @@ function openAddTip(language, onDone) {
   ]);
 
   const close = openModal(el('div', {}, [el('h2', {}, `Share a ${language.name} tip`), form]));
-}
-
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
-  );
 }

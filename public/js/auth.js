@@ -14,9 +14,23 @@ export async function loadCurrentUser() {
   }
 }
 
-// Render the top-right auth controls based on store.user.
+// A "My native language" picker — clicking any word translates INTO this
+// locale. Lives in the top bar so it's always one glance away.
+function nativeSelector() {
+  const select = el(
+    'select',
+    { class: 'native-select', title: 'Your native language — words translate into this', onchange: (e) => store.setNative(e.target.value) },
+    store.languages.map((l) =>
+      el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)
+    )
+  );
+  return el('span', { class: 'native-picker' }, [el('span', { class: 'who' }, 'Native:'), select]);
+}
+
+// Render the top-right controls (native picker + auth) based on store.user.
 export function renderAuthArea() {
   const area = clear(document.getElementById('auth-area'));
+  area.append(nativeSelector());
   if (store.user) {
     area.append(
       el('span', { class: 'who' }, `@${store.user.username}`),

@@ -19,6 +19,9 @@ import authRoutes from './routes/auth.js';
 import languageRoutes from './routes/languages.js';
 import wordRoutes from './routes/words.js';
 import tipRoutes from './routes/tips.js';
+import articleRoutes from './routes/articles.js';
+import frequencyRoutes from './routes/frequency.js';
+import messageRoutes from './routes/messages.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -34,6 +37,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/languages', languageRoutes);
 app.use('/api/words', wordRoutes);
 app.use('/api/tips', tipRoutes);
+app.use('/api/articles', articleRoutes);
+app.use('/api/frequency', frequencyRoutes);
+app.use('/api/messages', messageRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 

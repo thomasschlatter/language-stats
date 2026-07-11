@@ -4,6 +4,7 @@ import { getLanguageByCode } from '../models/languages.js';
 import {
   listWords,
   getWordById,
+  getEntry,
   findWord,
   createWord,
   updateWord,
@@ -23,8 +24,66 @@ router.get('/', (req, res) => {
   res.json({ words: listWords(language.id, search) });
 });
 
+// GET /api/words/entry?lang=de&text=ich
+// The core "word as an element" lookup: returns the entry for a (language,
+// text) pair — or word:null if that word isn't in the dictionary yet — plus
+// its links. Every rendered word points here.
+router.get('/entry', (req, res) => {
+  const { lang, text } = req.query;
+  const language = getLanguageByCode(lang);
+  if (!language) return res.status(404).json({ error: 'unknown language' });
+  if (!text) return res.status(400).json({ error: 'text is required' });
+
+  const word = getEntry(language.id, String(text).trim());
+  const links = word ? getLinkedWords(word.id) : [];
+  res.json({
+    languageCode: language.code,
+    languageName: language.name,
+    text: String(text).trim(),
+    word: word || null,
+    links,
+  });
+});
+
+// GET /api/words/resolve?text=ich&from=de&to=en
+// Given a word in language `from`, decide where a click should land, based on
+// the reader's native language `to`:
+//   - to === from            -> the word's own page
+//   - translation exists     -> the translated word's page (native language)
+//   - no translation / unknown word -> the source word's page (to add one)
+router.get('/resolve', (req, res) => {
+  const { text, from, to } = req.query;
+  const fromLang = getLanguageByCode(from);
+  if (!fromLang) return res.status(404).json({ error: 'unknown source language' });
+  if (!text) return res.status(400).json({ error: 'text is required' });
+
+  const word = String(text).trim();
+  const toLang = getLanguageByCode(to);
+
+  // Same language (or unknown native) -> just open the word's own page.
+  if (!toLang || toLang.code === fromLang.code) {
+    return res.json({ target: { languageCode: fromLang.code, text: word }, reason: 'self' });
+  }
+
+  const src = getEntry(fromLang.id, word);
+  if (src) {
+    const translation = getLinkedWords(src.id).find(
+      (l) => l.type === 'translation' && l.language_code === toLang.code
+    );
+    if (translation) {
+      return res.json({
+        target: { languageCode: toLang.code, text: translation.text },
+        reason: 'translation',
+      });
+    }
+    return res.json({ target: { languageCode: fromLang.code, text: src.text }, reason: 'no-translation' });
+  }
+  // Word not in the dictionary at all -> land on its (source) page to add it.
+  return res.json({ target: { languageCode: fromLang.code, text: word }, reason: 'unknown-word' });
+});
+
 // GET /api/words/:id  -> word + its linked (clickable) translations
-router.get('/:id', (req, res) => {
+router.get('/:id(\\d+)', (req, res) => {
   const word = getWordById(Number(req.params.id));
   if (!word) return res.status(404).json({ error: 'word not found' });
   res.json({ word, links: getLinkedWords(word.id) });

@@ -42,6 +42,34 @@ export function findWord(languageId, text) {
     .get(languageId, text);
 }
 
+// Fetch a single word entry by language + text (case-insensitive).
+export function getEntry(languageId, text) {
+  return db
+    .prepare(
+      `SELECT w.id, w.language_id, w.text, w.meaning, w.notes,
+              l.code AS language_code, l.name AS language_name
+       FROM words w
+       JOIN languages l ON l.id = w.language_id
+       WHERE w.language_id = ? AND w.text = ? COLLATE NOCASE`
+    )
+    .get(languageId, text);
+}
+
+// Look a word up by its TEXT across every language (case-insensitive).
+// The same spelling can exist in several languages, so this returns a list.
+export function lookupByText(text) {
+  return db
+    .prepare(
+      `SELECT w.id, w.language_id, w.text, w.meaning, w.notes,
+              l.code AS language_code, l.name AS language_name
+       FROM words w
+       JOIN languages l ON l.id = w.language_id
+       WHERE w.text = ? COLLATE NOCASE
+       ORDER BY l.name`
+    )
+    .all(text);
+}
+
 export function createWord({ languageId, text, meaning, notes, userId }) {
   const info = db
     .prepare(

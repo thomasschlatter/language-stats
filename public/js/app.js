@@ -4,8 +4,15 @@
 import { api } from './api.js';
 import { store } from './store.js';
 import { el, clear } from './dom.js';
+import { tokenizeTree } from './render.js';
 import { loadCurrentUser, renderAuthArea } from './auth.js';
 import { startRouter } from './router.js';
+
+// Make the persistent chrome (sidebar heading, top-bar labels) clickable too.
+function tokenizeChrome() {
+  tokenizeTree(document.querySelector('.sidebar'));
+  tokenizeTree(document.getElementById('auth-area'));
+}
 
 function renderSidebar() {
   const nav = clear(document.getElementById('language-list'));
@@ -33,15 +40,17 @@ async function init() {
 
   renderSidebar();
   renderAuthArea();
+  tokenizeChrome();
   startRouter();
 
   // Keep the active sidebar item in sync as routes change.
   window.addEventListener('hashchange', renderSidebar);
 
-  // Re-render auth + sidebar whenever store changes (login/logout).
+  // Re-render auth + sidebar whenever store changes (login/logout/native lang).
   store.subscribe(() => {
     renderAuthArea();
     renderSidebar();
+    tokenizeChrome();
     // Refresh the current view so add/edit buttons appear/disappear.
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });

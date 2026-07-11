@@ -17,14 +17,14 @@ router.get('/:code', (req, res) => {
   res.json({ language });
 });
 
-// POST /api/languages  (signed-in users can add a language)
+// POST /api/languages  (signed-in users can add a language/dialect)
 router.post('/', requireAuth, (req, res) => {
-  const { code, name } = req.body ?? {};
-  if (!code || !name) {
-    return res.status(400).json({ error: 'code and name are required' });
+  const { code, lang, country, name } = req.body ?? {};
+  if (!code || !lang || !name) {
+    return res.status(400).json({ error: 'code, lang and name are required' });
   }
   try {
-    res.status(201).json({ language: createLanguage({ code, name }) });
+    res.status(201).json({ language: createLanguage({ code, lang, country, name }) });
   } catch (err) {
     if (String(err.message).includes('UNIQUE')) {
       return res.status(409).json({ error: 'language code already exists' });

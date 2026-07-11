@@ -5,7 +5,8 @@ export function languageTabs(langCode, active) {
   const tab = (key, label, href) =>
     el('a', { href, class: active === key ? 'active' : '' }, label);
   return el('div', { class: 'tabs' }, [
-    tab('words', 'Words', `#/lang/${langCode}`),
+    tab('cards', 'Cards', `#/lang/${langCode}`),
     tab('tips', 'Tips', `#/lang/${langCode}/tips`),
+    tab('chat', 'Chat', `#/lang/${langCode}/chat`),
   ]);
 }
