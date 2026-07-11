@@ -179,6 +179,33 @@ CREATE TABLE IF NOT EXISTS user_words (
 
 CREATE INDEX IF NOT EXISTS idx_user_words ON user_words(user_id, language_id, status);
 
+-- ---------------------------------------------------------------------------
+-- 1-on-1 direct messages + inline corrections (the language-exchange core).
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS dm_messages (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  sender_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body         TEXT NOT NULL,
+  body_lang_id INTEGER REFERENCES languages(id),
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_dm_sender ON dm_messages(sender_id, id);
+CREATE INDEX IF NOT EXISTS idx_dm_recipient ON dm_messages(recipient_id, id);
+
+-- A correction proposes a fixed version of someone else's message.
+CREATE TABLE IF NOT EXISTS dm_corrections (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  message_id     INTEGER NOT NULL REFERENCES dm_messages(id) ON DELETE CASCADE,
+  corrector_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  corrected_text TEXT NOT NULL,
+  note           TEXT,
+  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_dm_corr ON dm_corrections(message_id);
+
 -- Card upvotes — one vote per user per article.
 CREATE TABLE IF NOT EXISTS article_votes (
   article_id INTEGER NOT NULL REFERENCES articles(id) ON DELETE CASCADE,

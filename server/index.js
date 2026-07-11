@@ -27,6 +27,8 @@ import progressRoutes from './routes/progress.js';
 import profileRoutes from './routes/profile.js';
 import userRoutes from './routes/users.js';
 import communityRoutes from './routes/community.js';
+import dmRoutes from './routes/dm.js';
+import translateRoutes from './routes/translate.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -49,6 +51,8 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/community', communityRoutes);
+app.use('/api/dm', dmRoutes);
+app.use('/api/translate', translateRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 

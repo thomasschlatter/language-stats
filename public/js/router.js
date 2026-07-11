@@ -15,9 +15,13 @@ import { renderChat } from './views/chat.js';
 import { renderProgress } from './views/progress.js';
 import { renderUserProfile } from './views/userProfile.js';
 import { renderCommunity } from './views/community.js';
+import { renderMessages } from './views/messages.js';
+import { renderDmThread } from './views/dmThread.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
+  { pattern: /^#\/messages$/, handler: () => renderMessages() },
+  { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])) },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/tips$/, handler: (m) => renderTips(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/chat$/, handler: (m) => renderChat(dec(m[1])) },

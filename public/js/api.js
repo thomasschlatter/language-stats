@@ -76,6 +76,14 @@ export const api = {
     return request('GET', `/community${qs ? `?${qs}` : ''}`);
   },
 
+  // --- direct messages ---
+  conversations: () => request('GET', '/dm'),
+  dmThread: (username, since = 0) =>
+    request('GET', `/dm/${encodeURIComponent(username)}${since ? `?since=${since}` : ''}`),
+  sendDM: (username, b) => request('POST', `/dm/${encodeURIComponent(username)}`, b),
+  correctMessage: (id, b) => request('POST', `/dm/messages/${id}/correct`, b),
+  translate: (text, from, to) => request('POST', '/translate', { text, from, to }),
+
   // --- progress / stats ---
   progress: (lang) => request('GET', `/progress?lang=${encodeURIComponent(lang)}`),
   wordProgress: (lang, word) =>
