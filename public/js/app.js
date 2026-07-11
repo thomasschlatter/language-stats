@@ -43,8 +43,18 @@ async function init() {
   tokenizeChrome();
   startRouter();
 
-  // Keep the active sidebar item in sync as routes change.
-  window.addEventListener('hashchange', renderSidebar);
+  // Highlight the active top-nav item.
+  const syncNav = () => {
+    const h = window.location.hash || '';
+    document.querySelectorAll('.topnav a').forEach((a) => {
+      const target = a.getAttribute('href');
+      a.classList.toggle('active', h === target || (target !== '#/' && h.startsWith(target)));
+    });
+  };
+  syncNav();
+
+  // Keep the active sidebar + nav in sync as routes change.
+  window.addEventListener('hashchange', () => { renderSidebar(); syncNav(); });
 
   // Re-render auth + sidebar whenever store changes (login/logout/native lang).
   store.subscribe(() => {

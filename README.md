@@ -39,6 +39,18 @@ word is again clickable.
   - `[gender-stats]` — POS breakdown of those words + noun-gender-by-ending
     analysis (majority-predicted gender per ending and the exception rate).
 - Community **tips** and per-language **chat**, both fully clickable/translatable.
+- **Personal progress**: mark words known/learning; a dashboard shows what % of
+  everyday conversation your known words cover, with milestones and a
+  "learn these next" list.
+- **Language exchange (Tandem-style):**
+  - **Profiles** — native/learning languages, bio, interests.
+  - **Community / partner finder** — browse and match members (native in what
+    you learn, learning what you speak), filter, search, **follow**.
+  - **Direct messages** — 1-on-1 threads, fully clickable/translatable.
+  - **Corrections** — the recipient proposes a corrected version of a message,
+    shown inline (Tandem's signature feature).
+  - **Translate** — word-gloss a partner's message into your native locale via
+    the community dictionary graph.
 
 ## Architecture
 
@@ -116,4 +128,11 @@ Copy `.env.example` to `.env` and set a real `JWT_SECRET` before deploying.
 | GET | `/api/frequency/coverage?lang&t` | words covering t% of speech |
 | GET | `/api/frequency/analysis?lang&t` | POS + noun-gender-by-ending |
 | GET/POST | `/api/tips`, `/api/messages` | tips, chat |
+| GET/PUT | `/api/profile`, GET `/api/users/:username` | profiles |
+| GET | `/api/community?speaks&learning&q&match` | partner finder |
+| POST | `/api/users/:username/follow` | follow toggle |
+| GET/POST | `/api/dm`, `/api/dm/:username` | direct messages |
+| POST | `/api/dm/messages/:id/correct` | correct a message |
+| GET | `/api/progress?lang`, POST `/api/progress/mark` | progress/coverage |
+| POST | `/api/translate` | word-gloss a message |
 ```

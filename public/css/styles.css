@@ -41,6 +41,7 @@ a:hover { text-decoration: underline; }
 .topnav { display: flex; gap: 1rem; margin-left: 1.5rem; flex: 1; }
 .topnav a { color: var(--muted); font-size: 0.9rem; }
 .topnav a:hover { color: var(--text); text-decoration: none; }
+.topnav a.active { color: var(--text); font-weight: 600; }
 .auth-area { display: flex; align-items: center; gap: 0.6rem; }
 .avatar.sm { width: 28px; height: 28px; font-size: 0.72rem; }
 .person-card .card-top { align-items: center; }
