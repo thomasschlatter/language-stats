@@ -33,7 +33,7 @@ export function renderAuthArea() {
   area.append(nativeSelector());
   if (store.user) {
     area.append(
-      el('span', { class: 'who' }, `@${store.user.username}`),
+      el('a', { class: 'who', href: `#/u/${encodeURIComponent(store.user.username)}`, title: 'Your profile' }, `@${store.user.username}`),
       el('button', { class: 'btn secondary small', onclick: doLogout }, 'Sign out')
     );
   } else {

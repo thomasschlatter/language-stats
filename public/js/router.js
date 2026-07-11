@@ -13,8 +13,10 @@ import { renderWordPage } from './views/wordPage.js';
 import { renderTips } from './views/tips.js';
 import { renderChat } from './views/chat.js';
 import { renderProgress } from './views/progress.js';
+import { renderUserProfile } from './views/userProfile.js';
 
 const routes = [
+  { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/tips$/, handler: (m) => renderTips(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/chat$/, handler: (m) => renderChat(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/progress$/, handler: (m) => renderProgress(dec(m[1])) },

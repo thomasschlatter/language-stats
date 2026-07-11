@@ -33,7 +33,27 @@ CREATE TABLE IF NOT EXISTS users (
   email         TEXT NOT NULL UNIQUE,
   username      TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
+  bio           TEXT,
+  interests     TEXT,                              -- comma-separated tags
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Which languages a user speaks natively vs is learning (drives partner match).
+CREATE TABLE IF NOT EXISTS user_languages (
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  language_id INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
+  role        TEXT NOT NULL,                       -- 'native' | 'learning'
+  PRIMARY KEY (user_id, language_id, role)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_languages ON user_languages(language_id, role);
+
+-- Follow graph.
+CREATE TABLE IF NOT EXISTS follows (
+  follower_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  following_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (follower_id, following_id)
 );
 
 -- ---------------------------------------------------------------------------
