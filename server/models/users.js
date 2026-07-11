@@ -63,6 +63,36 @@ export function getUserLanguages(userId) {
     .all(userId);
 }
 
+// Browse community members, optionally filtered by a native language
+// (`speaksId`), a learning language (`learningId`), and a username query.
+// Excludes `excludeUserId` (the viewer). Returns full profiles.
+export function listCommunity({ excludeUserId, speaksId, learningId, q, limit = 60 }) {
+  const joins = [];
+  const where = [];
+  const params = [];
+
+  if (speaksId) {
+    joins.push('JOIN user_languages nl ON nl.user_id = u.id AND nl.role = \'native\' AND nl.language_id = ?');
+    params.push(speaksId);
+  }
+  if (learningId) {
+    joins.push('JOIN user_languages ll ON ll.user_id = u.id AND ll.role = \'learning\' AND ll.language_id = ?');
+    params.push(learningId);
+  }
+  if (excludeUserId) { where.push('u.id != ?'); params.push(excludeUserId); }
+  if (q) { where.push('u.username LIKE ?'); params.push(`%${q}%`); }
+
+  const sql =
+    `SELECT DISTINCT u.* FROM users u
+     ${joins.join('\n')}
+     ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+     ORDER BY u.created_at DESC
+     LIMIT ?`;
+  params.push(limit);
+
+  return db.prepare(sql).all(...params).map(profile);
+}
+
 // A public profile: basic fields + languages split by role.
 export function profile(user) {
   if (!user) return null;

@@ -14,8 +14,10 @@ import { renderTips } from './views/tips.js';
 import { renderChat } from './views/chat.js';
 import { renderProgress } from './views/progress.js';
 import { renderUserProfile } from './views/userProfile.js';
+import { renderCommunity } from './views/community.js';
 
 const routes = [
+  { pattern: /^#\/community$/, handler: () => renderCommunity() },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/tips$/, handler: (m) => renderTips(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/chat$/, handler: (m) => renderChat(dec(m[1])) },

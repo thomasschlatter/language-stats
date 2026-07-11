@@ -70,6 +70,11 @@ export const api = {
   myProfile: () => request('GET', '/profile'),
   updateProfile: (b) => request('PUT', '/profile', b),
   userProfile: (username) => request('GET', `/users/${encodeURIComponent(username)}`),
+  followUser: (username) => request('POST', `/users/${encodeURIComponent(username)}/follow`),
+  community: (params = {}) => {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v)).toString();
+    return request('GET', `/community${qs ? `?${qs}` : ''}`);
+  },
 
   // --- progress / stats ---
   progress: (lang) => request('GET', `/progress?lang=${encodeURIComponent(lang)}`),

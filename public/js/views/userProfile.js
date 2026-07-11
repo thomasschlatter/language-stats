@@ -41,9 +41,10 @@ export async function renderUserProfile(username) {
         isMe
           ? el('button', { class: 'btn small', onclick: () => openEdit(prof) }, 'Edit profile')
           : (store.user
-              ? el('a', { class: 'btn small', href: `#/dm/${encodeURIComponent(prof.username)}` }, 'Message')
+              ? el('div', { class: 'row' }, [followBtn(prof), el('a', { class: 'btn small secondary', href: `#/dm/${encodeURIComponent(prof.username)}` }, 'Message')])
               : null),
       ]),
+      el('div', { class: 'prof-counts muted' }, `${prof.followers ?? 0} followers · ${prof.following_count ?? 0} following`),
       langRow('Speaks', prof.native),
       langRow('Learning', prof.learning),
       el('div', { class: 'prof-bio' }, prof.bio || el('span', { class: 'muted' }, 'No bio yet.')),
@@ -52,6 +53,20 @@ export async function renderUserProfile(username) {
         : null,
     ])
   );
+}
+
+function followBtn(prof) {
+  const btn = el('button', { class: `btn small${prof.following ? ' secondary' : ''}` }, prof.following ? 'Following' : 'Follow');
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const { following } = await api.followUser(prof.username);
+      prof.following = following;
+      btn.textContent = following ? 'Following' : 'Follow';
+      btn.classList.toggle('secondary', following);
+    } catch { /* ignore */ } finally { btn.disabled = false; }
+  });
+  return btn;
 }
 
 function openEdit(prof) {
