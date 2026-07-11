@@ -4,6 +4,7 @@
 import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear } from '../dom.js';
+import { avatarFor } from '../avatar.js';
 import { navigate } from '../router.js';
 
 export async function renderCommunity() {
@@ -56,7 +57,7 @@ function personCard(p) {
   const card = el('div', { class: 'card person-card' }, [
     el('div', { class: 'card-top' }, [
       el('a', { class: 'person-name', href: `#/u/${encodeURIComponent(p.username)}` }, [
-        el('span', { class: 'avatar sm' }, p.username.slice(0, 2).toUpperCase()),
+        avatarFor(p.avatar, p.username, 32),
         el('strong', {}, `@${p.username}`),
       ]),
       store.user ? followBtn(p) : null,

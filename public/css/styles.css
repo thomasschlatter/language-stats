@@ -234,6 +234,33 @@ a:hover { text-decoration: underline; }
 .article-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .article-head .vote-btn { font-size: 0.95rem; padding: 0.3rem 0.8rem; }
 
+/* ---- Character avatars ---- */
+.char-avatar {
+  image-rendering: pixelated;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.char-preview {
+  image-rendering: pixelated;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.char-creator { width: min(430px, 92vw); }
+.char-body { display: flex; gap: 1.1rem; align-items: center; margin: 1rem 0; }
+.char-preview-wrap { flex-shrink: 0; }
+.char-controls { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+.char-row { display: flex; align-items: center; gap: 0.5rem; }
+.char-arrow {
+  width: 34px; height: 34px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text); cursor: pointer; font-size: 1.2rem; line-height: 1;
+}
+.char-arrow:hover { border-color: var(--accent); }
+.char-label { flex: 1; text-align: center; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.06em; color: var(--muted); }
+
 /* ---- Profile ---- */
 .profile { max-width: 620px; }
 .profile-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }

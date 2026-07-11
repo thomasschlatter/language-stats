@@ -5,6 +5,8 @@
 import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
+import { avatarFor } from '../avatar.js';
+import { openCharacterCreator } from './characterCreator.js';
 
 export async function renderUserProfile(username) {
   const view = clear(document.getElementById('view'));
@@ -32,14 +34,17 @@ export async function renderUserProfile(username) {
   view.append(
     el('div', { class: 'profile' }, [
       el('div', { class: 'profile-head' }, [
-        el('div', { class: 'avatar' }, prof.username.slice(0, 2).toUpperCase()),
+        avatarFor(prof.avatar, prof.username, 64),
         el('div', {}, [
           el('h1', { style: 'margin:0' }, `@${prof.username}`),
           el('div', { class: 'muted' }, `member since ${(prof.created_at || '').slice(0, 10)}`),
         ]),
         el('div', { class: 'spacer' }),
         isMe
-          ? el('button', { class: 'btn small', onclick: () => openEdit(prof) }, 'Edit profile')
+          ? el('div', { class: 'row' }, [
+              el('button', { class: 'btn small', onclick: () => openCharacterCreator(prof.avatar, () => renderUserProfile(prof.username)) }, prof.avatar ? 'Edit character' : 'Create character'),
+              el('button', { class: 'btn small secondary', onclick: () => openEdit(prof) }, 'Edit profile'),
+            ])
           : (store.user
               ? el('div', { class: 'row' }, [followBtn(prof), el('a', { class: 'btn small secondary', href: `#/dm/${encodeURIComponent(prof.username)}` }, 'Message')])
               : null),

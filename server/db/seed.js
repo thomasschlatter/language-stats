@@ -13,7 +13,7 @@ import { findWord, createWord, linkExists, createLink } from '../models/words.js
 import { frequencyLoaded } from '../models/frequency.js';
 import { lexiconLoaded } from '../models/lexicon.js';
 import { findArticleBySlug, createArticle } from '../models/articles.js';
-import { createUser, getUserByUsername, updateProfile, setUserLanguages } from '../models/users.js';
+import { createUser, getUserByUsername, updateProfile, setUserLanguages, setAvatar } from '../models/users.js';
 import { createMessage } from '../models/messages.js';
 import { sendDM } from '../models/dm.js';
 import { createTip } from '../models/tips.js';
@@ -280,16 +280,16 @@ function seedDemo() {
   const langId = (code) => getLanguageByCode(code).id;
 
   const people = [
-    { u: 'mia',    native: ['en-US'], learning: ['de-DE'], bio: 'Learning German for a trip to Berlin. 🇩🇪', interests: 'travel, food, photography' },
-    { u: 'lukas',  native: ['de-DE'], learning: ['en-US'], bio: 'Muttersprachler aus München, helfe gern beim Üben!', interests: 'football, music, cooking' },
-    { u: 'sofia',  native: ['es-ES'], learning: ['de-DE'], bio: 'Aprendiendo alemán desde Madrid.', interests: 'art, cinema, hiking' },
-    { u: 'noah',   native: ['en-US'], learning: ['es-ES'], bio: 'Trying to finally learn Spanish this year.', interests: 'coffee, running, tech' },
-    { u: 'emma',   native: ['de-DE'], learning: ['es-ES'], bio: 'Deutsch native, learning Spanish for fun.', interests: 'books, yoga, travel' },
-    { u: 'leon',   native: ['de-CH'], learning: ['en-US'], bio: 'Grüezi! Swiss German native happy to help.', interests: 'skiing, tech, board games' },
-    { u: 'olivia', native: ['en-US'], learning: ['de-DE'], bio: 'Intermediate German, love language exchange.', interests: 'photography, dogs, baking' },
-    { u: 'ben',    native: ['de-DE'], learning: ['en-US'], bio: 'Hi! Ich verbessere mein Englisch.', interests: 'gaming, cooking, cycling' },
-    { u: 'carla',  native: ['es-ES'], learning: ['en-US'], bio: 'From Valencia, practising English daily.', interests: 'dancing, travel, food' },
-    { u: 'finn',   native: ['de-DE'], learning: ['es-ES'], bio: 'Learning Spanish, ask me anything in German.', interests: 'cycling, history, films' },
+    { u: 'mia',    native: ['en-US'], learning: ['de-DE'], bio: 'Learning German for a trip to Berlin. 🇩🇪', interests: 'travel, food, photography', av: { Bodies: 2, Hairstyles: 5,  Eyes: 1, Accessories: 3,  Outfits: 3 } },
+    { u: 'lukas',  native: ['de-DE'], learning: ['en-US'], bio: 'Muttersprachler aus München, helfe gern beim Üben!', interests: 'football, music, cooking', av: { Bodies: 0, Hairstyles: 12, Eyes: 0, Accessories: 6,  Outfits: 8 } },
+    { u: 'sofia',  native: ['es-ES'], learning: ['de-DE'], bio: 'Aprendiendo alemán desde Madrid.', interests: 'art, cinema, hiking', av: { Bodies: 4, Hairstyles: 20, Eyes: 3, Accessories: 11, Outfits: 15 } },
+    { u: 'noah',   native: ['en-US'], learning: ['es-ES'], bio: 'Trying to finally learn Spanish this year.', interests: 'coffee, running, tech', av: { Bodies: 1, Hairstyles: 2,  Eyes: 2, Accessories: 18, Outfits: 5 } },
+    { u: 'emma',   native: ['de-DE'], learning: ['es-ES'], bio: 'Deutsch native, learning Spanish for fun.', interests: 'books, yoga, travel', av: { Bodies: 5, Hairstyles: 30, Eyes: 4, Accessories: 2,  Outfits: 22 } },
+    { u: 'leon',   native: ['de-CH'], learning: ['en-US'], bio: 'Grüezi! Swiss German native happy to help.', interests: 'skiing, tech, board games', av: { Bodies: 0, Hairstyles: 8,  Eyes: 0, Accessories: 15, Outfits: 1 } },
+    { u: 'olivia', native: ['en-US'], learning: ['de-DE'], bio: 'Intermediate German, love language exchange.', interests: 'photography, dogs, baking', av: { Bodies: 6, Hairstyles: 35, Eyes: 5, Accessories: 0,  Outfits: 12 } },
+    { u: 'ben',    native: ['de-DE'], learning: ['en-US'], bio: 'Hi! Ich verbessere mein Englisch.', interests: 'gaming, cooking, cycling', av: { Bodies: 3, Hairstyles: 1,  Eyes: 1, Accessories: 22, Outfits: 0 } },
+    { u: 'carla',  native: ['es-ES'], learning: ['en-US'], bio: 'From Valencia, practising English daily.', interests: 'dancing, travel, food', av: { Bodies: 7, Hairstyles: 25, Eyes: 6, Accessories: 9,  Outfits: 30 } },
+    { u: 'finn',   native: ['de-DE'], learning: ['es-ES'], bio: 'Learning Spanish, ask me anything in German.', interests: 'cycling, history, films', av: { Bodies: 1, Hairstyles: 15, Eyes: 0, Accessories: 2,  Outfits: 18 } },
   ];
 
   const made = {};
@@ -299,6 +299,7 @@ function seedDemo() {
       updateProfile(user.id, { bio: p.bio, interests: p.interests });
       setUserLanguages(user.id, 'native', p.native.map(langId));
       setUserLanguages(user.id, 'learning', p.learning.map(langId));
+      setAvatar(user.id, p.av);
       made[p.u] = user;
     }
 

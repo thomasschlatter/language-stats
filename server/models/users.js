@@ -12,8 +12,16 @@ export function createUser({ email, username, password }) {
 
 export function getUserById(id) {
   return db
-    .prepare('SELECT id, email, username, bio, interests, created_at FROM users WHERE id = ?')
+    .prepare('SELECT id, email, username, bio, interests, avatar, created_at FROM users WHERE id = ?')
     .get(id);
+}
+
+// Save a user's character (avatar layer indices) as JSON.
+export function setAvatar(userId, avatar) {
+  db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(
+    avatar ? JSON.stringify(avatar) : null,
+    userId
+  );
 }
 
 // Returns the full row (incl. password_hash) — for auth checks only.
@@ -97,11 +105,14 @@ export function listCommunity({ excludeUserId, speaksId, learningId, q, limit = 
 export function profile(user) {
   if (!user) return null;
   const langs = getUserLanguages(user.id);
+  let avatar = null;
+  try { avatar = user.avatar ? JSON.parse(user.avatar) : null; } catch { avatar = null; }
   return {
     id: user.id,
     username: user.username,
     bio: user.bio || null,
     interests: user.interests ? user.interests.split(',').map((s) => s.trim()).filter(Boolean) : [],
+    avatar,
     native: langs.filter((l) => l.role === 'native').map(({ code, name }) => ({ code, name })),
     learning: langs.filter((l) => l.role === 'learning').map(({ code, name }) => ({ code, name })),
     created_at: user.created_at,

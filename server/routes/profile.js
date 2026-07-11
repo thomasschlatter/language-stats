@@ -2,9 +2,9 @@
 import { Router } from 'express';
 import {
   getUserById,
-  getUserByUsername,
   updateProfile,
   setUserLanguages,
+  setAvatar,
   profile,
 } from '../models/users.js';
 import { getLanguageByCode } from '../models/languages.js';
@@ -23,15 +23,22 @@ router.get('/', requireAuth, (req, res) => {
   res.json({ profile: profile(getUserById(req.user.id)) });
 });
 
-// PUT /api/profile  { bio?, interests?, native?: [codes], learning?: [codes] }
+// PUT /api/profile  { bio?, interests?, native?: [codes], learning?: [codes], avatar? }
 router.put('/', requireAuth, (req, res) => {
-  const { bio, interests, native, learning } = req.body ?? {};
-  updateProfile(req.user.id, {
-    bio,
-    interests: Array.isArray(interests) ? interests.join(', ') : interests,
-  });
+  const { bio, interests, native, learning, avatar } = req.body ?? {};
+  // Only touch bio/interests when provided, so an avatar-only save keeps them.
+  if (bio !== undefined || interests !== undefined) {
+    const current = profile(getUserById(req.user.id));
+    updateProfile(req.user.id, {
+      bio: bio !== undefined ? bio : current.bio,
+      interests: interests !== undefined
+        ? (Array.isArray(interests) ? interests.join(', ') : interests)
+        : current.interests.join(', '),
+    });
+  }
   if (native !== undefined) setUserLanguages(req.user.id, 'native', idsFromCodes(native));
   if (learning !== undefined) setUserLanguages(req.user.id, 'learning', idsFromCodes(learning));
+  if (avatar !== undefined) setAvatar(req.user.id, avatar);
   res.json({ profile: profile(getUserById(req.user.id)) });
 });
 
