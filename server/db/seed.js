@@ -13,6 +13,12 @@ import { findWord, createWord, linkExists, createLink } from '../models/words.js
 import { frequencyLoaded } from '../models/frequency.js';
 import { lexiconLoaded } from '../models/lexicon.js';
 import { findArticleBySlug, createArticle } from '../models/articles.js';
+import { createUser, getUserByUsername, updateProfile, setUserLanguages } from '../models/users.js';
+import { createMessage } from '../models/messages.js';
+import { sendDM } from '../models/dm.js';
+import { createTip } from '../models/tips.js';
+import { toggleFollow } from '../models/follows.js';
+import { toggleVote } from '../models/votes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -261,5 +267,81 @@ if (!findArticleBySlug(german.id, 'el-genero-en-aleman')) {
   });
   console.log('Created official article (es): El género en alemán.');
 }
+
+// ---------------------------------------------------------------------------
+// Demo users + activity, so Community / Chat / Messages aren't empty.
+// All demo accounts share the password: demo1234
+// ---------------------------------------------------------------------------
+function seedDemo() {
+  if (getUserByUsername('mia')) {
+    console.log('Demo users already present, skipping.');
+    return;
+  }
+  const langId = (code) => getLanguageByCode(code).id;
+
+  const people = [
+    { u: 'mia',    native: ['en-US'], learning: ['de-DE'], bio: 'Learning German for a trip to Berlin. 🇩🇪', interests: 'travel, food, photography' },
+    { u: 'lukas',  native: ['de-DE'], learning: ['en-US'], bio: 'Muttersprachler aus München, helfe gern beim Üben!', interests: 'football, music, cooking' },
+    { u: 'sofia',  native: ['es-ES'], learning: ['de-DE'], bio: 'Aprendiendo alemán desde Madrid.', interests: 'art, cinema, hiking' },
+    { u: 'noah',   native: ['en-US'], learning: ['es-ES'], bio: 'Trying to finally learn Spanish this year.', interests: 'coffee, running, tech' },
+    { u: 'emma',   native: ['de-DE'], learning: ['es-ES'], bio: 'Deutsch native, learning Spanish for fun.', interests: 'books, yoga, travel' },
+    { u: 'leon',   native: ['de-CH'], learning: ['en-US'], bio: 'Grüezi! Swiss German native happy to help.', interests: 'skiing, tech, board games' },
+    { u: 'olivia', native: ['en-US'], learning: ['de-DE'], bio: 'Intermediate German, love language exchange.', interests: 'photography, dogs, baking' },
+    { u: 'ben',    native: ['de-DE'], learning: ['en-US'], bio: 'Hi! Ich verbessere mein Englisch.', interests: 'gaming, cooking, cycling' },
+    { u: 'carla',  native: ['es-ES'], learning: ['en-US'], bio: 'From Valencia, practising English daily.', interests: 'dancing, travel, food' },
+    { u: 'finn',   native: ['de-DE'], learning: ['es-ES'], bio: 'Learning Spanish, ask me anything in German.', interests: 'cycling, history, films' },
+  ];
+
+  const made = {};
+  const tx = db.transaction(() => {
+    for (const p of people) {
+      const user = createUser({ email: `${p.u}@demo.ls`, username: p.u, password: 'demo1234' });
+      updateProfile(user.id, { bio: p.bio, interests: p.interests });
+      setUserLanguages(user.id, 'native', p.native.map(langId));
+      setUserLanguages(user.id, 'learning', p.learning.map(langId));
+      made[p.u] = user;
+    }
+
+    // German (de-DE) public room chatter.
+    const room = [
+      ['lukas', 'de-DE', 'Hallo zusammen! Wer lernt gerade Deutsch?'],
+      ['mia', 'en-US', 'Hi everyone! Just started — any tips for the articles?'],
+      ['ben', 'de-DE', 'Viel Erfolg! Schau dir die Karte über das Genus an.'],
+      ['olivia', 'en-US', 'The gender card with the frequency buttons is great.'],
+      ['sofia', 'de-DE', 'Ich übe jeden Tag zehn Minuten. Es hilft wirklich.'],
+    ];
+    for (const [u, lang, body] of room) {
+      createMessage({ languageId: german.id, bodyLangId: langId(lang), userId: made[u].id, body });
+    }
+    // Swiss room.
+    createMessage({ languageId: swiss.id, bodyLangId: langId('de-CH'), userId: made['leon'].id, body: 'Grüezi mitenand! Fragen zum Schweizerdeutsch? Nur zu.' });
+
+    // A DM thread: mia <-> lukas.
+    sendDM({ senderId: made['mia'].id, recipientId: made['lukas'].id, bodyLangId: langId('en-US'), body: 'Hi Lukas! Could you help me practise German sometimes?' });
+    sendDM({ senderId: made['lukas'].id, recipientId: made['mia'].id, bodyLangId: langId('de-DE'), body: 'Klar, gerne! Schreib mir einfach auf Deutsch, ich korrigiere dich.' });
+
+    // Follows.
+    for (const [a, b] of [['mia', 'lukas'], ['sofia', 'lukas'], ['olivia', 'ben'], ['noah', 'carla'], ['finn', 'emma']]) {
+      toggleFollow(made[a].id, made[b].id);
+    }
+
+    // A community tip.
+    createTip({
+      languageId: german.id,
+      bodyLangId: langId('en-US'),
+      userId: made['mia'].id,
+      title: 'Learn every noun with its article',
+      body: 'Never memorise a German noun alone — always store der/die/das with it. Future-you will thank you.',
+    });
+
+    // Some upvotes on the official gender card.
+    const gender = findArticleBySlug(german.id, 'gender-in-german');
+    if (gender) for (const u of ['mia', 'sofia', 'ben', 'leon', 'emma']) toggleVote(gender.id, made[u].id);
+  });
+  tx();
+  console.log(`Created ${people.length} demo users + activity (password: demo1234).`);
+}
+
+seedDemo();
 
 console.log('Seed complete: languages, words, frequencies, lexicon and articles ready.');
