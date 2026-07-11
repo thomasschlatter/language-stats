@@ -49,6 +49,20 @@ async function doLogout() {
   store.set({ user: null });
 }
 
+// Open the sign-in modal directly (used by inline prompts).
+export function promptSignIn() {
+  openAuthModal('login');
+}
+
+// An inline "Sign in <to do X>" prompt: a real button + plain helper text, so
+// it reads as an action rather than a row of clickable dictionary words.
+export function signInPrompt(text) {
+  return el('span', { class: 'signin-prompt muted' }, [
+    el('button', { class: 'btn small', type: 'button', onclick: () => openAuthModal('login') }, 'Sign in'),
+    text ? ` ${text}` : null,
+  ]);
+}
+
 function openAuthModal(mode) {
   const err = el('div', { class: 'error' });
   const emailInput = el('input', { type: 'email', placeholder: 'you@example.com' });

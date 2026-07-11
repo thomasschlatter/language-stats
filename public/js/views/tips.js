@@ -7,6 +7,7 @@ import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { renderText, tokenizeTree } from '../render.js';
 import { languageTabs } from './tabs.js';
+import { signInPrompt } from '../auth.js';
 
 export async function renderTips(langCode) {
   const view = clear(document.getElementById('view'));
@@ -22,7 +23,7 @@ export async function renderTips(langCode) {
       el('h1', {}, `${language.name} tips`),
       store.user
         ? el('button', { class: 'btn small', onclick: () => openAddTip(language, () => renderTips(langCode)) }, '+ Share a tip')
-        : el('span', { class: 'muted' }, 'Sign in to share tips'),
+        : signInPrompt('to share tips'),
     ])
   );
 

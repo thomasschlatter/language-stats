@@ -7,6 +7,7 @@ import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { renderText } from '../render.js';
 import { languageTabs } from './tabs.js';
+import { signInPrompt } from '../auth.js';
 
 let pollTimer = null;
 function stopPoll() {
@@ -99,7 +100,7 @@ export async function renderChat(langCode) {
     }, [input, writtenIn, el('button', { class: 'btn', type: 'submit' }, 'Send')]);
     view.append(form);
   } else {
-    view.append(el('p', { class: 'muted' }, 'Sign in to join the chat.'));
+    view.append(el('p', {}, signInPrompt('to join the chat.')));
   }
 
   // Poll for new messages (only while on this chat view).

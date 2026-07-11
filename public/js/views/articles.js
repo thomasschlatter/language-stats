@@ -8,6 +8,7 @@ import { el, clear, openModal } from '../dom.js';
 import { tokenizeTree } from '../render.js';
 import { languageTabs } from './tabs.js';
 import { voteButton } from './voteButton.js';
+import { signInPrompt } from '../auth.js';
 import { navigate } from '../router.js';
 
 export async function renderArticles(langCode) {
@@ -24,7 +25,7 @@ export async function renderArticles(langCode) {
       el('h1', {}, `${language.name} cards`),
       store.user
         ? el('button', { class: 'btn small', onclick: () => openNewCard(language) }, '+ New card')
-        : el('span', { class: 'muted' }, 'Sign in to create cards'),
+        : signInPrompt('to create cards'),
     ])
   );
   const note = el('p', { class: 'muted', style: 'margin-top:-0.5rem' });

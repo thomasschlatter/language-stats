@@ -7,6 +7,7 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { renderText, wordEl, tokenizeTree } from '../render.js';
+import { signInPrompt } from '../auth.js';
 import { navigate } from '../router.js';
 
 export async function renderWordPage(langCode, text) {
@@ -77,7 +78,7 @@ export async function renderWordPage(langCode, text) {
       ])
     );
   } else {
-    box.append(el('p', { class: 'muted', style: 'margin-top:1rem' }, 'Sign in to track this word and add or link words.'));
+    box.append(el('p', { style: 'margin-top:1rem' }, signInPrompt('to track this word, add or link words.')));
   }
 
   view.append(box);

@@ -6,6 +6,7 @@ import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { renderText, tokenizeTree } from '../render.js';
 import { languageTabs } from './tabs.js';
+import { signInPrompt } from '../auth.js';
 
 const MILESTONES = [50, 75, 90, 95];
 
@@ -21,8 +22,7 @@ export async function renderProgress(langCode) {
   view.append(el('h1', {}, `Your ${language.name} progress`));
 
   if (!store.user) {
-    view.append(el('p', { class: 'muted' }, 'Sign in to track words and see your conversation coverage.'));
-    tokenizeTree(view);
+    view.append(el('p', {}, signInPrompt('to track words and see your conversation coverage.')));
     return;
   }
 

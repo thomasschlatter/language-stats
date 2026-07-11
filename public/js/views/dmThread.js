@@ -6,6 +6,7 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { renderText } from '../render.js';
+import { signInPrompt } from '../auth.js';
 
 let pollTimer = null;
 function stopPoll() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
@@ -18,7 +19,7 @@ export async function renderDmThread(username) {
   const view = clear(document.getElementById('view'));
 
   if (!store.user) {
-    view.append(el('p', { class: 'muted' }, 'Sign in to send messages.'));
+    view.append(el('p', {}, signInPrompt('to send messages.')));
     return;
   }
 

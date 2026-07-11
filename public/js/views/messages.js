@@ -3,13 +3,14 @@
 import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear } from '../dom.js';
+import { signInPrompt } from '../auth.js';
 
 export async function renderMessages() {
   const view = clear(document.getElementById('view'));
   view.append(el('h1', {}, 'Messages'));
 
   if (!store.user) {
-    view.append(el('p', { class: 'muted' }, 'Sign in to see your conversations.'));
+    view.append(el('p', {}, signInPrompt('to see your conversations.')));
     return;
   }
 

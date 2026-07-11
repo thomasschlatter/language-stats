@@ -46,6 +46,9 @@ export function tokenizeTree(root, defaultLang = 'en-US') {
       if (!node.nodeValue || !/[\p{L}]/u.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
       for (let p = node.parentElement; p && p !== root.parentNode; p = p.parentElement) {
         if (p.classList?.contains('w')) return NodeFilter.FILTER_REJECT;
+        // Helper / meta / instructional text (.muted) is UI, not dictionary
+        // content — leave it plain so it doesn't look like a word link.
+        if (p.classList?.contains('muted')) return NodeFilter.FILTER_REJECT;
         if (SKIP_TAGS.has(p.tagName)) return NodeFilter.FILTER_REJECT;
         if (p.hasAttribute?.('data-no-tokenize')) return NodeFilter.FILTER_REJECT;
       }
