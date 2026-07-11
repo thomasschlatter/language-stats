@@ -4,3 +4,7 @@ node_modules/
 data/*.db
 data/*.db-*
 .DS_Store
+
+# transformers.js model cache
+.cache/
+**/.cache/

@@ -83,6 +83,7 @@ export const api = {
   sendDM: (username, b) => request('POST', `/dm/${encodeURIComponent(username)}`, b),
   correctMessage: (id, b) => request('POST', `/dm/messages/${id}/correct`, b),
   translate: (text, from, to) => request('POST', '/translate', { text, from, to }),
+  aiTranslate: (text, from, to) => request('POST', '/translate/ai', { text, from, to }),
 
   // --- progress / stats ---
   progress: (lang) => request('GET', `/progress?lang=${encodeURIComponent(lang)}`),

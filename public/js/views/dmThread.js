@@ -115,14 +115,27 @@ function messageEl(m) {
     const translate = el('button', { class: 'btn link small' }, 'Translate');
     translate.addEventListener('click', async () => {
       if (glossLine.childNodes.length) { clear(glossLine); return; } // toggle off
+      clear(glossLine).append(el('span', { class: 'muted' }, 'Translating… (first use loads the model, ~1 min)'));
+      // Try the local AI model first (fluent sentence); fall back to word-gloss.
       try {
-        const { tokens, known } = await api.translate(m.body, bodyLang, store.nativeLang);
-        clear(glossLine);
-        if (!known) { glossLine.append(el('span', { class: 'muted' }, `No dictionary matches into ${store.nativeLang} yet.`)); return; }
-        for (const t of tokens) {
-          if (t.translation) glossLine.append(el('span', { class: 'gloss-pair' }, [el('span', { class: 'gloss-src' }, t.word), '→', el('span', { class: 'gloss-tr' }, t.translation)]));
-        }
-      } catch (ex) { clear(glossLine).append(el('span', { class: 'error' }, ex.message)); }
+        const { translation } = await api.aiTranslate(m.body, bodyLang, store.nativeLang);
+        clear(glossLine).append(
+          el('div', { class: 'ai-translation' }, [
+            el('span', { class: 'ai-badge' }, 'AI'),
+            el('span', {}, translation),
+          ])
+        );
+      } catch {
+        try {
+          const { tokens, known } = await api.translate(m.body, bodyLang, store.nativeLang);
+          clear(glossLine);
+          if (!known) { glossLine.append(el('span', { class: 'muted' }, `No translation available into ${store.nativeLang} yet.`)); return; }
+          glossLine.append(el('span', { class: 'muted', style: 'margin-right:0.4rem' }, 'gloss:'));
+          for (const t of tokens) {
+            if (t.translation) glossLine.append(el('span', { class: 'gloss-pair' }, [el('span', { class: 'gloss-src' }, t.word), '→', el('span', { class: 'gloss-tr' }, t.translation)]));
+          }
+        } catch (ex) { clear(glossLine).append(el('span', { class: 'error' }, ex.message)); }
+      }
     });
 
     const correct = el('button', { class: 'btn link small' }, 'Correct');

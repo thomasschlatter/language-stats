@@ -49,8 +49,10 @@ word is again clickable.
   - **Direct messages** — 1-on-1 threads, fully clickable/translatable.
   - **Corrections** — the recipient proposes a corrected version of a message,
     shown inline (Tandem's signature feature).
-  - **Translate** — word-gloss a partner's message into your native locale via
-    the community dictionary graph.
+  - **Translate** — a partner's message is translated by a **small local AI
+    model** (OPUS-MT via transformers.js, runs on-device, no Python/API), with
+    an instant dictionary word-gloss as fallback. Models lazy-load per language
+    pair on first use (~150MB download, then cached).
 
 ## Architecture
 
@@ -134,5 +136,6 @@ Copy `.env.example` to `.env` and set a real `JWT_SECRET` before deploying.
 | GET/POST | `/api/dm`, `/api/dm/:username` | direct messages |
 | POST | `/api/dm/messages/:id/correct` | correct a message |
 | GET | `/api/progress?lang`, POST `/api/progress/mark` | progress/coverage |
-| POST | `/api/translate` | word-gloss a message |
+| POST | `/api/translate` | dictionary word-gloss |
+| POST | `/api/translate/ai` | local AI (OPUS-MT) sentence translation |
 ```
