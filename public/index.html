@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Language Stats</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#/">Language&nbsp;Stats</a>
+      <div id="auth-area" class="auth-area"><!-- filled by auth.js --></div>
+    </header>
+
+    <div class="layout">
+      <!-- Left column: languages -->
+      <aside class="sidebar">
+        <h2 class="sidebar-title">Languages</h2>
+        <nav id="language-list" class="language-list"></nav>
+      </aside>
+
+      <!-- Main content: rendered by the router -->
+      <main id="view" class="view"></main>
+    </div>
+
+    <!-- Simple modal used for auth + small forms -->
+    <div id="modal-root"></div>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>
