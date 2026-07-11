@@ -14,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import './db/index.js'; // initialise DB + schema on boot
+import { listLanguages } from './models/languages.js';
 import { attachUser } from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import languageRoutes from './routes/languages.js';
@@ -58,6 +59,13 @@ app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(500).json({ error: 'internal server error' });
 });
+
+// On a fresh deploy the database is empty — seed it once before serving. The
+// seed is idempotent, so this is a no-op on subsequent boots.
+if (listLanguages().length === 0) {
+  console.log('Empty database detected — seeding…');
+  await import('./db/seed.js');
+}
 
 app.listen(PORT, () => {
   console.log(`Language Stats running at http://localhost:${PORT}`);

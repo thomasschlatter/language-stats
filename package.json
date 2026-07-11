@@ -9,6 +9,9 @@
     "dev": "node --watch server/index.js",
     "seed": "node server/db/seed.js"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "keywords": [
     "language",
     "learning",

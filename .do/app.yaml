@@ -1,0 +1,29 @@
+# DigitalOcean App Platform spec.
+# Deploys straight from the public GitHub repo (no OAuth needed for public repos).
+#
+# NOTE: App Platform's filesystem is ephemeral — the SQLite database is
+# recreated and re-seeded on every deploy/restart, so user data (accounts,
+# chat, votes) does NOT persist across redeploys. For durable data, move to a
+# managed Postgres or attach persistent storage. Fine for a live demo.
+name: language-stats
+region: fra
+services:
+  - name: web
+    git:
+      repo_clone_url: https://github.com/thomasschlatter/language-stats.git
+      branch: main
+    build_command: npm install
+    run_command: npm start
+    environment_slug: node-js
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_count: 1
+    http_port: 8080
+    envs:
+      - key: PORT
+        value: "8080"
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: CHANGE_ME_TO_A_LONG_RANDOM_STRING
+      - key: NODE_ENV
+        value: production
