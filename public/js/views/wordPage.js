@@ -66,17 +66,18 @@ export async function renderWordPage(langCode, text) {
     );
   }
 
-  // Actions (signed-in users)
+  // Progress controls (signed-in users): mark this word known / learning.
   if (store.user) {
+    box.append(progressControls(langCode, data.text));
     box.append(
-      el('div', { class: 'row', style: 'margin-top:1.25rem' }, [
+      el('div', { class: 'row', style: 'margin-top:0.75rem' }, [
         !data.word &&
           el('button', { class: 'btn small', onclick: () => addEntry(langCode, data.text) }, `+ Add as ${langName} word`),
         el('button', { class: 'btn small secondary', onclick: () => addLink(langCode, data.text) }, '+ Add translation / link'),
       ])
     );
   } else {
-    box.append(el('p', { class: 'muted', style: 'margin-top:1rem' }, 'Sign in to add or link words.'));
+    box.append(el('p', { class: 'muted', style: 'margin-top:1rem' }, 'Sign in to track this word and add or link words.'));
   }
 
   view.append(box);
@@ -86,6 +87,35 @@ export async function renderWordPage(langCode, text) {
 
 function languageName(code) {
   return store.languages.find((l) => l.code === code)?.name || code;
+}
+
+// "I know this" / "Learning" toggle for a word, reflecting saved status.
+function progressControls(langCode, text) {
+  const wrap = el('div', { class: 'progress-controls row', style: 'margin-top:1.25rem' });
+  const label = el('span', { class: 'muted' }, 'Your progress:');
+  const known = el('button', { class: 'btn small secondary' }, '✓ I know this');
+  const learning = el('button', { class: 'btn small secondary' }, '◐ Learning');
+  wrap.append(label, known, learning);
+
+  let current = 'none';
+  const paint = () => {
+    known.classList.toggle('active', current === 'known');
+    learning.classList.toggle('active', current === 'learning');
+  };
+  const set = async (status) => {
+    const next = current === status ? 'none' : status; // click again to clear
+    try {
+      await api.markWord({ languageCode: langCode, word: text, status: next });
+      current = next;
+      paint();
+    } catch { /* ignore */ }
+  };
+  known.addEventListener('click', () => set('known'));
+  learning.addEventListener('click', () => set('learning'));
+
+  // Load existing status.
+  api.wordProgress(langCode, text).then((r) => { current = r.status; paint(); }).catch(() => {});
+  return wrap;
 }
 
 // Create the (locale, text) entry with an optional definition.

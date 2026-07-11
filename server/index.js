@@ -23,6 +23,7 @@ import tipRoutes from './routes/tips.js';
 import articleRoutes from './routes/articles.js';
 import frequencyRoutes from './routes/frequency.js';
 import messageRoutes from './routes/messages.js';
+import progressRoutes from './routes/progress.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -41,6 +42,7 @@ app.use('/api/tips', tipRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/frequency', frequencyRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/progress', progressRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 

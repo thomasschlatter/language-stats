@@ -12,10 +12,12 @@ import { renderArticle } from './views/article.js';
 import { renderWordPage } from './views/wordPage.js';
 import { renderTips } from './views/tips.js';
 import { renderChat } from './views/chat.js';
+import { renderProgress } from './views/progress.js';
 
 const routes = [
   { pattern: /^#\/lang\/([^/]+)\/tips$/, handler: (m) => renderTips(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/chat$/, handler: (m) => renderChat(dec(m[1])) },
+  { pattern: /^#\/lang\/([^/]+)\/progress$/, handler: (m) => renderProgress(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)$/, handler: (m) => renderArticles(dec(m[1])) },
   { pattern: /^#\/article\/(\d+)$/, handler: (m) => renderArticle(Number(m[1])) },
   { pattern: /^#\/w\/([^/]+)\/(.+)$/, handler: (m) => renderWordPage(dec(m[1]), dec(m[2])) },

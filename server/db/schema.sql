@@ -143,6 +143,22 @@ CREATE TABLE IF NOT EXISTS messages (
 
 CREATE INDEX IF NOT EXISTS idx_messages_room ON messages(language_id, id);
 
+-- ---------------------------------------------------------------------------
+-- Per-user word progress. Tracked by (lowercased) word form + locale, so ANY
+-- clickable word — not only dictionary entries — can be marked. Joins to
+-- word_frequencies give each user their conversation-coverage %.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS user_words (
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  language_id INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
+  word_lc     TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'learning',   -- 'learning' | 'known'
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, language_id, word_lc)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_words ON user_words(user_id, language_id, status);
+
 -- Card upvotes — one vote per user per article.
 CREATE TABLE IF NOT EXISTS article_votes (
   article_id INTEGER NOT NULL REFERENCES articles(id) ON DELETE CASCADE,

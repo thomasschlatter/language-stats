@@ -225,6 +225,20 @@ a:hover { text-decoration: underline; }
 .article-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .article-head .vote-btn { font-size: 0.95rem; padding: 0.3rem 0.8rem; }
 
+/* ---- Progress ---- */
+.stat-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 0.5rem; }
+.stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.15rem; text-align: center; }
+.stat-value { font-size: 1.8rem; font-weight: 700; color: var(--accent-2); }
+.stat-label { color: var(--muted); font-size: 0.85rem; }
+
+.coverage-meter { position: relative; height: 22px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; margin-top: 0.5rem; overflow: visible; }
+.coverage-meter-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; }
+.milestone { position: absolute; top: -4px; height: 30px; width: 2px; background: var(--border); }
+.milestone.reached { background: var(--accent-2); }
+.milestone-label { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 0.68rem; color: var(--muted); }
+
+.progress-controls .btn.active { background: var(--accent-2); border-color: var(--accent-2); color: #04160f; }
+
 /* ---- Chat ---- */
 .chat-list {
   border: 1px solid var(--border);

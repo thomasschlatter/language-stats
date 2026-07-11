@@ -65,4 +65,10 @@ export const api = {
   messages: (lang, since = 0) =>
     request('GET', `/messages?lang=${encodeURIComponent(lang)}${since ? `&since=${since}` : ''}`),
   sendMessage: (b) => request('POST', '/messages', b),
+
+  // --- progress / stats ---
+  progress: (lang) => request('GET', `/progress?lang=${encodeURIComponent(lang)}`),
+  wordProgress: (lang, word) =>
+    request('GET', `/progress/word?lang=${encodeURIComponent(lang)}&word=${encodeURIComponent(word)}`),
+  markWord: (b) => request('POST', '/progress/mark', b),
 };
