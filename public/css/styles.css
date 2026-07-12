@@ -93,6 +93,8 @@ a:hover { text-decoration: underline; }
 .person-name:hover { text-decoration: none; color: var(--accent); }
 .prof-counts { font-size: 0.85rem; margin-bottom: 1rem; }
 .auth-area .who { color: var(--muted); font-size: 0.9rem; }
+.welcome-steps { margin: 0.5rem 0 0; padding-left: 1.25rem; }
+.welcome-steps li { margin: 0.4rem 0; }
 .native-picker { display: flex; align-items: center; gap: 0.35rem; }
 .native-select { width: auto; padding: 0.3rem 0.5rem; font-size: 0.85rem; }
 

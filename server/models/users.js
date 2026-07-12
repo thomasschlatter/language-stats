@@ -89,7 +89,7 @@ export function getUserLanguages(userId) {
 // Browse community members, optionally filtered by a native language
 // (`speaksId`), a learning language (`learningId`), and a username query.
 // Excludes `excludeUserId` (the viewer). Returns full profiles.
-export function listCommunity({ excludeUserId, speaksId, learningId, q, limit = 60 }) {
+export function listCommunity({ excludeUserId, speaksId, learningId, q, limit = 24, offset = 0 }) {
   const joins = [];
   const where = [];
   const params = [];
@@ -110,8 +110,8 @@ export function listCommunity({ excludeUserId, speaksId, learningId, q, limit = 
      ${joins.join('\n')}
      ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
      ORDER BY u.created_at DESC
-     LIMIT ?`;
-  params.push(limit);
+     LIMIT ? OFFSET ?`;
+  params.push(limit, offset);
 
   return db.prepare(sql).all(...params).map(profile);
 }

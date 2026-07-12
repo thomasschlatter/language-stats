@@ -27,17 +27,34 @@ export async function renderCommunity() {
 
   const grid = el('div', { class: 'card-grid' });
   view.append(grid);
+  const moreWrap = el('div', { style: 'margin-top:1rem; text-align:center' });
+  view.append(moreWrap);
 
-  async function load(params) {
-    clear(grid).append(el('span', { class: 'muted' }, 'Loading…'));
+  let baseParams = {};
+  let offset = 0;
+
+  async function fetchPage(append) {
+    clear(moreWrap);
+    if (!append) clear(grid).append(el('span', { class: 'muted' }, 'Loading…'));
+    else moreWrap.append(el('span', { class: 'muted' }, 'Loading…'));
     try {
-      const { people } = await api.community(params || { speaks: speaks.value, learning: learning.value, q: q.value });
-      clear(grid);
-      if (!people.length) { grid.append(el('p', { class: 'muted' }, 'No members match. Try widening the filters.')); return; }
+      const { people, hasMore } = await api.community({ ...baseParams, offset });
+      if (!append) clear(grid);
+      clear(moreWrap);
+      if (!append && !people.length) { grid.append(el('p', { class: 'muted' }, 'No members match. Try widening the filters.')); return; }
       for (const p of people) grid.append(personCard(p));
+      offset += people.length;
+      if (hasMore) moreWrap.append(el('button', { class: 'btn secondary', onclick: () => fetchPage(true) }, 'Load more'));
     } catch (ex) {
-      clear(grid).append(el('p', { class: 'error' }, ex.message));
+      clear(moreWrap);
+      if (!append) clear(grid).append(el('p', { class: 'error' }, ex.message));
     }
+  }
+
+  function load(params) {
+    baseParams = params ?? { speaks: speaks.value, learning: learning.value, q: q.value };
+    offset = 0;
+    fetchPage(false);
   }
 
   function matchMe() {

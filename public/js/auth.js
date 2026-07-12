@@ -56,6 +56,23 @@ export function promptSignIn() {
   openAuthModal('login');
 }
 
+// One-time getting-started shown right after signup.
+function showWelcome() {
+  const close = openModal(el('div', {}, [
+    el('h2', {}, 'Welcome to Language Stats 👋'),
+    el('p', { class: 'muted' }, 'A quick way to get going:'),
+    el('ol', { class: 'welcome-steps' }, [
+      el('li', {}, 'Set the languages you speak and are learning, and make your character.'),
+      el('li', {}, 'Read a card, or generate a flashcard deck to start on vocabulary.'),
+      el('li', {}, 'Find a language partner in Community and say hi.'),
+    ]),
+    el('div', { class: 'row', style: 'justify-content:flex-end; gap:0.5rem; margin-top:1.25rem' }, [
+      el('button', { class: 'btn secondary', type: 'button', onclick: () => close() }, 'Explore on my own'),
+      el('a', { class: 'btn', href: '#/settings', onclick: () => close() }, 'Set up my profile'),
+    ]),
+  ]));
+}
+
 // An inline "Sign in <to do X>" prompt: a real button + plain helper text, so
 // it reads as an action rather than a row of clickable dictionary words.
 export function signInPrompt(text) {
@@ -85,6 +102,7 @@ function openAuthModal(mode) {
         const { user } = mode === 'signup' ? await api.signup(payload) : await api.login(payload);
         store.set({ user });
         close();
+        if (mode === 'signup') showWelcome();
       } catch (ex) {
         err.textContent = ex.message;
       }

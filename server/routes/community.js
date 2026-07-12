@@ -21,18 +21,22 @@ router.get('/', (req, res) => {
     if (myNative) learningId = getLanguageByCode(myNative.code)?.id;
   }
 
+  const limit = 24;
+  const offset = Math.max(0, Number(req.query.offset) || 0);
   const people = listCommunity({
     excludeUserId: req.user?.id,
     speaksId,
     learningId,
     q: req.query.q ? String(req.query.q) : null,
+    limit,
+    offset,
   });
 
   if (req.user) {
     const set = followingSet(req.user.id, people.map((p) => p.id));
     for (const p of people) p.following = set.has(p.id);
   }
-  res.json({ people });
+  res.json({ people, offset, hasMore: people.length === limit });
 });
 
 export default router;
