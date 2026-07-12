@@ -7,6 +7,7 @@ import {
 } from '../models/flashcards.js';
 import { topWords, totalCount } from '../models/frequency.js';
 import { aiTranslate } from '../models/aiTranslate.js';
+import { parseApkg } from '../lib/anki.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -111,6 +112,26 @@ router.post('/generate', requireAuth, async (req, res) => {
     name: name?.trim() || `Top ${n} ${language.name} words`, source: 'ai',
   });
   const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows });
+  res.status(201).json({ deck, added });
+});
+
+// POST /api/flashcards/import-apkg  { languageCode, name, data (base64) }
+router.post('/import-apkg', requireAuth, (req, res) => {
+  const { languageCode, name, data } = req.body ?? {};
+  const language = getLanguageByCode(languageCode);
+  if (!language) return res.status(404).json({ error: 'unknown language' });
+  if (!data) return res.status(400).json({ error: 'file data is required' });
+
+  let rows;
+  try {
+    rows = parseApkg(Buffer.from(data, 'base64'));
+  } catch (err) {
+    return res.status(400).json({ error: err.message || 'could not read .apkg' });
+  }
+  if (!rows.length) return res.status(400).json({ error: 'no cards found in the deck' });
+
+  const deck = createDeck({ userId: req.user.id, languageId: language.id, name: name?.trim() || 'Anki import', source: 'anki' });
+  const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows: rows.slice(0, 5000) });
   res.status(201).json({ deck, added });
 });
 

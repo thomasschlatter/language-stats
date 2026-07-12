@@ -109,6 +109,7 @@ export const api = {
   deleteDeck: (id) => request('DELETE', `/flashcards/decks/${id}`),
   addCard: (deckId, b) => request('POST', `/flashcards/decks/${deckId}/cards`, b),
   importDeck: (b) => request('POST', '/flashcards/import', b),
+  importApkg: (b) => request('POST', '/flashcards/import-apkg', b),
   generateDeck: (b) => request('POST', '/flashcards/generate', b),
   study: (deckId) => request('GET', `/flashcards/study${deckId ? `?deck=${deckId}` : ''}`),
   review: (b) => request('POST', '/flashcards/review', b),

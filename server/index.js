@@ -36,6 +36,9 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
+// .apkg uploads (base64) need a bigger limit than the default — apply it only
+// to that path, before the small global JSON parser.
+app.use('/api/flashcards/import-apkg', express.json({ limit: '30mb' }));
 app.use(express.json({ limit: '256kb' }));
 app.use(cookieParser());
 app.use(attachUser); // makes req.user available to every route
