@@ -27,6 +27,7 @@ import { renderStudy } from './views/study.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
+  { pattern: /^#\/world$/, handler: () => renderWorld() },
   { pattern: /^#\/search\/(.+)$/, handler: (m) => renderSearch(dec(m[1])) },
   { pattern: /^#\/settings$/, handler: () => renderSettings(), auth: true },
   { pattern: /^#\/decks$/, handler: () => renderDecks(), auth: true },
