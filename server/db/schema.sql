@@ -103,7 +103,7 @@ CREATE INDEX IF NOT EXISTS idx_links_target ON word_links(target_word_id);
 CREATE TABLE IF NOT EXISTS tips (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   language_id  INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE, -- which language it's about
-  body_lang_id INTEGER REFERENCES languages(id),                           -- which language it's written in
+  body_lang_id INTEGER REFERENCES languages(id) ON DELETE SET NULL,        -- which language it's written in
   user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title        TEXT NOT NULL,
   body         TEXT NOT NULL,
@@ -138,7 +138,7 @@ CREATE INDEX IF NOT EXISTS idx_freq_lang_rank ON word_frequencies(language_id, r
 CREATE TABLE IF NOT EXISTS articles (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   language_id  INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE, -- which language it's about
-  body_lang_id INTEGER REFERENCES languages(id),                           -- which language it's written in
+  body_lang_id INTEGER REFERENCES languages(id) ON DELETE SET NULL,        -- which language it's written in
   slug         TEXT NOT NULL,
   title        TEXT NOT NULL,
   summary      TEXT,
@@ -158,7 +158,7 @@ CREATE INDEX IF NOT EXISTS idx_articles_language ON articles(language_id);
 CREATE TABLE IF NOT EXISTS messages (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   language_id  INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE, -- the room
-  body_lang_id INTEGER REFERENCES languages(id),                           -- written-in locale
+  body_lang_id INTEGER REFERENCES languages(id) ON DELETE SET NULL,        -- written-in locale
   user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   body         TEXT NOT NULL,
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
@@ -190,7 +190,7 @@ CREATE TABLE IF NOT EXISTS dm_messages (
   sender_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   body         TEXT NOT NULL,
-  body_lang_id INTEGER REFERENCES languages(id),
+  body_lang_id INTEGER REFERENCES languages(id) ON DELETE SET NULL,
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

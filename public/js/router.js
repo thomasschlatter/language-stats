@@ -7,6 +7,8 @@
 // language-tagged element" model.
 
 import { store } from './store.js';
+import { el, clear } from './dom.js';
+import { signInPrompt } from './auth.js';
 import { renderArticles } from './views/articles.js';
 import { renderArticle } from './views/article.js';
 import { renderWordPage } from './views/wordPage.js';
@@ -21,9 +23,9 @@ import { renderSettings } from './views/settings.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
-  { pattern: /^#\/settings$/, handler: () => renderSettings() },
-  { pattern: /^#\/messages$/, handler: () => renderMessages() },
-  { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])) },
+  { pattern: /^#\/settings$/, handler: () => renderSettings(), auth: true },
+  { pattern: /^#\/messages$/, handler: () => renderMessages(), auth: true },
+  { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])), auth: true },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/tips$/, handler: (m) => renderTips(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/chat$/, handler: (m) => renderChat(dec(m[1])) },
@@ -53,11 +55,22 @@ function render() {
     if (first) return navigate(`#/lang/${encodeURIComponent(first.code)}`);
   }
 
-  for (const { pattern, handler } of routes) {
+  for (const { pattern, handler, auth } of routes) {
     const m = hash.match(pattern);
-    if (m) return handler(m);
+    if (!m) continue;
+    if (auth && !store.user) return renderAuthRequired();
+    return handler(m);
   }
 
   document.getElementById('view').innerHTML =
     '<p class="muted">Nothing here. Pick a language from the left.</p>';
+}
+
+// Shown instead of a private page when signed out.
+function renderAuthRequired() {
+  const view = clear(document.getElementById('view'));
+  view.append(
+    el('h1', {}, 'Sign in required'),
+    el('p', {}, signInPrompt('to view this page.'))
+  );
 }

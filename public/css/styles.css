@@ -97,6 +97,26 @@ a:hover { text-decoration: underline; }
 }
 .language-list a:hover { background: var(--surface-2); text-decoration: none; }
 .language-list a.active { background: var(--accent); color: #fff; }
+.lang-row { display: flex; align-items: center; gap: 0.35rem; }
+.lang-row > a { flex: 1; min-width: 0; }
+.lang-native-tag {
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--accent-2); border: 1px solid var(--accent-2); border-radius: 999px;
+  padding: 0.02rem 0.35rem; flex-shrink: 0;
+}
+.lang-remove {
+  border: none; background: none; color: var(--muted); cursor: pointer;
+  font-size: 1.1rem; line-height: 1; padding: 0 0.2rem; opacity: 0; flex-shrink: 0;
+}
+.lang-row:hover .lang-remove { opacity: 1; }
+.lang-remove:hover { color: var(--danger); }
+.lang-add {
+  margin-top: 0.5rem; width: 100%; text-align: left; background: none;
+  border: 1px dashed var(--border); color: var(--muted); border-radius: var(--radius);
+  padding: 0.4rem 0.65rem; cursor: pointer; font: inherit; font-size: 0.85rem;
+}
+.lang-add:hover { border-color: var(--accent); color: var(--text); }
+.btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
 
 .view { padding: 1.5rem 2rem; max-width: 900px; }
 

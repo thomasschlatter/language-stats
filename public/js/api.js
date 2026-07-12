@@ -34,6 +34,8 @@ export const api = {
 
   // --- languages ---
   languages: () => request('GET', '/languages'),
+  createLanguage: (b) => request('POST', '/languages', b),
+  deleteLanguage: (code) => request('DELETE', `/languages/${encodeURIComponent(code)}`),
 
   // --- words (graph dictionary) ---
   words: (lang, search) =>

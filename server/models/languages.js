@@ -22,3 +22,10 @@ export function createLanguage({ code, lang, country, name }) {
     .run(code, lang, country ?? null, name);
   return getLanguageById(info.lastInsertRowid);
 }
+
+// Delete a language by code. Cascades to its words/cards/tips/messages; frees
+// its use as a "written-in" language (those become null). Returns true if removed.
+export function deleteLanguage(code) {
+  const info = db.prepare('DELETE FROM languages WHERE code = ?').run(code);
+  return info.changes > 0;
+}

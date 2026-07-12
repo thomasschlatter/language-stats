@@ -1,6 +1,6 @@
 // /api/languages — the list shown in the left sidebar.
 import { Router } from 'express';
-import { listLanguages, getLanguageByCode, createLanguage } from '../models/languages.js';
+import { listLanguages, getLanguageByCode, createLanguage, deleteLanguage } from '../models/languages.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -31,6 +31,14 @@ router.post('/', requireAuth, (req, res) => {
     }
     throw err;
   }
+});
+
+// DELETE /api/languages/:code  (removes the language and all its content)
+router.delete('/:code', requireAuth, (req, res) => {
+  const language = getLanguageByCode(req.params.code);
+  if (!language) return res.status(404).json({ error: 'language not found' });
+  deleteLanguage(req.params.code);
+  res.json({ ok: true });
 });
 
 export default router;

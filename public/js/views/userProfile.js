@@ -61,10 +61,15 @@ export async function renderUserProfile(username) {
         : null,
       el('div', { class: 'prof-bio' }, prof.bio || el('span', { class: 'muted' }, 'No bio yet.')),
       prof.interests.length
-        ? el('div', { class: 'prof-interests' }, prof.interests.map((t) => el('span', { class: 'tag-chip' }, t)))
+        ? el('div', { class: 'prof-interests' }, prof.interests.map((t) => el('span', { class: 'tag-chip' }, titleCase(t))))
         : null,
     ])
   );
+}
+
+// Display helper: "board games" -> "Board Games" (doesn't mutate stored value).
+function titleCase(s) {
+  return String(s).replace(/\b\p{L}/gu, (c) => c.toUpperCase());
 }
 
 function followBtn(prof) {
