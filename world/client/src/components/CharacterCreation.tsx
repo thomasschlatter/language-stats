@@ -356,10 +356,22 @@ export default function CharacterCreation() {
     localStorage.getItem("strndd-avatar_uuid") || createLocalStorageUuid()
   );
   const [avatarStyleIndex, setAvatarStyleIndex] = useState<IAvatarIndex>(
-    JSON.parse(
-      localStorage.getItem("strndd-avatar_index") ||
-        JSON.stringify(createLocalStorageIndex())
-    )
+    // When opened from language-stats, ?avatar=<json> hands off the character
+    // (its layer indices map 1:1 onto STRANDED's, since ours is a slice of it).
+    {
+      ...JSON.parse(
+        localStorage.getItem("strndd-avatar_index") ||
+          JSON.stringify(createLocalStorageIndex())
+      ),
+      ...(() => {
+        try {
+          const a = new URLSearchParams(window.location.search).get("avatar");
+          return a ? JSON.parse(a) : {};
+        } catch {
+          return {};
+        }
+      })(),
+    }
   );
 
   const [avatarStyle, setAvatarStyle] = useState<IAvatar>({
