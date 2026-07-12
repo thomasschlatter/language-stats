@@ -21,6 +21,7 @@ import { renderMessages } from './views/messages.js';
 import { renderDmThread } from './views/dmThread.js';
 import { renderSettings } from './views/settings.js';
 import { renderSearch } from './views/search.js';
+import { renderWorld } from './views/world.js';
 import { renderDecks } from './views/decks.js';
 import { renderStudy } from './views/study.js';
 

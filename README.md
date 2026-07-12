@@ -121,6 +121,24 @@ layer — swapping engines touches `models/`, not the routes.
   and (for nouns) dominant gender per word form.
 - spaCy is a candidate future supplement for tagging rarer words.
 
+## World (companion multiplayer game)
+
+`world/` is a copy of **STRANDED** (a SkyOffice-style Phaser + Colyseus + WebRTC
+virtual space). It runs as its own service and is embedded in the **World** tab,
+which passes your username so it pre-fills in the game. It keeps its own build
+(Vite/TypeScript) so it stays independently maintainable — it is not merged into
+the no-build main app.
+
+```bash
+npm run world:install     # once (installs world server + client deps)
+npm run world:server      # Colyseus game server on :2567
+npm run world:client      # Vite client on :5173  (the World tab embeds this)
+```
+
+Secrets (real API keys / TLS certs) from the original were stripped out; `.env`
+files are git-ignored. If you want the optional AI-NPC, add your own key to
+`world/server/.env`.
+
 ## Getting started
 
 ```bash

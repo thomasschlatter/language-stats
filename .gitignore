@@ -8,3 +8,7 @@ data/*.db-*
 # transformers.js model cache
 .cache/
 **/.cache/
+
+# world (STRANDED companion) build output
+world/client/dist/
+world/**/*.tsbuildinfo

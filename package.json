@@ -9,7 +9,10 @@
     "dev": "node --watch server/index.js",
     "seed": "node server/db/seed.js",
     "scrape": "node server/scripts/scrape.js",
-    "test": "node --test"
+    "test": "node --test",
+    "world:install": "cd world && npm install && cd client && npm install",
+    "world:server": "cd world && npm start",
+    "world:client": "cd world/client && npm run dev"
   },
   "engines": {
     "node": ">=20"

@@ -1,0 +1,11 @@
+node_modules/
+django/djangopj/__pycache__
+.DS_Store
+certbot/.DS_Store
+.DS_Store
+package-lock.json
+server/.env
+django/files/.env
+yarn.lock
+.env
+venv/
