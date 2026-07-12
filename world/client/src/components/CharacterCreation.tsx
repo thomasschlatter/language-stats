@@ -726,9 +726,16 @@ export default function CharacterCreation() {
           })
         );
         localStorage.setItem("strndd-avatar_name", name);
-        game.load.spritesheet(uuid, dataURL, { frameWidth: 32, frameHeight: 48 });
-        game.load.start();
-        game.load.on("complete", () => {
+        // Phaser's loader rejects data: URIs, so add the sprite sheet to the
+        // texture manager directly from an <img> built from the canvas.
+        const spriteImg = new Image();
+        spriteImg.onload = () => {
+          if (!game.textures.exists(uuid)) {
+            game.textures.addSpriteSheet(uuid, spriteImg as any, {
+              frameWidth: 32,
+              frameHeight: 48,
+            });
+          }
           setIsLoading(false);
           game.registerKeys();
           for (let i = 0; i < Object.keys(FRAMES).length; i++) {
@@ -747,7 +754,17 @@ export default function CharacterCreation() {
           game.anims.play(`${uuid}_idle_down`, game.myPlayer);
           game.network.readyToConnect();
           dispatch(setLoggedIn(true));
-        });
+        };
+        spriteImg.onerror = () => {
+          setIsLoading(false);
+          // Fall back to a default avatar so the user can still join.
+          game.registerKeys();
+          game.myPlayer.setPlayerName(name);
+          game.myPlayer.setPlayerTexture(avatars[avatarIndex].name);
+          game.network.readyToConnect();
+          dispatch(setLoggedIn(true));
+        };
+        spriteImg.src = dataURL;
       }
     }
   };
