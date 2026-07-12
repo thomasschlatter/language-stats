@@ -172,11 +172,14 @@ CREATE INDEX IF NOT EXISTS idx_messages_room ON messages(language_id, id);
 -- word_frequencies give each user their conversation-coverage %.
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS user_words (
-  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  language_id INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
-  word_lc     TEXT NOT NULL,
-  status      TEXT NOT NULL DEFAULT 'learning',   -- 'learning' | 'known'
-  updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  language_id  INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
+  word_lc      TEXT NOT NULL,
+  status       TEXT,                               -- 'learning' | 'known' | null (seen-only)
+  seen_count   INTEGER NOT NULL DEFAULT 0,         -- how many times "seen" (per the seen policy)
+  seen_policy  TEXT,                               -- which seen-policy last counted it (for experiments)
+  last_seen_at TEXT,
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (user_id, language_id, word_lc)
 );
 

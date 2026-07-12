@@ -21,6 +21,36 @@ export function markWord({ userId, languageId, wordLc, status }) {
   return { status };
 }
 
+// Record that the user has "seen" one or more words (per the seen policy).
+// Increments seen_count and stamps the policy that counted them.
+export function recordSeen(userId, languageId, words, policy) {
+  const stmt = db.prepare(
+    `INSERT INTO user_words (user_id, language_id, word_lc, seen_count, seen_policy, last_seen_at, updated_at)
+     VALUES (?, ?, ?, 1, ?, datetime('now'), datetime('now'))
+     ON CONFLICT(user_id, language_id, word_lc) DO UPDATE SET
+       seen_count = seen_count + 1,
+       seen_policy = excluded.seen_policy,
+       last_seen_at = excluded.last_seen_at`
+  );
+  const tx = db.transaction((list) => {
+    for (const w of list) {
+      const wlc = String(w).toLowerCase();
+      if (wlc) stmt.run(userId, languageId, wlc, policy);
+    }
+  });
+  tx(words);
+}
+
+// { word_lc: seen_count } for every word this user has seen in a language.
+export function seenMap(userId, languageId) {
+  const rows = db
+    .prepare('SELECT word_lc, seen_count FROM user_words WHERE user_id = ? AND language_id = ? AND seen_count > 0')
+    .all(userId, languageId);
+  const map = {};
+  for (const r of rows) map[r.word_lc] = r.seen_count;
+  return map;
+}
+
 export function wordStatus(userId, languageId, wordLc) {
   const row = db
     .prepare('SELECT status FROM user_words WHERE user_id = ? AND language_id = ? AND word_lc = ?')

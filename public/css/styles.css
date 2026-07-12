@@ -135,6 +135,7 @@ a:hover { text-decoration: underline; }
   cursor: pointer;
   border-radius: 4px;
   padding: 0 1px;
+  color: var(--seen-color, inherit); /* red→green familiarity (set by seen.js) */
   transition: background 0.08s, color 0.08s;
 }
 .w:hover {
@@ -279,6 +280,13 @@ a:hover { text-decoration: underline; }
 .settings-field > label { display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: var(--muted); }
 .ok-msg { color: var(--accent-2); font-size: 0.9rem; min-height: 1.1em; margin-top: 0.4rem; }
 .prof-place { font-size: 0.9rem; margin: 0.25rem 0 0.5rem; }
+
+/* ---- Seen / familiarity legend ---- */
+.seen-legend { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--muted); }
+.seen-gradient {
+  flex: 1; height: 10px; border-radius: 999px; max-width: 240px;
+  background: linear-gradient(90deg, hsl(0 65% 55%), hsl(60 65% 50%), hsl(120 65% 45%));
+}
 
 /* ---- Character avatars ---- */
 .char-avatar {

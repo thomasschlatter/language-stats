@@ -42,6 +42,10 @@ word is again clickable.
 - **Personal progress**: mark words known/learning; a dashboard shows what % of
   everyday conversation your known words cover, with milestones and a
   "learn these next" list.
+- **Familiarity colouring**: every word is tinted red→green by how often you've
+  seen it. What counts as "seen" is a **versioned, swappable policy**
+  (`server/lib/seenPolicy.js`; each increment stores the policy that counted it,
+  so experiments stay traceable). Shown in Settings.
 - **Language exchange (Tandem-style):**
   - **Profiles** — native/learning languages, bio, interests.
   - **Community / partner finder** — browse and match members (native in what

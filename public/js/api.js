@@ -93,4 +93,8 @@ export const api = {
   wordProgress: (lang, word) =>
     request('GET', `/progress/word?lang=${encodeURIComponent(lang)}&word=${encodeURIComponent(word)}`),
   markWord: (b) => request('POST', '/progress/mark', b),
+  // seen-count tracking (red→green familiarity coloring)
+  seenMap: (lang) => request('GET', `/progress/seen?lang=${encodeURIComponent(lang)}`),
+  recordSeen: (b) => request('POST', '/progress/seen', b),
+  seenPolicy: () => request('GET', '/progress/policy'),
 };

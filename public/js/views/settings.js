@@ -41,6 +41,23 @@ export async function renderSettings() {
     field('Native language (words translate into this)', nativeSelect),
   ]));
 
+  // Word familiarity: explains the red→green colouring and the active "seen" policy.
+  const familiaritySection = section('Word familiarity', [
+    el('p', { class: 'muted', style: 'margin-top:0' }, 'Words are coloured by how often you\'ve seen them:'),
+    el('div', { class: 'seen-legend' }, [
+      el('span', {}, 'never'),
+      el('div', { class: 'seen-gradient' }),
+      el('span', {}, 'seen a lot'),
+    ]),
+    el('div', { class: 'muted', style: 'font-size:0.82rem; margin-top:0.6rem' }, el('span', { id: 'seen-policy' }, 'Loading policy…')),
+  ]);
+  view.append(familiaritySection);
+  api.seenPolicy().then(({ current, policies }) => {
+    const p = policies[current];
+    const node = document.getElementById('seen-policy');
+    if (node && p) node.textContent = `"Seen" policy: ${current} — ${p.description}`;
+  }).catch(() => {});
+
   if (!store.user) {
     view.append(el('p', {}, signInPrompt('to edit your character, profile and account.')));
     return;

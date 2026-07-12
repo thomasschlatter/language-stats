@@ -12,6 +12,7 @@ import { api } from './api.js';
 import { store } from './store.js';
 import { el } from './dom.js';
 import { navigate } from './router.js';
+import { registerSeen } from './seen.js';
 
 // A "word" = a run of Unicode letters/marks, allowing internal ' and -.
 const WORD_RE = /[\p{L}\p{M}]+(?:['’-][\p{L}\p{M}]+)*/gu;
@@ -76,7 +77,7 @@ function nearestLang(elm, root) {
 
 // A single clickable, language-tagged word.
 export function wordEl(word, langCode) {
-  return el(
+  const span = el(
     'span',
     {
       class: 'w',
@@ -87,6 +88,9 @@ export function wordEl(word, langCode) {
     },
     word
   );
+  // Familiarity colouring + seen tracking (signed-in users only).
+  if (store.user) registerSeen(span, word, langCode);
+  return span;
 }
 
 // Resolve a click to the right destination and navigate there.
