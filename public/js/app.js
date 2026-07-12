@@ -22,11 +22,12 @@ function reloadLanguages() {
 async function updateDueBadge() {
   const link = document.querySelector('.topnav a[href="#/decks"]');
   if (!link) return;
-  link.querySelector('.due-badge')?.remove();
-  if (!store.user) return;
+  const clearBadges = () => link.querySelectorAll('.due-badge').forEach((b) => b.remove());
+  if (!store.user) { clearBadges(); return; }
   try {
     const { decks } = await api.decks();
     const due = decks.reduce((s, d) => s + (d.due || 0), 0);
+    clearBadges(); // remove AFTER the await, so concurrent calls can't double-append
     if (due > 0) link.append(el('span', { class: 'due-badge' }, String(due)));
   } catch { /* ignore */ }
 }
