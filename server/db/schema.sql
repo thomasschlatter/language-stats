@@ -60,6 +60,23 @@ CREATE TABLE IF NOT EXISTS follows (
   PRIMARY KEY (follower_id, following_id)
 );
 
+-- Moderation: blocks (hide each other's content, no DMs) + content reports.
+CREATE TABLE IF NOT EXISTS blocks (
+  blocker_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  blocked_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (blocker_id, blocked_id)
+);
+
+CREATE TABLE IF NOT EXISTS reports (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  reporter_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  target_type TEXT NOT NULL,                        -- 'message' | 'dm' | 'article' | 'user'
+  target_id   INTEGER NOT NULL,
+  reason      TEXT,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- ---------------------------------------------------------------------------
 -- Words = graph NODES
 -- ---------------------------------------------------------------------------

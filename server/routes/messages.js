@@ -2,16 +2,22 @@
 import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
 import { listMessages, createMessage } from '../models/messages.js';
+import { blockedIds } from '../models/moderation.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-// GET /api/messages?lang=de-DE&since=42
+// GET /api/messages?lang=de-DE&since=42  (hides messages from users you blocked)
 router.get('/', (req, res) => {
   const language = getLanguageByCode(req.query.lang);
   if (!language) return res.status(404).json({ error: 'unknown language' });
   const since = Number(req.query.since) || 0;
-  res.json({ messages: listMessages(language.id, since) });
+  let messages = listMessages(language.id, since);
+  if (req.user) {
+    const blocked = blockedIds(req.user.id);
+    if (blocked.size) messages = messages.filter((m) => !blocked.has(m.author_id));
+  }
+  res.json({ messages });
 });
 
 // POST /api/messages  { languageCode, bodyLanguageCode?, body }

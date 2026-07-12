@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { getUserByUsername } from '../models/users.js';
 import { getLanguageByCode } from '../models/languages.js';
 import { sendDM, thread, conversations, getMessage, addCorrection } from '../models/dm.js';
+import { blockedBetween } from '../models/moderation.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -38,7 +39,11 @@ router.get('/:username', requireAuth, (req, res) => {
   const other = getUserByUsername(req.params.username);
   if (!other) return res.status(404).json({ error: 'user not found' });
   const since = Number(req.query.since) || 0;
-  res.json({ partner: other.username, messages: thread(req.user.id, other.id, since) });
+  res.json({
+    partner: other.username,
+    blocked: blockedBetween(req.user.id, other.id),
+    messages: thread(req.user.id, other.id, since),
+  });
 });
 
 // POST /api/dm/:username  { body, bodyLanguageCode? }
@@ -46,6 +51,7 @@ router.post('/:username', requireAuth, (req, res) => {
   const other = getUserByUsername(req.params.username);
   if (!other) return res.status(404).json({ error: 'user not found' });
   if (other.id === req.user.id) return res.status(400).json({ error: 'cannot message yourself' });
+  if (blockedBetween(req.user.id, other.id)) return res.status(403).json({ error: 'you cannot message this user' });
   const { body, bodyLanguageCode } = req.body ?? {};
   if (!body || !body.trim()) return res.status(400).json({ error: 'body is required' });
   const bodyLang = bodyLanguageCode ? getLanguageByCode(bodyLanguageCode) : null;

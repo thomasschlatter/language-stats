@@ -78,6 +78,8 @@ export const api = {
   updateProfile: (b) => request('PUT', '/profile', b),
   userProfile: (username) => request('GET', `/users/${encodeURIComponent(username)}`),
   followUser: (username) => request('POST', `/users/${encodeURIComponent(username)}/follow`),
+  blockUser: (username) => request('POST', `/users/${encodeURIComponent(username)}/block`),
+  report: (b) => request('POST', '/reports', b),
   community: (params = {}) => {
     const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v)).toString();
     return request('GET', `/community${qs ? `?${qs}` : ''}`);

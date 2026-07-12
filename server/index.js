@@ -30,6 +30,7 @@ import communityRoutes from './routes/community.js';
 import dmRoutes from './routes/dm.js';
 import translateRoutes from './routes/translate.js';
 import flashcardRoutes from './routes/flashcards.js';
+import reportRoutes from './routes/reports.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -58,6 +59,7 @@ app.use('/api/community', communityRoutes);
 app.use('/api/dm', dmRoutes);
 app.use('/api/translate', translateRoutes);
 app.use('/api/flashcards', flashcardRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 

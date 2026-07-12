@@ -46,7 +46,11 @@ export async function renderUserProfile(username) {
               el('button', { class: 'btn small secondary', onclick: () => openEdit(prof) }, 'Edit profile'),
             ])
           : (store.user
-              ? el('div', { class: 'row' }, [followBtn(prof), el('a', { class: 'btn small secondary', href: `#/dm/${encodeURIComponent(prof.username)}` }, 'Message')])
+              ? el('div', { class: 'row' }, [
+                  prof.blocked ? null : followBtn(prof),
+                  prof.blocked ? null : el('a', { class: 'btn small secondary', href: `#/dm/${encodeURIComponent(prof.username)}` }, 'Message'),
+                  blockBtn(prof),
+                ])
               : null),
       ]),
       el('div', { class: 'prof-counts muted' }, `${prof.followers ?? 0} followers · ${prof.following_count ?? 0} following`),
@@ -113,6 +117,19 @@ function followBtn(prof) {
       btn.textContent = following ? 'Following' : 'Follow';
       btn.classList.toggle('secondary', following);
     } catch { /* ignore */ } finally { btn.disabled = false; }
+  });
+  return btn;
+}
+
+function blockBtn(prof) {
+  const btn = el('button', { class: 'btn small secondary' }, prof.blocked ? 'Unblock' : 'Block');
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const { blocked } = await api.blockUser(prof.username);
+      prof.blocked = blocked;
+      renderUserProfile(prof.username); // re-render to reflect follow/message availability
+    } catch { btn.disabled = false; }
   });
   return btn;
 }

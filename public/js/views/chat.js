@@ -8,6 +8,7 @@ import { el, clear } from '../dom.js';
 import { renderText } from '../render.js';
 import { signInPrompt } from '../auth.js';
 import { avatarFor } from '../avatar.js';
+import { openReport } from '../report.js';
 import { navigate } from '../router.js';
 
 let pollTimer = null;
@@ -66,6 +67,9 @@ export async function renderChat(langCode) {
         el('div', { class: 'chat-meta' }, [
           el('span', { class: 'chat-author' }, `@${m.author}`),
           el('span', { class: 'chat-lang' }, bodyLang),
+          (store.user && m.author !== store.user.username)
+            ? el('button', { class: 'btn link small', style: 'font-size:0.72rem', onclick: () => openReport('message', m.id) }, 'report')
+            : null,
         ]),
         el('div', { class: 'chat-body', lang: bodyLang }, renderText(m.body, bodyLang)),
       ]),

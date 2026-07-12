@@ -8,6 +8,7 @@ import { el, clear } from '../dom.js';
 import { renderText } from '../render.js';
 import { signInPrompt } from '../auth.js';
 import { avatarFor } from '../avatar.js';
+import { openReport } from '../report.js';
 
 let pollTimer = null;
 function stopPoll() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
@@ -46,15 +47,23 @@ export async function renderDmThread(username) {
   };
   const atBottom = () => list.scrollHeight - list.scrollTop - list.clientHeight < 60;
 
+  let blocked = false;
   list.append(el('span', { class: 'muted' }, 'Loading…'));
   try {
-    const { messages } = await api.dmThread(username);
+    const res = await api.dmThread(username);
+    blocked = res.blocked;
     clear(list);
-    if (!messages.length) { empty = el('p', { class: 'muted' }, 'No messages yet. Say hi!'); list.append(empty); }
-    messages.forEach(add);
+    if (!res.messages.length) { empty = el('p', { class: 'muted' }, 'No messages yet. Say hi!'); list.append(empty); }
+    res.messages.forEach(add);
     list.scrollTop = list.scrollHeight;
   } catch (ex) {
     clear(list).append(el('p', { class: 'error' }, ex.message));
+    return;
+  }
+
+  // If either side has blocked, there's no composer.
+  if (blocked) {
+    view.append(el('p', { class: 'muted', style: 'margin-top:0.75rem' }, 'Messaging is unavailable with this user.'));
     return;
   }
 
@@ -149,7 +158,9 @@ function messageEl(m) {
     const correct = el('button', { class: 'btn link small' }, 'Correct');
     correct.addEventListener('click', () => openCorrect(m, corr, bodyLang, correct));
 
-    actions.append(translate, correct);
+    const report = el('button', { class: 'btn link small', onclick: () => openReport('dm', m.id) }, 'Report');
+
+    actions.append(translate, correct, report);
     wrap.append(actions, glossLine);
   }
   return row;

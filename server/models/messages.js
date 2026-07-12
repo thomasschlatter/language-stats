@@ -1,7 +1,7 @@
 // Chat message queries.
 import db from '../db/index.js';
 
-const COLS = `m.id, m.body, m.created_at, u.username AS author, u.avatar AS author_avatar, bl.code AS body_lang`;
+const COLS = `m.id, m.body, m.created_at, u.id AS author_id, u.username AS author, u.avatar AS author_avatar, bl.code AS body_lang`;
 
 function parseAvatar(row) {
   if (row && row.author_avatar) {

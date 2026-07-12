@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { getUserByUsername, profile } from '../models/users.js';
 import { toggleFollow, isFollowing, followerCount, followingCount } from '../models/follows.js';
+import { toggleBlock, isBlocked } from '../models/moderation.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -13,8 +14,19 @@ router.get('/:username', (req, res) => {
   const p = profile(user);
   p.followers = followerCount(user.id);
   p.following_count = followingCount(user.id);
-  if (req.user) p.following = isFollowing(req.user.id, user.id);
+  if (req.user) {
+    p.following = isFollowing(req.user.id, user.id);
+    p.blocked = isBlocked(req.user.id, user.id);
+  }
   res.json({ profile: p });
+});
+
+// POST /api/users/:username/block  -> toggle block
+router.post('/:username/block', requireAuth, (req, res) => {
+  const user = getUserByUsername(req.params.username);
+  if (!user) return res.status(404).json({ error: 'user not found' });
+  if (user.id === req.user.id) return res.status(400).json({ error: 'cannot block yourself' });
+  res.json(toggleBlock(req.user.id, user.id));
 });
 
 // POST /api/users/:username/follow  -> toggle follow
