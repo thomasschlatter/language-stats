@@ -81,34 +81,72 @@ export default class Game extends Phaser.Scene {
 
     createCharacterAnims(this.anims)
 
-    this.map = this.make.tilemap({ key: 'islandMap' })
-    const CompleteExterior = this.map.addTilesetImage('Modern_Exteriors', 'complete_exterior_tileset')
+    // --- Procedurally generate a unique world, seeded by the room id so every
+    // player in the same room gets the SAME map, and different rooms differ. ---
+    const seedStr =
+      (this.network as any).room?.roomId ||
+      (this.network as any).room?.id ||
+      this.network.mySessionId ||
+      'world'
+    let h = 2166136261
+    for (let i = 0; i < seedStr.length; i++) {
+      h ^= seedStr.charCodeAt(i)
+      h = Math.imul(h, 16777619)
+    }
+    let s = h >>> 0
+    const rng = () => {
+      s = (s + 0x6d2b79f5) | 0
+      let t = Math.imul(s ^ (s >>> 15), 1 | s)
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+    }
 
-    this.addGroupFromTiled('ObjectsUnder', 'complete_exterior_tileset', 'Modern_Exteriors', false)
+    const W = 48
+    const H = 36
+    const GRASS = 1167 // base ground tile (Tiled gid 1168 → data index gid-1)
+    const WALL = 480 //   collidable obstacle tile (gid 481 → gid-1)
+    const grid: number[][] = []
+    for (let y = 0; y < H; y++) {
+      const row: number[] = []
+      for (let x = 0; x < W; x++) {
+        const border = x === 0 || y === 0 || x === W - 1 || y === H - 1
+        row.push(border ? WALL : GRASS)
+      }
+      grid.push(row)
+    }
+    const clusters = 20 + Math.floor(rng() * 16)
+    for (let i = 0; i < clusters; i++) {
+      const cx = 2 + Math.floor(rng() * (W - 4))
+      const cy = 2 + Math.floor(rng() * (H - 4))
+      const size = 1 + Math.floor(rng() * 3)
+      for (let dy = 0; dy < size; dy++)
+        for (let dx = 0; dx < size; dx++) {
+          const x = cx + dx
+          const y = cy + dy
+          if (x > 0 && y > 0 && x < W - 1 && y < H - 1) grid[y][x] = WALL
+        }
+    }
+    const spawnTX = Math.floor(W / 2)
+    const spawnTY = Math.floor(H / 2)
+    for (let dy = -3; dy <= 3; dy++)
+      for (let dx = -3; dx <= 3; dx++) {
+        const x = spawnTX + dx
+        const y = spawnTY + dy
+        if (x > 0 && y > 0 && x < W - 1 && y < H - 1) grid[y][x] = GRASS
+      }
 
-    //const groundLayer = this.map.createLayer('Ground', FloorAndGround)
-    const groundLayer = this.map.createLayer('Ground', CompleteExterior)
-    groundLayer.setCollisionByProperty({ collides: true })
+    this.map = this.make.tilemap({ data: grid, tileWidth: 32, tileHeight: 32 })
+    const tileset = this.map.addTilesetImage(
+      'Modern_Exteriors',
+      'complete_exterior_tileset',
+      32,
+      32
+    )!
+    const groundLayer = this.map.createLayer(0, tileset, 0, 0)!
+    groundLayer.setCollision([WALL])
 
-    const groundLayer2 = this.map.createLayer('Ground 2', CompleteExterior)
-    groundLayer2.setCollisionByProperty({ collides: true })
-
-    //debugDraw(groundLayer, this)
-
-    this.myPlayer = this.add.myPlayer(705, 500, 'adam', this.network.mySessionId)
+    this.myPlayer = this.add.myPlayer(spawnTX * 32, spawnTY * 32, 'adam', this.network.mySessionId)
     this.playerSelector = new PlayerSelector(this, 0, 0, 16, 16)
-
-    // import other objects from Tiled map to Phaser
-    //this.addGroupFromTiled('Ground', 'complete_exterior_tileset', 'Modern_Exteriors', true)
-    //this.addGroupFromTiled('Terrains', 'terrains', '1_Terrains_32x32', false)
-    //this.addGroupFromTiled('Objects', 'office', 'Modern_Office_Black_Shadow', false)
-    //this.addGroupFromTiled('ObjectsOnCollide', 'office', 'Modern_Office_Black_Shadow', true)
-    this.addGroupFromTiled('Objects', 'complete_exterior_tileset', 'Modern_Exteriors', false)
-    this.addGroupFromTiled('ObjectsOnCollide', 'complete_exterior_tileset', 'Modern_Exteriors', true)
-    this.addGroupFromTiled('ObjectsOnCollide 2', 'complete_exterior_tileset', 'Modern_Exteriors', true)
-    //this.addGroupFromTiled('GenericObjects', 'generic', 'Generic', false)
-    //this.addGroupFromTiled('GenericObjectsOnCollide', 'generic', 'Generic', true)
-    //this.addGroupFromTiled('Basement', 'basement', 'Basement', true)
   
     this.otherPlayers = this.physics.add.group({ classType: OtherPlayer })
 
@@ -129,7 +167,6 @@ export default class Game extends Phaser.Scene {
 
     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
     this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], groundLayer)
-    this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], groundLayer2)
 
     this.physics.add.overlap(
       this.myPlayer,
