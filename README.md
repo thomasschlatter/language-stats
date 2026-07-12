@@ -106,10 +106,16 @@ layer — swapping engines touches `models/`, not the routes.
 
 ## Data & licensing
 
-- **Word frequencies** — `server/seed-data/opensubtitles/de_50k.txt`, from
-  `hermitdave/FrequencyWords` (MIT), derived from **OpenSubtitles**
-  (opensubtitles.org). Distributed lowercased; correct German casing is
-  restored from the UD treebank at seed time (see `SOURCE.md`).
+- **Word frequencies** — `server/seed-data/opensubtitles/{de,en,es,fr,it,pt}_50k.txt`,
+  from `hermitdave/FrequencyWords` (MIT), derived from **OpenSubtitles**
+  (opensubtitles.org). 50k words per language. Distributed lowercased; correct
+  German casing is restored from the UD treebank at seed time (see `SOURCE.md`).
+- **Word definitions** — fetched from **Wiktionary** (CC BY-SA) by a
+  re-runnable scraper: `npm run scrape -- [langCode] [limit]`. It pulls
+  definitions for the most frequent words and stores them on the dictionary
+  entries; incremental (skips recently-scraped words unless `--force`), so you
+  can re-run it any time to add more or refresh. Run `npm run seed` first, then
+  `npm run scrape`.
 - **POS + gender** — `server/seed-data/ud/*.conllu`, the **Universal
   Dependencies German-GSD** treebank (CC BY-SA). Aggregated to a dominant POS
   and (for nouns) dominant gender per word form.

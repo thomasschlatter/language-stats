@@ -12,8 +12,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Store the database file under <project>/data so it is easy to find/back up.
-const dataDir = join(__dirname, '..', '..', 'data');
+// Store the database file under DATA_DIR (set this to a persistent volume in
+// production) or <project>/data locally.
+const dataDir = process.env.DATA_DIR || join(__dirname, '..', '..', 'data');
 mkdirSync(dataDir, { recursive: true });
 
 const dbPath = join(dataDir, 'language-stats.db');

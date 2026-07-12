@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS words (
   meaning     TEXT,                        -- short definition in the same language
   notes       TEXT,                        -- optional extra notes
   created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  scraped_at  TEXT,                        -- when the definition was last fetched (Wiktionary)
   created_at  TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE (language_id, text)
 );

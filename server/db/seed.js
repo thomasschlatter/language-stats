@@ -43,6 +43,9 @@ const english = ensureLanguage('en-US', 'en', 'US', 'English (US)');
 const swiss = ensureLanguage('de-CH', 'de', 'CH', 'German (Switzerland)');
 // A second native language, so cards can be shown per learner's native tongue:
 const spanish = ensureLanguage('es-ES', 'es', 'ES', 'Spanish (Spain)');
+const french = ensureLanguage('fr-FR', 'fr', 'FR', 'French (France)');
+const italian = ensureLanguage('it-IT', 'it', 'IT', 'Italian (Italy)');
+const portuguese = ensureLanguage('pt-PT', 'pt', 'PT', 'Portuguese (Portugal)');
 
 // Starter words. Each entry has a word + a monolingual gloss in its OWN
 // language, so the words inside a definition are themselves clickable and
@@ -105,7 +108,13 @@ function loadFrequencies(language, file) {
   console.log(`Loaded ${n} ${language.code} word frequencies from OpenSubtitles.`);
 }
 
-loadFrequencies(german, join(__dirname, '..', 'seed-data', 'opensubtitles', 'de_50k.txt'));
+const freqDir = join(__dirname, '..', 'seed-data', 'opensubtitles');
+loadFrequencies(german, join(freqDir, 'de_50k.txt'));
+loadFrequencies(english, join(freqDir, 'en_50k.txt'));
+loadFrequencies(spanish, join(freqDir, 'es_50k.txt'));
+loadFrequencies(french, join(freqDir, 'fr_50k.txt'));
+loadFrequencies(italian, join(freqDir, 'it_50k.txt'));
+loadFrequencies(portuguese, join(freqDir, 'pt_50k.txt'));
 
 // ---------------------------------------------------------------------------
 // Load POS + gender from the Universal Dependencies German treebank.

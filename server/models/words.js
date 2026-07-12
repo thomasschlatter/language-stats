@@ -80,6 +80,19 @@ export function createWord({ languageId, text, meaning, notes, userId }) {
   return getWordById(info.lastInsertRowid);
 }
 
+// Insert or refresh a word's definition (used by the Wiktionary scraper).
+export function upsertScrapedWord({ languageId, text, meaning }) {
+  const existing = db.prepare('SELECT id FROM words WHERE language_id = ? AND text = ?').get(languageId, text);
+  if (existing) {
+    db.prepare("UPDATE words SET meaning = ?, scraped_at = datetime('now') WHERE id = ?").run(meaning, existing.id);
+    return existing.id;
+  }
+  const info = db
+    .prepare("INSERT INTO words (language_id, text, meaning, scraped_at) VALUES (?, ?, ?, datetime('now'))")
+    .run(languageId, text, meaning);
+  return info.lastInsertRowid;
+}
+
 export function updateWord(id, { meaning, notes }) {
   db.prepare('UPDATE words SET meaning = ?, notes = ? WHERE id = ?').run(
     meaning ?? null,
