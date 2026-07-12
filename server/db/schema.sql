@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   bio           TEXT,
   interests     TEXT,                              -- comma-separated tags
+  origin        TEXT,                              -- where they're from
+  location      TEXT,                              -- where they live now
   avatar        TEXT,                              -- JSON: layer indices for the character sprite
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );

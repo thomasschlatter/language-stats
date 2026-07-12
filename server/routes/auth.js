@@ -5,6 +5,7 @@ import {
   getUserByEmail,
   getUserById,
   verifyPassword,
+  changePassword,
   publicUser,
 } from '../models/users.js';
 import { issueToken, clearToken, requireAuth } from '../middleware/auth.js';
@@ -55,6 +56,20 @@ router.post('/logout', (req, res) => {
 // GET /api/auth/me
 router.get('/me', requireAuth, (req, res) => {
   res.json({ user: publicUser(getUserById(req.user.id)) });
+});
+
+// POST /api/auth/change-password  { currentPassword, newPassword }
+router.post('/change-password', requireAuth, (req, res) => {
+  const { currentPassword, newPassword } = req.body ?? {};
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'currentPassword and newPassword are required' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'new password must be at least 6 characters' });
+  }
+  const result = changePassword(req.user.id, currentPassword, newPassword);
+  if (!result.ok) return res.status(400).json({ error: result.error });
+  res.json({ ok: true });
 });
 
 export default router;

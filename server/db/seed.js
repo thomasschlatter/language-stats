@@ -292,11 +292,20 @@ function seedDemo() {
     { u: 'finn',   native: ['de-DE'], learning: ['es-ES'], bio: 'Learning Spanish, ask me anything in German.', interests: 'cycling, history, films', av: { Bodies: 1, Hairstyles: 15, Eyes: 0, Accessories: 2,  Outfits: 18 } },
   ];
 
+  const places = {
+    mia: ['Chicago, USA', 'Berlin, Germany'], lukas: ['Munich, Germany', 'Munich, Germany'],
+    sofia: ['Madrid, Spain', 'Madrid, Spain'], noah: ['Austin, USA', 'Mexico City, Mexico'],
+    emma: ['Hamburg, Germany', 'Barcelona, Spain'], leon: ['Zürich, Switzerland', 'Zürich, Switzerland'],
+    olivia: ['Portland, USA', 'Vienna, Austria'], ben: ['Cologne, Germany', 'London, UK'],
+    carla: ['Valencia, Spain', 'Dublin, Ireland'], finn: ['Leipzig, Germany', 'Leipzig, Germany'],
+  };
+
   const made = {};
   const tx = db.transaction(() => {
     for (const p of people) {
       const user = createUser({ email: `${p.u}@demo.ls`, username: p.u, password: 'demo1234' });
-      updateProfile(user.id, { bio: p.bio, interests: p.interests });
+      const [from, lives] = places[p.u] || [null, null];
+      updateProfile(user.id, { bio: p.bio, interests: p.interests, origin: from, location: lives });
       setUserLanguages(user.id, 'native', p.native.map(langId));
       setUserLanguages(user.id, 'learning', p.learning.map(langId));
       setAvatar(user.id, p.av);

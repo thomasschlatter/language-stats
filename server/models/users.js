@@ -12,7 +12,7 @@ export function createUser({ email, username, password }) {
 
 export function getUserById(id) {
   return db
-    .prepare('SELECT id, email, username, bio, interests, avatar, created_at FROM users WHERE id = ?')
+    .prepare('SELECT id, email, username, bio, interests, origin, location, avatar, created_at FROM users WHERE id = ?')
     .get(id);
 }
 
@@ -33,6 +33,17 @@ export function verifyPassword(user, password) {
   return bcrypt.compareSync(password, user.password_hash);
 }
 
+// Verify the current password, then set a new one. Returns { ok, error? }.
+export function changePassword(userId, currentPassword, newPassword) {
+  const row = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(userId);
+  if (!row) return { ok: false, error: 'user not found' };
+  if (!bcrypt.compareSync(currentPassword, row.password_hash)) {
+    return { ok: false, error: 'current password is incorrect' };
+  }
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(bcrypt.hashSync(newPassword, 10), userId);
+  return { ok: true };
+}
+
 // Strip sensitive fields before sending a user to the client.
 export function publicUser(user) {
   if (!user) return null;
@@ -44,9 +55,9 @@ export function getUserByUsername(username) {
   return db.prepare('SELECT * FROM users WHERE username = ?').get(username);
 }
 
-export function updateProfile(userId, { bio, interests }) {
-  db.prepare('UPDATE users SET bio = ?, interests = ? WHERE id = ?')
-    .run(bio ?? null, interests ?? null, userId);
+export function updateProfile(userId, { bio, interests, origin, location }) {
+  db.prepare('UPDATE users SET bio = ?, interests = ?, origin = ?, location = ? WHERE id = ?')
+    .run(bio ?? null, interests ?? null, origin ?? null, location ?? null, userId);
 }
 
 // Replace a user's languages for a given role ('native' | 'learning').
@@ -112,6 +123,8 @@ export function profile(user) {
     username: user.username,
     bio: user.bio || null,
     interests: user.interests ? user.interests.split(',').map((s) => s.trim()).filter(Boolean) : [],
+    origin: user.origin || null,
+    location: user.location || null,
     avatar,
     native: langs.filter((l) => l.role === 'native').map(({ code, name }) => ({ code, name })),
     learning: langs.filter((l) => l.role === 'learning').map(({ code, name }) => ({ code, name })),

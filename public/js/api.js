@@ -30,6 +30,7 @@ export const api = {
   login: (b) => request('POST', '/auth/login', b),
   logout: () => request('POST', '/auth/logout'),
   me: () => request('GET', '/auth/me'),
+  changePassword: (b) => request('POST', '/auth/change-password', b),
 
   // --- languages ---
   languages: () => request('GET', '/languages'),

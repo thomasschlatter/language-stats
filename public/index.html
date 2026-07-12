@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Language Stats</title>
+    <!-- Apply saved theme before paint to avoid a flash. -->
+    <script>
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('ls_theme') || 'dark');
+    </script>
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
@@ -12,6 +16,7 @@
       <nav class="topnav">
         <a href="#/community">Community</a>
         <a href="#/messages">Messages</a>
+        <a href="#/settings">Settings</a>
       </nav>
       <div id="auth-area" class="auth-area"><!-- filled by auth.js --></div>
     </header>

@@ -17,9 +17,11 @@ import { renderUserProfile } from './views/userProfile.js';
 import { renderCommunity } from './views/community.js';
 import { renderMessages } from './views/messages.js';
 import { renderDmThread } from './views/dmThread.js';
+import { renderSettings } from './views/settings.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
+  { pattern: /^#\/settings$/, handler: () => renderSettings() },
   { pattern: /^#\/messages$/, handler: () => renderMessages() },
   { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])) },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },

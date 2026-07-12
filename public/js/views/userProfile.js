@@ -52,6 +52,13 @@ export async function renderUserProfile(username) {
       el('div', { class: 'prof-counts muted' }, `${prof.followers ?? 0} followers · ${prof.following_count ?? 0} following`),
       langRow('Speaks', prof.native),
       langRow('Learning', prof.learning),
+      (prof.origin || prof.location)
+        ? el('div', { class: 'prof-place muted' }, [
+            prof.origin ? `From ${prof.origin}` : null,
+            prof.origin && prof.location ? ' · ' : null,
+            prof.location ? `Lives in ${prof.location}` : null,
+          ].filter(Boolean).join(''))
+        : null,
       el('div', { class: 'prof-bio' }, prof.bio || el('span', { class: 'muted' }, 'No bio yet.')),
       prof.interests.length
         ? el('div', { class: 'prof-interests' }, prof.interests.map((t) => el('span', { class: 'tag-chip' }, t)))
@@ -78,6 +85,10 @@ function openEdit(prof) {
   const err = el('div', { class: 'error' });
   const bio = el('textarea', { placeholder: 'A short bio…' });
   bio.value = prof.bio || '';
+  const origin = el('input', { type: 'text', placeholder: 'e.g. Munich, Germany' });
+  origin.value = prof.origin || '';
+  const location = el('input', { type: 'text', placeholder: 'e.g. London, UK' });
+  location.value = prof.location || '';
   const interests = el('input', { type: 'text', placeholder: 'interests, comma separated' });
   interests.value = prof.interests.join(', ');
 
@@ -101,6 +112,8 @@ function openEdit(prof) {
       try {
         await api.updateProfile({
           bio: bio.value,
+          origin: origin.value,
+          location: location.value,
           interests: interests.value.split(',').map((s) => s.trim()).filter(Boolean),
           native: checked(nativePick),
           learning: checked(learnPick),
@@ -113,6 +126,8 @@ function openEdit(prof) {
     },
   }, [
     el('label', {}, 'Bio'), bio,
+    el('label', {}, 'From (origin)'), origin,
+    el('label', {}, 'Lives in'), location,
     el('label', {}, 'Interests'), interests,
     el('label', {}, 'Speaks (native)'), nativePick,
     el('label', {}, 'Learning'), learnPick,

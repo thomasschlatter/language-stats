@@ -23,17 +23,21 @@ router.get('/', requireAuth, (req, res) => {
   res.json({ profile: profile(getUserById(req.user.id)) });
 });
 
-// PUT /api/profile  { bio?, interests?, native?: [codes], learning?: [codes], avatar? }
+// PUT /api/profile { bio?, interests?, origin?, location?, native?, learning?, avatar? }
 router.put('/', requireAuth, (req, res) => {
-  const { bio, interests, native, learning, avatar } = req.body ?? {};
-  // Only touch bio/interests when provided, so an avatar-only save keeps them.
-  if (bio !== undefined || interests !== undefined) {
-    const current = profile(getUserById(req.user.id));
+  const { bio, interests, origin, location, native, learning, avatar } = req.body ?? {};
+  // Update text fields together, preserving any not included in this request
+  // (so an avatar-only or languages-only save doesn't wipe them).
+  const textKeys = ['bio', 'interests', 'origin', 'location'];
+  if (textKeys.some((k) => req.body?.[k] !== undefined)) {
+    const cur = profile(getUserById(req.user.id));
     updateProfile(req.user.id, {
-      bio: bio !== undefined ? bio : current.bio,
+      bio: bio !== undefined ? bio : cur.bio,
       interests: interests !== undefined
         ? (Array.isArray(interests) ? interests.join(', ') : interests)
-        : current.interests.join(', '),
+        : cur.interests.join(', '),
+      origin: origin !== undefined ? origin : cur.origin,
+      location: location !== undefined ? location : cur.location,
     });
   }
   if (native !== undefined) setUserLanguages(req.user.id, 'native', idsFromCodes(native));

@@ -11,6 +11,24 @@
   --radius: 10px;
 }
 
+/* Light theme — applied when <html data-theme="light"> */
+:root[data-theme="light"] {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #eceff6;
+  --border: #d7dce8;
+  --text: #191d2b;
+  --muted: #5c6377;
+  --accent: #4257d0;
+  --accent-2: #12946a;
+  --danger: #d64141;
+}
+/* A few chips are tuned for dark; boost contrast on light. */
+:root[data-theme="light"] .g-m { background: rgba(66,87,208,0.14); color: #3346c0; }
+:root[data-theme="light"] .g-f { background: rgba(214,65,65,0.12); color: #c23b3b; }
+:root[data-theme="light"] .g-n { background: rgba(18,148,106,0.12); color: #0f7d5a; }
+:root[data-theme="light"] .topbar { box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+
 * { box-sizing: border-box; }
 
 body {
@@ -233,6 +251,14 @@ a:hover { text-decoration: underline; }
 .vote-arrow { font-size: 0.7rem; }
 .article-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .article-head .vote-btn { font-size: 0.95rem; padding: 0.3rem 0.8rem; }
+
+/* ---- Settings ---- */
+.settings-section { border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; max-width: 620px; }
+.settings-title { margin: 0 0 0.75rem; font-size: 1.05rem; }
+.settings-field { margin-bottom: 0.75rem; }
+.settings-field > label { display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: var(--muted); }
+.ok-msg { color: var(--accent-2); font-size: 0.9rem; min-height: 1.1em; margin-top: 0.4rem; }
+.prof-place { font-size: 0.9rem; margin: 0.25rem 0 0.5rem; }
 
 /* ---- Character avatars ---- */
 .char-avatar {
