@@ -1,7 +1,14 @@
 // Chat message queries.
 import db from '../db/index.js';
 
-const COLS = `m.id, m.body, m.created_at, u.username AS author, bl.code AS body_lang`;
+const COLS = `m.id, m.body, m.created_at, u.username AS author, u.avatar AS author_avatar, bl.code AS body_lang`;
+
+function parseAvatar(row) {
+  if (row && row.author_avatar) {
+    try { row.author_avatar = JSON.parse(row.author_avatar); } catch { row.author_avatar = null; }
+  }
+  return row;
+}
 
 // Newest messages in a room (returned oldest-first for display). When `since`
 // is given, returns only messages newer than that id (for polling).
@@ -17,7 +24,8 @@ export function listMessages(languageId, since = 0, limit = 50) {
          ORDER BY m.id ASC
          LIMIT ?`
       )
-      .all(languageId, since, limit);
+      .all(languageId, since, limit)
+      .map(parseAvatar);
   }
   // Initial load: last `limit` messages, then flip to chronological order.
   const rows = db
@@ -30,7 +38,8 @@ export function listMessages(languageId, since = 0, limit = 50) {
        ORDER BY m.id DESC
        LIMIT ?`
     )
-    .all(languageId, limit);
+    .all(languageId, limit)
+    .map(parseAvatar);
   return rows.reverse();
 }
 
@@ -40,7 +49,7 @@ export function createMessage({ languageId, bodyLangId, userId, body }) {
       'INSERT INTO messages (language_id, body_lang_id, user_id, body) VALUES (?, ?, ?, ?)'
     )
     .run(languageId, bodyLangId ?? null, userId, body);
-  return db
+  const row = db
     .prepare(
       `SELECT ${COLS}
        FROM messages m
@@ -49,4 +58,5 @@ export function createMessage({ languageId, bodyLangId, userId, body }) {
        WHERE m.id = ?`
     )
     .get(info.lastInsertRowid);
+  return parseAvatar(row);
 }

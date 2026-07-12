@@ -7,6 +7,7 @@ import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { renderText } from '../render.js';
 import { signInPrompt } from '../auth.js';
+import { avatarFor } from '../avatar.js';
 
 let pollTimer = null;
 function stopPoll() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
@@ -92,7 +93,13 @@ export async function renderDmThread(username) {
 function messageEl(m) {
   const mine = m.sender === store.user.username;
   const bodyLang = m.body_lang || store.nativeLang;
-  const wrap = el('div', { class: `chat-msg${mine ? ' mine' : ''}` });
+  const row = el('div', { class: `chat-msg${mine ? ' mine' : ''}` });
+  const wrap = el('div', { class: 'chat-msg-main' });
+
+  row.append(
+    el('a', { class: 'chat-avatar-link', href: `#/u/${encodeURIComponent(m.sender)}` }, avatarFor(m.sender_avatar, m.sender, 32)),
+    wrap
+  );
 
   wrap.append(
     el('div', { class: 'chat-meta' }, [
@@ -145,7 +152,7 @@ function messageEl(m) {
     actions.append(translate, correct);
     wrap.append(actions, glossLine);
   }
-  return wrap;
+  return row;
 }
 
 function correctionEl(c, bodyLang) {

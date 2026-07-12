@@ -2,8 +2,16 @@
 import db from '../db/index.js';
 
 const MSG_COLS = `m.id, m.body, m.created_at,
-                  su.username AS sender, ru.username AS recipient,
+                  su.username AS sender, su.avatar AS sender_avatar,
+                  ru.username AS recipient,
                   bl.code AS body_lang`;
+
+function parseAvatar(row) {
+  if (row && row.sender_avatar) {
+    try { row.sender_avatar = JSON.parse(row.sender_avatar); } catch { row.sender_avatar = null; }
+  }
+  return row;
+}
 
 const MSG_FROM = `FROM dm_messages m
                   JOIN users su ON su.id = m.sender_id
@@ -14,7 +22,7 @@ export function sendDM({ senderId, recipientId, bodyLangId, body }) {
   const info = db
     .prepare('INSERT INTO dm_messages (sender_id, recipient_id, body, body_lang_id) VALUES (?, ?, ?, ?)')
     .run(senderId, recipientId, body, bodyLangId ?? null);
-  return db.prepare(`SELECT ${MSG_COLS} ${MSG_FROM} WHERE m.id = ?`).get(info.lastInsertRowid);
+  return parseAvatar(db.prepare(`SELECT ${MSG_COLS} ${MSG_FROM} WHERE m.id = ?`).get(info.lastInsertRowid));
 }
 
 // Messages between two users, oldest first (or newer than `since` for polling).
@@ -28,7 +36,8 @@ export function thread(userA, userB, since = 0) {
        ORDER BY m.id ASC
        LIMIT 200`
     )
-    .all({ a: userA, b: userB, since });
+    .all({ a: userA, b: userB, since })
+    .map(parseAvatar);
   attachCorrections(rows);
   return rows;
 }
@@ -47,9 +56,11 @@ export function conversations(userId) {
     .all({ me: userId });
 
   return partners.map((p) => {
-    const last = db.prepare(`SELECT ${MSG_COLS} ${MSG_FROM} WHERE m.id = ?`).get(p.last_id);
-    const partner = db.prepare('SELECT username FROM users WHERE id = ?').get(p.partner_id);
-    return { partner: partner?.username, last };
+    const last = parseAvatar(db.prepare(`SELECT ${MSG_COLS} ${MSG_FROM} WHERE m.id = ?`).get(p.last_id));
+    const partner = db.prepare('SELECT username, avatar FROM users WHERE id = ?').get(p.partner_id);
+    let partnerAvatar = null;
+    try { partnerAvatar = partner?.avatar ? JSON.parse(partner.avatar) : null; } catch { partnerAvatar = null; }
+    return { partner: partner?.username, partner_avatar: partnerAvatar, last };
   });
 }
 

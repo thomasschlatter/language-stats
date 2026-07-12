@@ -306,7 +306,10 @@ a:hover { text-decoration: underline; }
   flex-direction: column;
   gap: 0.7rem;
 }
-.chat-msg { max-width: 85%; }
+.chat-msg { max-width: 85%; display: flex; gap: 0.5rem; align-items: flex-start; }
+.chat-msg-main { min-width: 0; }
+.chat-avatar-link { flex-shrink: 0; line-height: 0; }
+.chat-avatar-link:hover { text-decoration: none; }
 .chat-meta { display: flex; gap: 0.5rem; align-items: baseline; margin-bottom: 0.1rem; }
 .chat-author { font-weight: 600; font-size: 0.85rem; }
 .chat-lang { color: var(--muted); font-size: 0.72rem; font-family: ui-monospace, monospace; }
@@ -321,7 +324,7 @@ a:hover { text-decoration: underline; }
 .chat-form { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
 .chat-form input[type="text"] { flex: 1; }
 .chat-lang-select { width: auto; }
-.chat-msg.mine { align-self: flex-end; text-align: right; }
+.chat-msg.mine { align-self: flex-end; text-align: right; flex-direction: row-reverse; }
 .chat-msg.mine .chat-body { border-radius: 12px 4px 12px 12px; background: var(--accent); color: #fff; }
 .chat-msg.mine .chat-meta { justify-content: flex-end; }
 

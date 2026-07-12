@@ -4,6 +4,7 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { signInPrompt } from '../auth.js';
+import { avatarFor } from '../avatar.js';
 
 export async function renderMessages() {
   const view = clear(document.getElementById('view'));
@@ -36,7 +37,7 @@ export async function renderMessages() {
     list.append(
       el('a', { class: 'card convo', href: `#/dm/${encodeURIComponent(c.partner)}` }, [
         el('div', { class: 'convo-top' }, [
-          el('span', { class: 'avatar sm' }, c.partner.slice(0, 2).toUpperCase()),
+          avatarFor(c.partner_avatar, c.partner, 36),
           el('strong', {}, `@${c.partner}`),
         ]),
         el('div', { class: 'muted convo-preview' }, preview),

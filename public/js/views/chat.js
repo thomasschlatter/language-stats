@@ -8,6 +8,7 @@ import { el, clear } from '../dom.js';
 import { renderText } from '../render.js';
 import { languageTabs } from './tabs.js';
 import { signInPrompt } from '../auth.js';
+import { avatarFor } from '../avatar.js';
 
 let pollTimer = null;
 function stopPoll() {
@@ -44,11 +45,14 @@ export async function renderChat(langCode) {
   const renderMsg = (m) => {
     const bodyLang = m.body_lang || store.nativeLang;
     return el('div', { class: 'chat-msg' }, [
-      el('div', { class: 'chat-meta' }, [
-        el('span', { class: 'chat-author' }, `@${m.author}`),
-        el('span', { class: 'chat-lang' }, bodyLang),
+      el('a', { class: 'chat-avatar-link', href: `#/u/${encodeURIComponent(m.author)}` }, avatarFor(m.author_avatar, m.author, 32)),
+      el('div', { class: 'chat-msg-main' }, [
+        el('div', { class: 'chat-meta' }, [
+          el('span', { class: 'chat-author' }, `@${m.author}`),
+          el('span', { class: 'chat-lang' }, bodyLang),
+        ]),
+        el('div', { class: 'chat-body', lang: bodyLang }, renderText(m.body, bodyLang)),
       ]),
-      el('div', { class: 'chat-body', lang: bodyLang }, renderText(m.body, bodyLang)),
     ]);
   };
   const atBottom = () => list.scrollHeight - list.scrollTop - list.clientHeight < 60;
