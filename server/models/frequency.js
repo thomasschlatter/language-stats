@@ -8,6 +8,20 @@ export function frequencyLoaded(languageId) {
   return row.n > 0;
 }
 
+// The N most frequent words (cased form), most-frequent first.
+export function topWords(languageId, limit = 30) {
+  return db
+    .prepare(
+      `SELECT f.rank, COALESCE(l.form, f.word) AS word
+       FROM word_frequencies f
+       LEFT JOIN lexicon l ON l.language_id = f.language_id AND l.word_lc = f.word
+       WHERE f.language_id = ?
+       ORDER BY f.rank
+       LIMIT ?`
+    )
+    .all(languageId, limit);
+}
+
 export function totalCount(languageId) {
   const row = db
     .prepare('SELECT MAX(cum) AS total FROM word_frequencies WHERE language_id = ?')

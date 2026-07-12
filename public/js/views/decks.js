@@ -17,7 +17,10 @@ export async function renderDecks() {
   view.append(
     el('div', { class: 'section-head' }, [
       el('span', { class: 'muted' }, 'Your decks — studying them turns those words greener in “Studied” colour mode.'),
-      el('button', { class: 'btn small', onclick: () => openImport(() => renderDecks()) }, '+ Import deck'),
+      el('div', { class: 'row' }, [
+        el('button', { class: 'btn small secondary', onclick: () => openGenerate(() => renderDecks()) }, '✨ Generate (AI)'),
+        el('button', { class: 'btn small', onclick: () => openImport(() => renderDecks()) }, '+ Import deck'),
+      ]),
     ])
   );
 
@@ -61,6 +64,46 @@ export async function renderDecks() {
       ]),
     ]));
   }
+}
+
+// Generate a starter deck from the most frequent words, auto-translated by the
+// local AI model.
+function openGenerate(onDone) {
+  const err = el('div', { class: 'error' });
+  const langSel = el('select', {}, store.languages.map((l) => el('option', { value: l.code }, l.name)));
+  const backSel = el('select', {}, store.languages.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)));
+  const count = el('input', { type: 'number', value: '30', min: '1', max: '100', style: 'max-width:100px' });
+  const submit = el('button', { class: 'btn', type: 'submit' }, 'Generate deck');
+  const status = el('div', { class: 'muted' });
+
+  const form = el('form', {
+    onsubmit: async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      submit.disabled = true;
+      status.textContent = 'Generating… the first run downloads the translation model (~1 min), then it\'s fast.';
+      try {
+        const { deck, added } = await api.generateDeck({
+          languageCode: langSel.value, backLanguageCode: backSel.value, count: Number(count.value),
+        });
+        close();
+        onDone();
+      } catch (ex) {
+        err.textContent = ex.message;
+        submit.disabled = false;
+        status.textContent = '';
+      }
+    },
+  }, [
+    el('label', {}, 'Language to learn (front)'), langSel,
+    el('label', {}, 'Translate to (back)'), backSel,
+    el('label', {}, 'How many words'), count,
+    el('div', { class: 'muted', style: 'font-size:0.78rem; margin-top:0.3rem' }, 'Takes the most frequent words and translates each with the on-device AI model. Great as a beginner deck.'),
+    err, status,
+    el('div', { class: 'row', style: 'margin-top:1rem' }, [submit]),
+  ]);
+
+  const close = openModal(el('div', {}, [el('h2', {}, 'Generate a deck (AI)'), form]));
 }
 
 function openImport(onDone) {

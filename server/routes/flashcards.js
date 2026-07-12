@@ -5,6 +5,8 @@ import {
   createDeck, getDeck, listDecks, deleteDeck,
   addCards, dueCards, reviewCard, familiarityMap,
 } from '../models/flashcards.js';
+import { topWords, totalCount } from '../models/frequency.js';
+import { aiTranslate } from '../models/aiTranslate.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -72,6 +74,41 @@ router.post('/import', requireAuth, (req, res) => {
     languageId: language.id,
     name: name?.trim() || 'Imported deck',
     source: source || 'csv',
+  });
+  const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows });
+  res.status(201).json({ deck, added });
+});
+
+// POST /api/flashcards/generate  { languageCode, backLanguageCode, count, name }
+// Builds a deck from the most frequent words, auto-translating each with the
+// local OPUS-MT model (no external API). First use downloads the model.
+router.post('/generate', requireAuth, async (req, res) => {
+  const { languageCode, backLanguageCode, count, name } = req.body ?? {};
+  const language = getLanguageByCode(languageCode);
+  const back = getLanguageByCode(backLanguageCode);
+  if (!language || !back) return res.status(404).json({ error: 'unknown language' });
+  if (!totalCount(language.id)) return res.status(400).json({ error: 'no frequency data for this language' });
+
+  const n = Math.min(Math.max(Number(count) || 30, 1), 100);
+  const words = topWords(language.id, n);
+
+  const rows = [];
+  for (const w of words) {
+    let translation = '';
+    if (language.lang !== back.lang) {
+      try {
+        const r = await aiTranslate({ fromBase: language.lang, toBase: back.lang, text: w.word });
+        translation = r.translation;
+      } catch { translation = ''; }
+    } else {
+      translation = w.word;
+    }
+    rows.push({ front: w.word, back: translation });
+  }
+
+  const deck = createDeck({
+    userId: req.user.id, languageId: language.id,
+    name: name?.trim() || `Top ${n} ${language.name} words`, source: 'ai',
   });
   const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows });
   res.status(201).json({ deck, added });
