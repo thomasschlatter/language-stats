@@ -15,15 +15,16 @@ const loaded = new Set();   // languages whose seen-map has been fetched
 let currentPolicy = 'viewport-once-v1';
 
 // --- colouring ------------------------------------------------------------
+// A translucent highlight behind the word: red (never seen) -> green (seen a lot).
 function colorFor(count) {
   const t = Math.min(count, CAP) / CAP;      // 0..1
   const hue = Math.round(t * 120);           // 0 = red, 120 = green
-  const light = document.documentElement.getAttribute('data-theme') === 'light' ? 38 : 70;
-  return `hsl(${hue} 65% ${light}%)`;
+  const alpha = document.documentElement.getAttribute('data-theme') === 'light' ? 0.28 : 0.34;
+  return `hsl(${hue} 75% 50% / ${alpha})`;
 }
 function keyOf(lang, wlc) { return `${lang}::${wlc}`; }
 function applyColor(elm, lang, wlc) {
-  elm.style.setProperty('--seen-color', colorFor(counts.get(keyOf(lang, wlc)) || 0));
+  elm.style.setProperty('--seen-bg', colorFor(counts.get(keyOf(lang, wlc)) || 0));
 }
 function recolor(lang, wlc) {
   const sel = `.w[data-lang="${CSS.escape(lang)}"][data-w="${CSS.escape(wlc)}"]`;
@@ -113,6 +114,6 @@ store.subscribe((s) => {
     lastUser = uid;
     counts.clear();
     loaded.clear();
-    document.querySelectorAll('.w').forEach((elm) => elm.style.removeProperty('--seen-color'));
+    document.querySelectorAll('.w').forEach((elm) => elm.style.removeProperty('--seen-bg'));
   }
 });

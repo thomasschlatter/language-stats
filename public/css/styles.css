@@ -133,9 +133,9 @@ a:hover { text-decoration: underline; }
 /* ---- Word elements (the clickable, language-tagged words) ---- */
 .w {
   cursor: pointer;
-  border-radius: 4px;
-  padding: 0 1px;
-  color: var(--seen-color, inherit); /* red→green familiarity (set by seen.js) */
+  border-radius: 3px;
+  padding: 0.02em 0.16em;
+  background: var(--seen-bg, transparent); /* red→green familiarity (set by seen.js) */
   transition: background 0.08s, color 0.08s;
 }
 .w:hover {
