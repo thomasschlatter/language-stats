@@ -46,7 +46,7 @@ export function findWord(languageId, text) {
 export function getEntry(languageId, text) {
   return db
     .prepare(
-      `SELECT w.id, w.language_id, w.text, w.meaning, w.notes,
+      `SELECT w.id, w.language_id, w.text, w.meaning, w.notes, w.scraped_at,
               l.code AS language_code, l.name AS language_name
        FROM words w
        JOIN languages l ON l.id = w.language_id

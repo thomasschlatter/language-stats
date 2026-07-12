@@ -8,10 +8,12 @@ import {
   findWord,
   createWord,
   updateWord,
+  upsertScrapedWord,
   getLinkedWords,
   linkExists,
   createLink,
 } from '../models/words.js';
+import { fetchDefinition } from '../lib/wiktionary.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -28,18 +30,31 @@ router.get('/', (req, res) => {
 // The core "word as an element" lookup: returns the entry for a (language,
 // text) pair — or word:null if that word isn't in the dictionary yet — plus
 // its links. Every rendered word points here.
-router.get('/entry', (req, res) => {
+router.get('/entry', async (req, res) => {
   const { lang, text } = req.query;
   const language = getLanguageByCode(lang);
   if (!language) return res.status(404).json({ error: 'unknown language' });
   if (!text) return res.status(400).json({ error: 'text is required' });
 
-  const word = getEntry(language.id, String(text).trim());
+  const word0 = String(text).trim();
+  let word = getEntry(language.id, word0);
+
+  // On-demand definition: if we've never fetched this word (no entry, or an
+  // entry with no meaning and not yet scraped), pull it from Wiktionary now and
+  // cache the result (even a miss, so we don't refetch every view).
+  if (!word || (!word.meaning && !word.scraped_at)) {
+    try {
+      const def = await fetchDefinition(word0, language.lang);
+      upsertScrapedWord({ languageId: language.id, text: word0, meaning: def || null });
+      word = getEntry(language.id, word0);
+    } catch { /* network hiccup — proceed without a definition */ }
+  }
+
   const links = word ? getLinkedWords(word.id) : [];
   res.json({
     languageCode: language.code,
     languageName: language.name,
-    text: String(text).trim(),
+    text: word0,
     word: word || null,
     links,
   });

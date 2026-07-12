@@ -14,25 +14,9 @@ import './../db/index.js';
 import { listLanguages } from '../models/languages.js';
 import { topWords, totalCount } from '../models/frequency.js';
 import { findWord, upsertScrapedWord } from '../models/words.js';
+import { fetchDefinition } from '../lib/wiktionary.js';
 
-const UA = 'language-stats/0.1 (https://github.com/thomasschlatter/language-stats; educational project)';
-const REST = 'https://en.wiktionary.org/api/rest_v1/page/definition/';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const stripHtml = (s) => s.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim();
-
-async function fetchDefinition(word, baseLang) {
-  const res = await fetch(REST + encodeURIComponent(word), { headers: { 'User-Agent': UA, Accept: 'application/json' } });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  const entries = data[baseLang];
-  if (!Array.isArray(entries) || !entries.length) return null;
-  // Take up to two senses from the first part of speech.
-  const e = entries[0];
-  const defs = (e.definitions || []).map((d) => stripHtml(d.definition || '')).filter(Boolean).slice(0, 2);
-  if (!defs.length) return null;
-  return (e.partOfSpeech ? `(${e.partOfSpeech}) ` : '') + defs.join('; ');
-}
 
 async function scrapeLanguage(language, limit, { force, delay }) {
   const words = topWords(language.id, limit);
