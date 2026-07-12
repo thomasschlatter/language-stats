@@ -65,6 +65,37 @@ export async function renderUserProfile(username) {
         : null,
     ])
   );
+
+  // Word-familiarity rundown (only on your own profile).
+  if (isMe) {
+    const box = el('div', { class: 'familiarity-rundown' }, [el('div', { class: 'links-title' }, 'Word familiarity'), el('p', { class: 'muted' }, 'Loading…')]);
+    view.append(box);
+    api.rundown().then(({ rundown }) => {
+      clear(box).append(el('div', { class: 'links-title' }, 'Word familiarity'));
+      if (!rundown.length) { box.append(el('p', { class: 'muted' }, 'Start reading and studying to build familiarity.')); return; }
+      for (const r of rundown) {
+        box.append(
+          el('div', { class: 'fam-row' }, [
+            el('div', { class: 'fam-lang' }, r.name),
+            el('div', { class: 'fam-stats' }, [
+              famStat(r.seen, 'seen'),
+              famStat(r.inDeck, 'in decks'),
+              famStat(r.mature, 'mastered'),
+              famStat(r.known, 'marked known'),
+              r.coveragePct != null ? famStat(`${r.coveragePct}%`, 'conversation') : null,
+            ]),
+          ])
+        );
+      }
+    }).catch(() => { clear(box); });
+  }
+}
+
+function famStat(value, label) {
+  return el('div', { class: 'fam-stat' }, [
+    el('div', { class: 'fam-value' }, String(value)),
+    el('div', { class: 'fam-label' }, label),
+  ]);
 }
 
 // Display helper: "board games" -> "Board Games" (doesn't mutate stored value).

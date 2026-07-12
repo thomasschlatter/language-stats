@@ -1,11 +1,36 @@
 // /api/progress — per-user word progress + coverage stats.
 import { Router } from 'express';
-import { getLanguageByCode } from '../models/languages.js';
-import { markWord, wordStatus, summary, suggestions, recordSeen, seenMap } from '../models/progress.js';
+import { getLanguageByCode, listLanguages } from '../models/languages.js';
+import { getUserLanguages } from '../models/users.js';
+import { markWord, wordStatus, summary, suggestions, recordSeen, seenMap, seenWordCount } from '../models/progress.js';
+import { familiarityMap } from '../models/flashcards.js';
 import { SEEN_POLICIES, CURRENT_SEEN_POLICY, isValidPolicy } from '../lib/seenPolicy.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+
+// GET /api/progress/rundown -> per-language word-familiarity summary for the user
+router.get('/rundown', requireAuth, (req, res) => {
+  const learning = new Set(
+    getUserLanguages(req.user.id).filter((l) => l.role === 'learning').map((l) => l.code)
+  );
+  const rundown = [];
+  for (const lang of listLanguages()) {
+    const s = summary(req.user.id, lang.id);
+    const seen = seenWordCount(req.user.id, lang.id);
+    const fam = familiarityMap(req.user.id, lang.id);
+    const inDeck = Object.keys(fam).length;
+    const mature = Object.values(fam).filter((v) => v >= 0.9).length;
+    if (s.known || s.learning || seen || inDeck || learning.has(lang.code)) {
+      rundown.push({
+        code: lang.code, name: lang.name,
+        known: s.known, learning: s.learning, seen, inDeck, mature,
+        coveragePct: s.coveragePct,
+      });
+    }
+  }
+  res.json({ rundown });
+});
 
 // GET /api/progress/policy  -> the current + available "seen" policies
 router.get('/policy', (_req, res) => {

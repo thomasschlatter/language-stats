@@ -18,6 +18,20 @@ function reloadLanguages() {
   return api.languages().then(({ languages }) => store.set({ languages })).catch(() => {});
 }
 
+// Show a badge with total due cards on the Flashcards nav item.
+async function updateDueBadge() {
+  const link = document.querySelector('.topnav a[href="#/decks"]');
+  if (!link) return;
+  link.querySelector('.due-badge')?.remove();
+  if (!store.user) return;
+  try {
+    const { decks } = await api.decks();
+    const due = decks.reduce((s, d) => s + (d.due || 0), 0);
+    if (due > 0) link.append(el('span', { class: 'due-badge' }, String(due)));
+  } catch { /* ignore */ }
+}
+window.addEventListener('ls:decks-changed', updateDueBadge);
+
 // Collapsible languages section (persisted).
 function setupSidebarCollapse() {
   const toggle = document.getElementById('lang-toggle');
@@ -128,6 +142,7 @@ async function init() {
   tokenizeChrome();
   setupSidebarCollapse();
   startRouter();
+  updateDueBadge();
 
   // Highlight the active top-nav item.
   const syncNav = () => {
@@ -147,6 +162,7 @@ async function init() {
     renderAuthArea();
     renderSidebar();
     tokenizeChrome();
+    updateDueBadge();
     // Refresh the current view so add/edit buttons appear/disappear.
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });

@@ -162,6 +162,7 @@ async function openAddToDeck(langCode, data) {
         }
         await api.addCard(deckId, { front: data.text, back: back.value });
         noteCardAdded(langCode, data.text);
+        window.dispatchEvent(new Event('ls:decks-changed'));
         close();
       } catch (ex) { err.textContent = ex.message; }
     },

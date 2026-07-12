@@ -26,6 +26,7 @@ export async function renderDecks() {
   list.append(el('p', { class: 'muted' }, 'Loading…'));
 
   const { decks } = await api.decks();
+  window.dispatchEvent(new Event('ls:decks-changed'));
   clear(list);
   if (!decks.length) {
     list.append(el('p', { class: 'muted' }, 'No decks yet. Import a CSV, or an Anki “Notes in Plain Text” (TSV) export.'));

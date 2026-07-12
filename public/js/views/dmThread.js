@@ -110,9 +110,9 @@ function messageEl(m) {
   const bubble = el('div', { class: 'chat-body', lang: bodyLang }, renderText(m.body, bodyLang));
   wrap.append(bubble);
 
-  // Corrections shown beneath.
+  // Corrections shown beneath (with an exact word-level diff vs the original).
   const corr = el('div', { class: 'corrections' });
-  (m.corrections || []).forEach((c) => corr.append(correctionEl(c, bodyLang)));
+  (m.corrections || []).forEach((c) => corr.append(correctionEl(c, m.body, bodyLang)));
   wrap.append(corr);
 
   // Actions on the OTHER person's messages: translate + correct.
@@ -155,13 +155,43 @@ function messageEl(m) {
   return row;
 }
 
-function correctionEl(c, bodyLang) {
+function correctionEl(c, original, bodyLang) {
   return el('div', { class: 'correction' }, [
     el('span', { class: 'correction-mark' }, '✎'),
-    el('span', { class: 'correction-text', lang: bodyLang }, renderText(c.corrected_text, bodyLang)),
+    el('span', { class: 'correction-text', lang: bodyLang }, diffNodes(original || '', c.corrected_text)),
     c.note ? el('div', { class: 'correction-note muted' }, renderText(c.note, store.nativeLang)) : null,
     el('div', { class: 'correction-by muted' }, `by @${c.corrector}`),
   ]);
+}
+
+// Word-level diff (LCS): unchanged plain, removed struck, added highlighted.
+function wordDiff(aStr, bStr) {
+  const a = aStr.trim().split(/\s+/).filter(Boolean);
+  const b = bStr.trim().split(/\s+/).filter(Boolean);
+  const n = a.length, m = b.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--)
+    for (let j = m - 1; j >= 0; j--)
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const ops = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { ops.push({ t: 'eq', w: a[i] }); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { ops.push({ t: 'del', w: a[i] }); i++; }
+    else { ops.push({ t: 'ins', w: b[j] }); j++; }
+  }
+  while (i < n) ops.push({ t: 'del', w: a[i++] });
+  while (j < m) ops.push({ t: 'ins', w: b[j++] });
+  return ops;
+}
+function diffNodes(a, b) {
+  const nodes = [];
+  wordDiff(a, b).forEach((op, idx) => {
+    if (idx > 0) nodes.push(document.createTextNode(' '));
+    if (op.t === 'eq') nodes.push(document.createTextNode(op.w));
+    else nodes.push(el('span', { class: op.t === 'del' ? 'diff-del' : 'diff-ins' }, op.w));
+  });
+  return nodes;
 }
 
 // Inline correction form prefilled with the original message text.
@@ -179,7 +209,7 @@ function openCorrect(m, corrContainer, bodyLang, triggerBtn) {
       err.textContent = '';
       try {
         const { correction } = await api.correctMessage(m.id, { correctedText: corrected.value, note: note.value });
-        corrContainer.append(correctionEl(correction, bodyLang));
+        corrContainer.append(correctionEl(correction, m.body, bodyLang));
         box.remove();
         delete triggerBtn.dataset.open;
       } catch (ex) { err.textContent = ex.message; }

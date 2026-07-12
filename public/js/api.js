@@ -90,6 +90,7 @@ export const api = {
 
   // --- progress / stats ---
   progress: (lang) => request('GET', `/progress?lang=${encodeURIComponent(lang)}`),
+  rundown: () => request('GET', '/progress/rundown'),
   wordProgress: (lang, word) =>
     request('GET', `/progress/word?lang=${encodeURIComponent(lang)}&word=${encodeURIComponent(word)}`),
   markWord: (b) => request('POST', '/progress/mark', b),

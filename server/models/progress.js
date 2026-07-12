@@ -41,6 +41,13 @@ export function recordSeen(userId, languageId, words, policy) {
   tx(words);
 }
 
+// How many distinct words the user has seen at least once in a language.
+export function seenWordCount(userId, languageId) {
+  return db
+    .prepare('SELECT COUNT(*) AS n FROM user_words WHERE user_id = ? AND language_id = ? AND seen_count > 0')
+    .get(userId, languageId).n;
+}
+
 // { word_lc: seen_count } for every word this user has seen in a language.
 export function seenMap(userId, languageId) {
   const rows = db

@@ -60,6 +60,24 @@ a:hover { text-decoration: underline; }
 .topnav a { color: var(--muted); font-size: 0.9rem; }
 .topnav a:hover { color: var(--text); text-decoration: none; }
 .topnav a.active { color: var(--text); font-weight: 600; }
+.topnav a { position: relative; }
+.due-badge {
+  display: inline-block; margin-left: 0.3rem; background: var(--accent-2); color: #04160f;
+  border-radius: 999px; font-size: 0.68rem; font-weight: 700; padding: 0.02rem 0.35rem; vertical-align: middle;
+}
+
+/* ---- Familiarity rundown (profile) ---- */
+.familiarity-rundown { margin-top: 1.5rem; }
+.fam-row { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.fam-lang { font-weight: 600; min-width: 140px; }
+.fam-stats { display: flex; gap: 1.1rem; flex-wrap: wrap; }
+.fam-stat { text-align: center; }
+.fam-value { font-weight: 700; color: var(--accent-2); }
+.fam-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+
+/* ---- Correction diff ---- */
+.diff-del { text-decoration: line-through; color: var(--danger); opacity: 0.8; }
+.diff-ins { color: var(--accent-2); font-weight: 600; }
 .auth-area { display: flex; align-items: center; gap: 0.6rem; }
 .avatar.sm { width: 28px; height: 28px; font-size: 0.72rem; }
 .person-card .card-top { align-items: center; }
@@ -130,7 +148,7 @@ a:hover { text-decoration: underline; }
 .lang-add:hover { border-color: var(--accent); color: var(--text); }
 .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-.view { padding: 1.5rem 2rem; max-width: 900px; }
+.view { padding: 1.5rem 2rem; }
 
 /* ---- Tabs ---- */
 .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
@@ -331,10 +349,10 @@ a:hover { text-decoration: underline; }
   border: 1px solid var(--border);
   border-radius: 8px;
 }
-.char-creator { width: min(430px, 92vw); }
-.char-body { display: flex; gap: 1.1rem; align-items: center; margin: 1rem 0; }
+.char-creator { width: 100%; }
+.char-body { display: flex; gap: 1.1rem; align-items: center; margin: 1rem 0; flex-wrap: wrap; }
 .char-preview-wrap { flex-shrink: 0; }
-.char-controls { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+.char-controls { flex: 1; min-width: 190px; display: flex; flex-direction: column; gap: 0.4rem; }
 .char-row { display: flex; align-items: center; gap: 0.5rem; }
 .char-arrow {
   width: 34px; height: 34px; border-radius: 6px;

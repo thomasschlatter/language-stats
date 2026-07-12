@@ -27,6 +27,7 @@ export async function renderStudy(deckId) {
   async function rate(r) {
     const card = queue.shift();
     try { await api.review({ cardId: card.id, rating: r }); } catch { /* ignore */ }
+    window.dispatchEvent(new Event('ls:decks-changed'));
     if (r === 1) queue.push(card); // relearn again this session
     render();
   }
