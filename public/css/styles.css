@@ -78,6 +78,14 @@ a:hover { text-decoration: underline; }
 /* ---- Correction diff ---- */
 .diff-del { text-decoration: line-through; color: var(--danger); opacity: 0.8; }
 .diff-ins { color: var(--accent-2); font-weight: 600; }
+.search-form { flex: 0 1 240px; margin: 0 0.75rem; }
+.search-form input {
+  width: 100%; padding: 0.4rem 0.7rem; font-size: 0.9rem;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 999px; color: var(--text);
+}
+.search-result { display: block; color: var(--text); }
+.search-result:hover { border-color: var(--accent); text-decoration: none; }
+@media (max-width: 680px) { .search-form { flex-basis: 140px; margin: 0 0.4rem; } }
 .auth-area { display: flex; align-items: center; gap: 0.6rem; }
 .avatar.sm { width: 28px; height: 28px; font-size: 0.72rem; }
 .person-card .card-top { align-items: center; }

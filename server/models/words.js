@@ -62,6 +62,23 @@ export function ensureWord(languageId, text) {
   return db.prepare('INSERT INTO words (language_id, text) VALUES (?, ?)').run(languageId, text).lastInsertRowid;
 }
 
+// Search dictionary words across all languages (prefix match), with a snippet
+// of the top definition for each.
+export function searchWords(q, limit = 30) {
+  return db
+    .prepare(
+      `SELECT w.id, w.text, l.code AS language_code, l.name AS language_name,
+              (SELECT wd.text FROM word_definitions wd WHERE wd.word_id = w.id
+               ORDER BY wd.accepted DESC, wd.id LIMIT 1) AS def
+       FROM words w
+       JOIN languages l ON l.id = w.language_id
+       WHERE w.text LIKE ?
+       ORDER BY (w.text = ?) DESC, length(w.text), w.text
+       LIMIT ?`
+    )
+    .all(`${q}%`, q, limit);
+}
+
 // Look a word up by its TEXT across every language (case-insensitive).
 // The same spelling can exist in several languages, so this returns a list.
 export function lookupByText(text) {

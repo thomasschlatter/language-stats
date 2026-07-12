@@ -20,11 +20,13 @@ import { renderCommunity } from './views/community.js';
 import { renderMessages } from './views/messages.js';
 import { renderDmThread } from './views/dmThread.js';
 import { renderSettings } from './views/settings.js';
+import { renderSearch } from './views/search.js';
 import { renderDecks } from './views/decks.js';
 import { renderStudy } from './views/study.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
+  { pattern: /^#\/search\/(.+)$/, handler: (m) => renderSearch(dec(m[1])) },
   { pattern: /^#\/settings$/, handler: () => renderSettings(), auth: true },
   { pattern: /^#\/decks$/, handler: () => renderDecks(), auth: true },
   { pattern: /^#\/study\/(\d+)$/, handler: (m) => renderStudy(Number(m[1])), auth: true },

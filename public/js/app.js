@@ -33,6 +33,17 @@ async function updateDueBadge() {
 }
 window.addEventListener('ls:decks-changed', updateDueBadge);
 
+// Top-bar word search.
+function setupSearch() {
+  const form = document.getElementById('search-form');
+  const input = document.getElementById('search-input');
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = input.value.trim();
+    if (q) window.location.hash = `#/search/${encodeURIComponent(q)}`;
+  });
+}
+
 // Collapsible languages section (persisted).
 function setupSidebarCollapse() {
   const toggle = document.getElementById('lang-toggle');
@@ -147,6 +158,7 @@ async function init() {
   renderAuthArea();
   tokenizeChrome();
   setupSidebarCollapse();
+  setupSearch();
   startRouter();
   updateDueBadge();
 

@@ -41,6 +41,7 @@ export const api = {
   // --- words (graph dictionary) ---
   words: (lang, search) =>
     request('GET', `/words?lang=${encodeURIComponent(lang)}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
+  searchWords: (q) => request('GET', `/words/search?q=${encodeURIComponent(q)}`),
   // A word "element": (locale, text) -> entry (or null) + its links
   entry: (lang, text) =>
     request('GET', `/words/entry?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(text)}`),

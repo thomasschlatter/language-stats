@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
 import {
   listWords,
+  searchWords,
   getWordById,
   getEntry,
   ensureWord,
@@ -32,6 +33,13 @@ router.get('/', (req, res) => {
   const language = getLanguageByCode(lang);
   if (!language) return res.status(404).json({ error: 'unknown language' });
   res.json({ words: listWords(language.id, search) });
+});
+
+// GET /api/words/search?q=hau  -> dictionary matches across languages
+router.get('/search', (req, res) => {
+  const q = String(req.query.q || '').trim();
+  if (!q) return res.json({ results: [] });
+  res.json({ results: searchWords(q) });
 });
 
 // GET /api/words/entry?lang=de&text=ich
