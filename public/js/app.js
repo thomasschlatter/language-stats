@@ -7,6 +7,7 @@ import { el, clear, openModal } from './dom.js';
 import { tokenizeTree } from './render.js';
 import { loadCurrentUser, renderAuthArea } from './auth.js';
 import { startRouter } from './router.js';
+import { guardSingleInstance } from './singleInstance.js';
 
 // Make the persistent chrome (sidebar heading, top-bar labels) clickable too.
 function tokenizeChrome() {
@@ -148,6 +149,9 @@ function openAddLanguage() {
 }
 
 async function init() {
+  // Refuse to run in a second window of the same browser (avoids World collisions).
+  if (!(await guardSingleInstance())) return;
+
   // Load languages + user in parallel.
   const [langsResult] = await Promise.allSettled([api.languages(), loadCurrentUser()]);
   if (langsResult.status === 'fulfilled') {
