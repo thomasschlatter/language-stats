@@ -8,6 +8,7 @@ import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { renderText, wordEl, tokenizeTree } from '../render.js';
 import { signInPrompt } from '../auth.js';
+import { noteCardAdded } from '../seen.js';
 import { navigate } from '../router.js';
 
 export async function renderWordPage(langCode, text) {
@@ -72,8 +73,9 @@ export async function renderWordPage(langCode, text) {
     box.append(progressControls(langCode, data.text));
     box.append(
       el('div', { class: 'row', style: 'margin-top:0.75rem' }, [
+        el('button', { class: 'btn small', onclick: () => openAddToDeck(langCode, data) }, '＋ Add to flashcards'),
         !data.word &&
-          el('button', { class: 'btn small', onclick: () => addEntry(langCode, data.text) }, `+ Add as ${langName} word`),
+          el('button', { class: 'btn small secondary', onclick: () => addEntry(langCode, data.text) }, `+ Add as ${langName} word`),
         el('button', { class: 'btn small secondary', onclick: () => addLink(langCode, data.text) }, '+ Add translation / link'),
       ])
     );
@@ -117,6 +119,62 @@ function progressControls(langCode, text) {
   // Load existing status.
   api.wordProgress(langCode, text).then((r) => { current = r.status; paint(); }).catch(() => {});
   return wrap;
+}
+
+// Add this word to a flashcard deck (existing or new).
+async function openAddToDeck(langCode, data) {
+  const err = el('div', { class: 'error' });
+  const nativeBase = store.nativeLang.split('-')[0];
+  const tr = (data.links || []).find(
+    (l) => l.type === 'translation' && (l.language_code === store.nativeLang || l.language_code.split('-')[0] === nativeBase)
+  );
+  const back = el('input', { type: 'text', placeholder: 'meaning / translation' });
+  back.value = tr?.text || data.word?.meaning || '';
+
+  const deckSel = el('select', {});
+  const nameInput = el('input', { type: 'text', placeholder: 'new deck name' });
+  const nameWrap = el('div', {}, [el('label', {}, 'New deck name'), nameInput]);
+
+  let decks = [];
+  try { ({ decks } = await api.decks()); } catch { /* ignore */ }
+  const langDecks = decks.filter((d) => d.lang === langCode);
+  deckSel.append(
+    ...langDecks.map((d) => el('option', { value: String(d.id) }, `${d.name} (${d.total})`)),
+    el('option', { value: 'new' }, '＋ Create new deck')
+  );
+  if (!langDecks.length) deckSel.value = 'new';
+  const syncName = () => { nameWrap.style.display = deckSel.value === 'new' ? '' : 'none'; };
+  deckSel.addEventListener('change', syncName);
+  syncName();
+
+  const form = el('form', {
+    onsubmit: async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      try {
+        let deckId;
+        if (deckSel.value === 'new') {
+          const name = nameInput.value.trim() || `${languageName(langCode)} deck`;
+          const { deck } = await api.createDeck({ languageCode: langCode, name });
+          deckId = deck.id;
+        } else {
+          deckId = Number(deckSel.value);
+        }
+        await api.addCard(deckId, { front: data.text, back: back.value });
+        noteCardAdded(langCode, data.text);
+        close();
+      } catch (ex) { err.textContent = ex.message; }
+    },
+  }, [
+    el('label', {}, 'Deck'), deckSel,
+    nameWrap,
+    el('label', {}, 'Front'), el('div', { class: 'muted', style: 'font-size:1.05rem' }, data.text),
+    el('label', {}, 'Back'), back,
+    err,
+    el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Add card')]),
+  ]);
+
+  const close = openModal(el('div', {}, [el('h2', {}, `Add “${data.text}” to a deck`), form]));
 }
 
 // Create the (locale, text) entry with an optional definition.

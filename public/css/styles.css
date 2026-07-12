@@ -82,12 +82,24 @@ a:hover { text-decoration: underline; }
   padding: 1rem;
 }
 .sidebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
   margin: 0 0 0.75rem;
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  font-family: inherit;
 }
+.sidebar-title:hover { color: var(--text); }
+.sidebar-title .caret { transition: transform 0.12s; }
+.sidebar-title.collapsed .caret { transform: rotate(-90deg); }
 .language-list { display: flex; flex-direction: column; gap: 0.25rem; }
 .language-list a {
   display: block;
@@ -395,6 +407,7 @@ a:hover { text-decoration: underline; }
 .chat-form { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
 .chat-form input[type="text"] { flex: 1; }
 .chat-lang-select { width: auto; }
+.chat-room-select { width: auto; }
 .chat-msg.mine { align-self: flex-end; text-align: right; flex-direction: row-reverse; }
 .chat-msg.mine .chat-body { border-radius: 12px 4px 12px 12px; background: var(--accent); color: #fff; }
 .chat-msg.mine .chat-meta { justify-content: flex-end; }

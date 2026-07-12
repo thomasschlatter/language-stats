@@ -44,6 +44,19 @@ router.delete('/decks/:id(\\d+)', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// POST /api/flashcards/decks/:id/cards  { front, back? }  -> add one card
+router.post('/decks/:id(\\d+)/cards', requireAuth, (req, res) => {
+  const deck = getDeck(Number(req.params.id), req.user.id);
+  if (!deck) return res.status(404).json({ error: 'deck not found' });
+  const { front, back } = req.body ?? {};
+  if (!front || !front.trim()) return res.status(400).json({ error: 'front is required' });
+  const added = addCards({
+    deckId: deck.id, userId: req.user.id, languageId: deck.language_id,
+    rows: [{ front, back }],
+  });
+  res.status(201).json({ added, deck });
+});
+
 // POST /api/flashcards/import  { languageCode, name, text, source? }
 router.post('/import', requireAuth, (req, res) => {
   const { languageCode, name, text, source } = req.body ?? {};

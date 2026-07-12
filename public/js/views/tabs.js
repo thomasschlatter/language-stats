@@ -7,7 +7,6 @@ export function languageTabs(langCode, active) {
   return el('div', { class: 'tabs' }, [
     tab('cards', 'Cards', `#/lang/${langCode}`),
     tab('tips', 'Tips', `#/lang/${langCode}/tips`),
-    tab('chat', 'Chat', `#/lang/${langCode}/chat`),
     tab('progress', 'Progress', `#/lang/${langCode}/progress`),
   ]);
 }

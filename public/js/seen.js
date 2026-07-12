@@ -125,6 +125,12 @@ export function registerSeen(elm, word, lang) {
   else if (observer) observer.observe(elm);
 }
 
+// Called after a word is added to a deck, so it's marked in-deck immediately.
+export function noteCardAdded(lang, word) {
+  studyLevels.set(keyOf(lang, word.toLowerCase()), 0);
+  recolorLang(lang);
+}
+
 // A top-bar toggle button to switch colouring mode.
 export function colorModeToggle() {
   const label = () => (mode === 'studied' ? '🎴 Studied' : '👁 Seen');

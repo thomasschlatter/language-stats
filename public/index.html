@@ -15,6 +15,7 @@
       <a class="brand" href="#/">Language&nbsp;Stats</a>
       <nav class="topnav">
         <a href="#/community">Community</a>
+        <a href="#/chat">Chat</a>
         <a href="#/decks">Flashcards</a>
         <a href="#/messages">Messages</a>
         <a href="#/settings">Settings</a>
@@ -25,7 +26,9 @@
     <div class="layout">
       <!-- Left column: languages -->
       <aside class="sidebar">
-        <h2 class="sidebar-title">Languages</h2>
+        <button class="sidebar-title" id="lang-toggle" aria-expanded="true">
+          <span>Languages</span><span class="caret">▾</span>
+        </button>
         <nav id="language-list" class="language-list"></nav>
       </aside>
 

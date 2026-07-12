@@ -6,34 +6,50 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { renderText } from '../render.js';
-import { languageTabs } from './tabs.js';
 import { signInPrompt } from '../auth.js';
 import { avatarFor } from '../avatar.js';
+import { navigate } from '../router.js';
 
 let pollTimer = null;
 function stopPoll() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
 }
 
-// Stop polling as soon as we navigate away from a chat route.
+// Stop polling as soon as we navigate away from any chat route.
 window.addEventListener('hashchange', () => {
-  if (!/^#\/lang\/[^/]+\/chat$/.test(location.hash)) stopPoll();
+  if (!/^#\/chat/.test(location.hash)) stopPoll();
 });
 
 export async function renderChat(langCode) {
   stopPoll();
   const view = clear(document.getElementById('view'));
+
+  // Top-level chat: pick a room (default = last used, else your native locale).
+  if (!langCode) {
+    langCode = localStorage.getItem('ls_chat_room') ||
+      (store.languages.some((l) => l.code === store.nativeLang) ? store.nativeLang : store.languages[0]?.code);
+  }
   const language = store.languages.find((l) => l.code === langCode);
   if (!language) {
-    view.append(el('p', { class: 'muted' }, 'Unknown language.'));
+    view.append(el('p', { class: 'muted' }, 'No chat rooms available.'));
     return;
   }
+  localStorage.setItem('ls_chat_room', langCode);
 
-  view.append(languageTabs(langCode, 'chat'));
-  view.append(el('h1', {}, `${language.name} chat`));
+  const roomSel = el('select', {
+    class: 'chat-room-select',
+    onchange: (e) => navigate(`#/chat/${encodeURIComponent(e.target.value)}`),
+  }, store.languages.map((l) => el('option', { value: l.code, selected: l.code === langCode ? '' : null }, l.name)));
+
+  view.append(
+    el('div', { class: 'section-head' }, [
+      el('h1', { style: 'margin:0' }, 'Chat'),
+      el('div', { class: 'row' }, [el('span', { class: 'muted' }, 'Room:'), roomSel]),
+    ])
+  );
   view.append(
     el('p', { class: 'muted', style: 'margin-top:-0.5rem' },
-      'Every word anyone writes is clickable — click it for its translation in your native locale.')
+      `Public room for people learning ${language.name}. Every word is clickable — click for its translation.`)
   );
 
   const list = el('div', { class: 'chat-list' });

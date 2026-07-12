@@ -18,6 +18,25 @@ function reloadLanguages() {
   return api.languages().then(({ languages }) => store.set({ languages })).catch(() => {});
 }
 
+// Collapsible languages section (persisted).
+function setupSidebarCollapse() {
+  const toggle = document.getElementById('lang-toggle');
+  const list = document.getElementById('language-list');
+  if (!toggle || !list) return;
+  const apply = (collapsed) => {
+    list.style.display = collapsed ? 'none' : '';
+    toggle.classList.toggle('collapsed', collapsed);
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+  };
+  let collapsed = localStorage.getItem('ls_lang_collapsed') === '1';
+  apply(collapsed);
+  toggle.addEventListener('click', () => {
+    collapsed = !collapsed;
+    localStorage.setItem('ls_lang_collapsed', collapsed ? '1' : '0');
+    apply(collapsed);
+  });
+}
+
 function renderSidebar() {
   const nav = clear(document.getElementById('language-list'));
   const currentCode = decodeURIComponent((window.location.hash.match(/#\/lang\/([^/]+)/) || [])[1] || '');
@@ -107,6 +126,7 @@ async function init() {
   renderSidebar();
   renderAuthArea();
   tokenizeChrome();
+  setupSidebarCollapse();
   startRouter();
 
   // Highlight the active top-nav item.
