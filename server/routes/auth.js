@@ -6,20 +6,28 @@ import {
   getUserById,
   verifyPassword,
   changePassword,
+  deleteUser,
   publicUser,
 } from '../models/users.js';
 import { issueToken, clearToken, requireAuth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rateLimit.js';
 
 const router = Router();
 
 // POST /api/auth/signup
-router.post('/signup', (req, res) => {
+router.post('/signup', rateLimit({ max: 8 }), (req, res) => {
   const { email, username, password } = req.body ?? {};
   if (!email || !username || !password) {
     return res.status(400).json({ error: 'email, username and password are required' });
   }
-  if (password.length < 6) {
-    return res.status(400).json({ error: 'password must be at least 6 characters' });
+  if (email.length > 200 || username.length > 30) {
+    return res.status(400).json({ error: 'email or username too long' });
+  }
+  if (!/^[a-zA-Z0-9_.-]{2,30}$/.test(username)) {
+    return res.status(400).json({ error: 'username may use letters, numbers, . _ - (2–30 chars)' });
+  }
+  if (password.length < 6 || password.length > 200) {
+    return res.status(400).json({ error: 'password must be 6–200 characters' });
   }
   try {
     const user = createUser({ email, username, password });
@@ -34,7 +42,7 @@ router.post('/signup', (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', (req, res) => {
+router.post('/login', rateLimit({ max: 12 }), (req, res) => {
   const { email, password } = req.body ?? {};
   if (!email || !password) {
     return res.status(400).json({ error: 'email and password are required' });
@@ -69,6 +77,13 @@ router.post('/change-password', requireAuth, (req, res) => {
   }
   const result = changePassword(req.user.id, currentPassword, newPassword);
   if (!result.ok) return res.status(400).json({ error: result.error });
+  res.json({ ok: true });
+});
+
+// DELETE /api/auth/account  -> permanently delete the signed-in user
+router.delete('/account', requireAuth, (req, res) => {
+  deleteUser(req.user.id);
+  clearToken(res);
   res.json({ ok: true });
 });
 

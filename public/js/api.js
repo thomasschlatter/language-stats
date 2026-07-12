@@ -31,6 +31,7 @@ export const api = {
   logout: () => request('POST', '/auth/logout'),
   me: () => request('GET', '/auth/me'),
   changePassword: (b) => request('POST', '/auth/change-password', b),
+  deleteAccount: () => request('DELETE', '/auth/account'),
 
   // --- languages ---
   languages: () => request('GET', '/languages'),

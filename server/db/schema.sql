@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS languages (
   lang       TEXT NOT NULL,                -- base language, e.g. 'de'
   country    TEXT,                         -- ISO country, e.g. 'DE', 'CH'
   name       TEXT NOT NULL,                -- display name, e.g. 'German (Germany)'
+  created_by INTEGER,                      -- user who added it (null = seeded/official)
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

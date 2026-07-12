@@ -55,6 +55,10 @@ export function getUserByUsername(username) {
   return db.prepare('SELECT * FROM users WHERE username = ?').get(username);
 }
 
+export function deleteUser(id) {
+  return db.prepare('DELETE FROM users WHERE id = ?').run(id).changes > 0;
+}
+
 export function updateProfile(userId, { bio, interests, origin, location }) {
   db.prepare('UPDATE users SET bio = ?, interests = ?, origin = ?, location = ? WHERE id = ?')
     .run(bio ?? null, interests ?? null, origin ?? null, location ?? null, userId);

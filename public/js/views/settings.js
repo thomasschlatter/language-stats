@@ -3,7 +3,7 @@
 
 import { api } from '../api.js';
 import { store } from '../store.js';
-import { el, clear } from '../dom.js';
+import { el, clear, openModal } from '../dom.js';
 import { avatarFor } from '../avatar.js';
 import { signInPrompt } from '../auth.js';
 import { openCharacterCreator } from './characterCreator.js';
@@ -88,8 +88,9 @@ export async function renderSettings() {
   // Account
   view.append(section('Account', [
     changePasswordForm(),
-    el('div', { style: 'margin-top:1rem' }, [
+    el('div', { class: 'row', style: 'margin-top:1rem; gap:0.5rem' }, [
       el('button', { class: 'btn small secondary', onclick: async () => { await api.logout(); store.set({ user: null }); renderSettings(); } }, 'Sign out'),
+      el('button', { class: 'btn small danger', onclick: confirmDeleteAccount }, 'Delete account'),
     ]),
   ]));
 }
@@ -137,6 +138,22 @@ function profileForm(prof) {
     err, ok,
     el('div', { style: 'margin-top:0.75rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Save profile')]),
   ]);
+}
+
+function confirmDeleteAccount() {
+  const err = el('div', { class: 'error' });
+  const close = openModal(el('div', {}, [
+    el('h2', {}, 'Delete your account?'),
+    el('p', { class: 'muted' }, 'This permanently removes your profile, character, decks, messages, and progress. This cannot be undone.'),
+    err,
+    el('div', { class: 'row', style: 'justify-content:flex-end; margin-top:1rem' }, [
+      el('button', { class: 'btn small secondary', type: 'button', onclick: () => close() }, 'Cancel'),
+      el('button', { class: 'btn small danger', type: 'button', onclick: async () => {
+        try { await api.deleteAccount(); store.set({ user: null }); close(); location.hash = '#/'; }
+        catch (ex) { err.textContent = ex.message; }
+      } }, 'Delete forever'),
+    ]),
+  ]));
 }
 
 function changePasswordForm() {

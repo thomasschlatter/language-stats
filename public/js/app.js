@@ -78,14 +78,17 @@ function renderSidebar() {
 }
 
 function confirmRemoveLanguage(lang) {
+  const err = el('div', { class: 'error' });
   const close = openModal(el('div', {}, [
     el('h2', {}, `Remove ${lang.name}?`),
     el('p', { class: 'muted' }, 'This permanently deletes all of its words, cards, tips and messages.'),
+    err,
     el('div', { class: 'row', style: 'justify-content:flex-end; margin-top:1rem' }, [
       el('button', { class: 'btn small secondary', type: 'button', onclick: () => close() }, 'Cancel'),
       el('button', {
         class: 'btn small danger', type: 'button',
         onclick: async () => {
+          err.textContent = '';
           try {
             await api.deleteLanguage(lang.code);
             await reloadLanguages();
@@ -93,8 +96,10 @@ function confirmRemoveLanguage(lang) {
             if ((window.location.hash || '').startsWith(`#/lang/${lang.code}`)) {
               window.location.hash = store.languages[0] ? `#/lang/${store.languages[0].code}` : '#/';
             }
-          } catch { /* ignore */ }
-          close();
+            close();
+          } catch (ex) {
+            err.textContent = ex.message;
+          }
         },
       }, 'Remove'),
     ]),

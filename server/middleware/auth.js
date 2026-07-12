@@ -6,9 +6,15 @@
 
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-insecure-secret-change-me';
+const DEFAULT_SECRET = 'dev-insecure-secret-change-me';
+const JWT_SECRET = process.env.JWT_SECRET || DEFAULT_SECRET;
 const TOKEN_TTL = process.env.TOKEN_TTL || '7d';
 const COOKIE_NAME = 'ls_token';
+
+// Fail fast in production if the secret wasn't set — otherwise tokens are forgeable.
+if (process.env.NODE_ENV === 'production' && JWT_SECRET === DEFAULT_SECRET) {
+  throw new Error('JWT_SECRET must be set to a strong value in production.');
+}
 
 export function issueToken(res, user) {
   const token = jwt.sign({ uid: user.id, username: user.username }, JWT_SECRET, {
