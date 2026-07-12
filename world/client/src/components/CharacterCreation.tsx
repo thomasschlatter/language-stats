@@ -705,137 +705,49 @@ export default function CharacterCreation() {
         // complete
         // set is loading to true after canvas is drawn
         setIsLoading(true);
-        if (!userAlreadyExists) {
-          let uuid = uuidv4();
-          formData.append("uuid", uuid);
-          formData.append("name", name);
-          formData.append(
-            "title",
-            avatarStyleIndex.Bodies.toString() +
-              "_" +
-              avatarStyleIndex.Accessories.toString() +
-              "_" +
-              avatarStyleIndex.Outfits.toString() +
-              "_" +
-              avatarStyleIndex.Hairstyles.toString() +
-              "_" +
-              avatarStyleIndex.Eyes.toString()
-          );
-          fetch(`${baseURL}/api/imageupload/`, {
-            method: "POST",
-            body: formData,
+        // Load the composited character spritesheet straight from the canvas —
+        // no backend upload needed (the Django image service was removed).
+        const uuid = uuidv4();
+        const dataURL = canvasComplete.toDataURL("image/png");
+        localStorage.setItem(
+          "strndd-avatar_index",
+          JSON.stringify({
+            Bodies: avatarStyleIndex.Bodies,
+            Accessories: avatarStyleIndex.Accessories,
+            Bodies_kids: avatarStyleIndex.Bodies_kids,
+            Outfits_kids: avatarStyleIndex.Outfits_kids,
+            Books: avatarStyleIndex.Books,
+            Outfits: avatarStyleIndex.Outfits,
+            Hairstyles: avatarStyleIndex.Hairstyles,
+            Smartphones: avatarStyleIndex.Smartphones,
+            Eyes: avatarStyleIndex.Eyes,
+            Hairstyles_kids: avatarStyleIndex.Hairstyles_kids,
+            Eyes_kids: avatarStyleIndex.Eyes_kids,
           })
-            .then((response) => {
-              if (response.status === 200) {
-                //dispatch(setAvatar(res.data));
-                setIsLoading(false);
-                localStorage.setItem(
-                  "strndd-avatar_index",
-                  JSON.stringify({
-                    Bodies: avatarStyleIndex.Bodies,
-                    Accessories: avatarStyleIndex.Accessories,
-                    Bodies_kids: avatarStyleIndex.Bodies_kids,
-                    Outfits_kids: avatarStyleIndex.Outfits_kids,
-                    Books: avatarStyleIndex.Books,
-                    Outfits: avatarStyleIndex.Outfits,
-                    Hairstyles: avatarStyleIndex.Hairstyles,
-                    Smartphones: avatarStyleIndex.Smartphones,
-                    Eyes: avatarStyleIndex.Eyes,
-                    Hairstyles_kids: avatarStyleIndex.Hairstyles_kids,
-                    Eyes_kids: avatarStyleIndex.Eyes_kids,
-                  })
-                );
-                return response.json();
-              } else {
-                throw new Error("Failed to upload image");
-              }
-            })
-            .then((data) => {
-              let url_from_server = data.url;
-              //console.log("url from server : " + data.file_name);
-              // https://strndd.s3.ap-southeast-2.amazonaws.com/media/04005095-f677-4259-a6a5-4fa7c14a0bad.png
-              let uuid_from_server = data.uuid;
-              let name_from_server = data.name;
-              localStorage.setItem("strndd-avatar_url", url_from_server);
-              localStorage.setItem("strndd-avatar_uuid", uuid_from_server);
-              localStorage.setItem("strndd-avatar_name", name_from_server);
-              if (url_from_server) {
-                // use uploaded avatar
-                game.load.spritesheet(uuid, data.url, {
-                  frameWidth: 32,
-                  frameHeight: 48,
-                });
-                game.load.start();
-                game.load.on("complete", () => {
-                  // register keys
-                  game.registerKeys();
-                  // loop over FRAMES
-                  for (let i = 0; i < Object.keys(FRAMES).length; i++) {
-                    // create animation for each frame
-                    game.anims.create({
-                      key: `${uuid_from_server}_${Object.keys(FRAMES)[i]}`,
-                      frames: game.anims.generateFrameNames(uuid_from_server, {
-                        start: FRAMES[Object.keys(FRAMES)[i]].start,
-                        end: FRAMES[Object.keys(FRAMES)[i]].end,
-                      }),
-                      repeat: FRAMES[Object.keys(FRAMES)[i]].repeat,
-                      frameRate: FRAMES[Object.keys(FRAMES)[i]].frameRate,
-                    });
-                  }
-                  game.myPlayer.setPlayerName(name_from_server);
-                  game.myPlayer.setPlayerTexture(uuid_from_server);
-                  game.anims.play(
-                    `${uuid_from_server}_idle_down`,
-                    game.myPlayer
-                  );
-                  game.network.readyToConnect();
-                  dispatch(setLoggedIn(true));
-                  //dispatch(setAvatarId(uuid_from_server));
-                });
-              } else {
-                // use default avatar
-                game.myPlayer.setPlayerTexture(avatars[avatarIndex].name);
-                game.network.readyToConnect();
-                dispatch(setLoggedIn(true));
-                //dispatch(setAvatarId('adam'));
-              }
+        );
+        localStorage.setItem("strndd-avatar_name", name);
+        game.load.spritesheet(uuid, dataURL, { frameWidth: 32, frameHeight: 48 });
+        game.load.start();
+        game.load.on("complete", () => {
+          setIsLoading(false);
+          game.registerKeys();
+          for (let i = 0; i < Object.keys(FRAMES).length; i++) {
+            game.anims.create({
+              key: `${uuid}_${Object.keys(FRAMES)[i]}`,
+              frames: game.anims.generateFrameNames(uuid, {
+                start: FRAMES[Object.keys(FRAMES)[i]].start,
+                end: FRAMES[Object.keys(FRAMES)[i]].end,
+              }),
+              repeat: FRAMES[Object.keys(FRAMES)[i]].repeat,
+              frameRate: FRAMES[Object.keys(FRAMES)[i]].frameRate,
             });
-        } else {
-          // use already uploaded avatar
-          game.load.spritesheet(uuid, avatarUrl, {
-            frameWidth: 32,
-            frameHeight: 48,
-          });
-          game.load.start();
-          game.load.on("complete", () => {
-            // register keys
-            //game.scene.stop('game')
-            //game.scene.stop('background')
-            //game.scene.launch('lobby', {
-            //  network: game.network,
-            //})
-            game.registerKeys();
-            // loop over FRAMES
-            for (let i = 0; i < Object.keys(FRAMES).length; i++) {
-              // create animation for each frame
-              game.anims.create({
-                key: `${uuid}_${Object.keys(FRAMES)[i]}`,
-                frames: game.anims.generateFrameNames(uuid, {
-                  start: FRAMES[Object.keys(FRAMES)[i]].start,
-                  end: FRAMES[Object.keys(FRAMES)[i]].end,
-                }),
-                repeat: FRAMES[Object.keys(FRAMES)[i]].repeat,
-                frameRate: FRAMES[Object.keys(FRAMES)[i]].frameRate,
-              });
-            }
-            game.myPlayer.setPlayerName(name);
-            game.myPlayer.setPlayerTexture(uuid);
-            game.anims.play(`${uuid}_idle_down`, game.myPlayer);
-            console.log("Join! Name:", name, "Avatar:", "custom");
-            game.network.readyToConnect();
-            dispatch(setLoggedIn(true));
-          });
-        }
+          }
+          game.myPlayer.setPlayerName(name);
+          game.myPlayer.setPlayerTexture(uuid);
+          game.anims.play(`${uuid}_idle_down`, game.myPlayer);
+          game.network.readyToConnect();
+          dispatch(setLoggedIn(true));
+        });
       }
     }
   };
