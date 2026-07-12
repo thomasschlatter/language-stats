@@ -281,6 +281,23 @@ a:hover { text-decoration: underline; }
 .ok-msg { color: var(--accent-2); font-size: 0.9rem; min-height: 1.1em; margin-top: 0.4rem; }
 .prof-place { font-size: 0.9rem; margin: 0.25rem 0 0.5rem; }
 
+/* ---- Deck marker: word is in a study deck ---- */
+.w.in-deck { box-shadow: inset 0 -2px 0 var(--accent); }
+
+/* ---- Flashcards ---- */
+.deck-card .card-top { align-items: center; }
+.study-stage { display: flex; justify-content: center; margin-top: 1.5rem; }
+.flash-card {
+  width: min(460px, 92vw); background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center;
+}
+.flash-count { font-size: 0.8rem; margin-bottom: 1rem; }
+.flash-front { font-size: 1.9rem; font-weight: 600; margin-bottom: 1rem; }
+.flash-back { font-size: 1.3rem; color: var(--accent-2); margin-bottom: 1.5rem; }
+.rate-row { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+.study-done { text-align: center; margin-top: 2rem; }
+.study-done h2 { margin-bottom: 0.5rem; }
+
 /* ---- Seen / familiarity legend ---- */
 .seen-legend { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--muted); }
 .seen-gradient {

@@ -19,6 +19,7 @@ import { sendDM } from '../models/dm.js';
 import { createTip } from '../models/tips.js';
 import { toggleFollow } from '../models/follows.js';
 import { toggleVote } from '../models/votes.js';
+import { createDeck, addCards, reviewCard } from '../models/flashcards.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -349,7 +350,27 @@ function seedDemo() {
     if (gender) for (const u of ['mia', 'sofia', 'ben', 'leon', 'emma']) toggleVote(gender.id, made[u].id);
   });
   tx();
-  console.log(`Created ${people.length} demo users + activity (password: demo1234).`);
+
+  // A demo flashcard deck for mia, with a few cards "studied" to varying
+  // maturity so the studied-mode colouring + deck markers are visible.
+  const deck = createDeck({ userId: made.mia.id, languageId: german.id, name: 'German basics', source: 'csv' });
+  addCards({
+    deckId: deck.id, userId: made.mia.id, languageId: german.id,
+    rows: [
+      { front: 'Hallo', back: 'hello' }, { front: 'Danke', back: 'thank you' },
+      { front: 'Haus', back: 'house' }, { front: 'Katze', back: 'cat' },
+      { front: 'Wasser', back: 'water' }, { front: 'lernen', back: 'to learn' },
+    ],
+  });
+  const cards = db.prepare('SELECT id, word_lc FROM cards WHERE deck_id = ?').all(deck.id);
+  const byWord = Object.fromEntries(cards.map((c) => [c.word_lc, c.id]));
+  const study = (word, times) => { for (let i = 0; i < times; i++) reviewCard(byWord[word], made.mia.id, 3); };
+  study('hallo', 4);  // mature -> green
+  study('danke', 3);  // -> yellow-green
+  study('haus', 1);   // -> orange
+  // Katze / Wasser / lernen stay new -> red, still underlined (in deck)
+
+  console.log(`Created ${people.length} demo users + activity + a flashcard deck (password: demo1234).`);
 }
 
 seedDemo();

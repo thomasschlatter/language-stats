@@ -3,6 +3,7 @@
 import { api } from './api.js';
 import { store } from './store.js';
 import { el, openModal, clear } from './dom.js';
+import { colorModeToggle } from './seen.js';
 
 // Load the current user on startup (if a valid cookie exists).
 export async function loadCurrentUser() {
@@ -33,6 +34,7 @@ export function renderAuthArea() {
   area.append(nativeSelector());
   if (store.user) {
     area.append(
+      colorModeToggle(),
       el('a', { class: 'who', href: `#/u/${encodeURIComponent(store.user.username)}`, title: 'Your profile' }, `@${store.user.username}`),
       el('button', { class: 'btn secondary small', onclick: doLogout }, 'Sign out')
     );

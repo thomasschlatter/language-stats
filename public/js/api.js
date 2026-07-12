@@ -97,4 +97,13 @@ export const api = {
   seenMap: (lang) => request('GET', `/progress/seen?lang=${encodeURIComponent(lang)}`),
   recordSeen: (b) => request('POST', '/progress/seen', b),
   seenPolicy: () => request('GET', '/progress/policy'),
+
+  // --- flashcards / SRS ---
+  decks: () => request('GET', '/flashcards/decks'),
+  createDeck: (b) => request('POST', '/flashcards/decks', b),
+  deleteDeck: (id) => request('DELETE', `/flashcards/decks/${id}`),
+  importDeck: (b) => request('POST', '/flashcards/import', b),
+  study: (deckId) => request('GET', `/flashcards/study${deckId ? `?deck=${deckId}` : ''}`),
+  review: (b) => request('POST', '/flashcards/review', b),
+  familiarity: (lang) => request('GET', `/flashcards/familiarity?lang=${encodeURIComponent(lang)}`),
 };

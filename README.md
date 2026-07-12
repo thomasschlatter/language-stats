@@ -42,10 +42,15 @@ word is again clickable.
 - **Personal progress**: mark words known/learning; a dashboard shows what % of
   everyday conversation your known words cover, with milestones and a
   "learn these next" list.
-- **Familiarity colouring**: every word is tinted red→green by how often you've
-  seen it. What counts as "seen" is a **versioned, swappable policy**
-  (`server/lib/seenPolicy.js`; each increment stores the policy that counted it,
-  so experiments stay traceable). Shown in Settings.
+- **Flashcards (SRS)**: import decks from CSV/TSV (incl. Anki "Notes in Plain
+  Text" export), study with an SM-2 scheduler (again/hard/good/easy), and track
+  spaced-repetition maturity per word.
+- **Familiarity colouring**: every word is tinted red→green, with a top-bar
+  **👁 Seen / 🎴 Studied** toggle choosing the meaning — how often you've
+  encountered the word (a versioned, swappable "seen" policy in
+  `server/lib/seenPolicy.js`) or its flashcard study maturity. Words in a study
+  deck also get an underline. Green comes slowly (studied maturity needs real
+  reviews; seen is capped high).
 - **Language exchange (Tandem-style):**
   - **Profiles** — native/learning languages, bio, interests.
   - **Community / partner finder** — browse and match members (native in what

@@ -212,6 +212,40 @@ CREATE TABLE IF NOT EXISTS dm_corrections (
 
 CREATE INDEX IF NOT EXISTS idx_dm_corr ON dm_corrections(message_id);
 
+-- ---------------------------------------------------------------------------
+-- Flashcards: decks + cards with SM-2 spaced-repetition state. A card's
+-- maturity (grown interval) drives "studied" word colouring.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS decks (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  language_id INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
+  name        TEXT NOT NULL,
+  source      TEXT,                                 -- 'csv' | 'anki' | 'manual'
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS cards (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  deck_id     INTEGER NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  language_id INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
+  word_lc     TEXT,                                 -- lowercased front (for word colouring)
+  front       TEXT NOT NULL,
+  back        TEXT,
+  ease        REAL NOT NULL DEFAULT 2.5,
+  interval    REAL NOT NULL DEFAULT 0,              -- days until next review
+  reps        INTEGER NOT NULL DEFAULT 0,
+  lapses      INTEGER NOT NULL DEFAULT 0,
+  due_at      TEXT,                                 -- when next due (new cards due now)
+  state       TEXT NOT NULL DEFAULT 'new',          -- new | learning | review
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_cards_due  ON cards(user_id, language_id, due_at);
+CREATE INDEX IF NOT EXISTS idx_cards_word ON cards(user_id, language_id, word_lc);
+CREATE INDEX IF NOT EXISTS idx_cards_deck ON cards(deck_id);
+
 -- Card upvotes — one vote per user per article.
 CREATE TABLE IF NOT EXISTS article_votes (
   article_id INTEGER NOT NULL REFERENCES articles(id) ON DELETE CASCADE,

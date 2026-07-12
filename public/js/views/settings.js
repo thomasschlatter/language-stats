@@ -43,11 +43,12 @@ export async function renderSettings() {
 
   // Word familiarity: explains the red→green colouring and the active "seen" policy.
   const familiaritySection = section('Word familiarity', [
-    el('p', { class: 'muted', style: 'margin-top:0' }, 'Words are coloured by how often you\'ve seen them:'),
+    el('p', { class: 'muted', style: 'margin-top:0' },
+      'Words are highlighted red→green. The 👁 Seen / 🎴 Studied toggle (top bar) picks what the colour means: how often you\'ve seen a word, or its spaced-repetition study progress. Words in a study deck also get an underline.'),
     el('div', { class: 'seen-legend' }, [
-      el('span', {}, 'never'),
+      el('span', {}, 'red = new'),
       el('div', { class: 'seen-gradient' }),
-      el('span', {}, 'seen a lot'),
+      el('span', {}, 'green = familiar'),
     ]),
     el('div', { class: 'muted', style: 'font-size:0.82rem; margin-top:0.6rem' }, el('span', { id: 'seen-policy' }, 'Loading policy…')),
   ]);

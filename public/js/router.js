@@ -20,10 +20,14 @@ import { renderCommunity } from './views/community.js';
 import { renderMessages } from './views/messages.js';
 import { renderDmThread } from './views/dmThread.js';
 import { renderSettings } from './views/settings.js';
+import { renderDecks } from './views/decks.js';
+import { renderStudy } from './views/study.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
   { pattern: /^#\/settings$/, handler: () => renderSettings(), auth: true },
+  { pattern: /^#\/decks$/, handler: () => renderDecks(), auth: true },
+  { pattern: /^#\/study\/(\d+)$/, handler: (m) => renderStudy(Number(m[1])), auth: true },
   { pattern: /^#\/messages$/, handler: () => renderMessages(), auth: true },
   { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])), auth: true },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },

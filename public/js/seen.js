@@ -1,56 +1,93 @@
-// Familiarity tracking: colours each word from red (never seen) to green (seen
-// many times), and records "seen" events per the current policy.
+// Word familiarity colouring. Two selectable modes (toggle in the top bar):
+//   • "seen"    — red→green by how often you've encountered the word
+//                 (grows slowly; capped high so a few reloads barely move it)
+//   • "studied" — red→green by spaced-repetition maturity of the word's card(s)
+//                 (only words that are in a study deck are coloured)
+// In BOTH modes, words that are in a study deck get a distinct deck marker.
 //
-// The policy (what counts as "seen") is fetched from the server and is
-// deliberately swappable — see server/lib/seenPolicy.js. Supported client
-// triggers: viewport-once-v1 (word scrolls into view), click-v1 (word clicked),
-// render-v1 (word rendered at all).
+// Sightings are always recorded (per the seen policy) so the "seen" data exists
+// regardless of the active colouring mode.
 
 import { api } from './api.js';
 import { store } from './store.js';
+import { el } from './dom.js';
 
-const CAP = 8; // seen_count at which a word is fully "green"
-const counts = new Map();   // `${lang}::${wlc}` -> seen_count
-const loaded = new Set();   // languages whose seen-map has been fetched
+const SEEN_CAP = 30; // sightings needed to reach full green in "seen" mode
+
+const seenCounts = new Map();  // key -> sighting count
+const studyLevels = new Map(); // key -> SRS maturity 0..1 (presence = in a deck)
+const seenLoaded = new Set();
+const studyLoaded = new Set();
 let currentPolicy = 'viewport-once-v1';
+let mode = localStorage.getItem('ls_color_mode') || 'studied';
 
-// --- colouring ------------------------------------------------------------
-// A translucent highlight behind the word: red (never seen) -> green (seen a lot).
-function colorFor(count) {
-  const t = Math.min(count, CAP) / CAP;      // 0..1
-  const hue = Math.round(t * 120);           // 0 = red, 120 = green
-  const alpha = document.documentElement.getAttribute('data-theme') === 'light' ? 0.28 : 0.34;
-  return `hsl(${hue} 75% 50% / ${alpha})`;
+const keyOf = (lang, wlc) => `${lang}::${wlc}`;
+
+// --- colours --------------------------------------------------------------
+function bg(hue) {
+  const a = document.documentElement.getAttribute('data-theme') === 'light' ? 0.28 : 0.34;
+  return `hsl(${hue} 75% 50% / ${a})`;
 }
-function keyOf(lang, wlc) { return `${lang}::${wlc}`; }
-function applyColor(elm, lang, wlc) {
-  elm.style.setProperty('--seen-bg', colorFor(counts.get(keyOf(lang, wlc)) || 0));
+const colorSeen = (count) => bg(Math.round((Math.min(count, SEEN_CAP) / SEEN_CAP) * 120));
+const colorLevel = (lvl) => bg(Math.round(Math.min(Math.max(lvl, 0), 1) * 120));
+
+function applyColor(elm) {
+  const lang = elm.getAttribute('data-lang');
+  const wlc = elm.dataset.w;
+  if (!lang || wlc == null) return;
+  const key = keyOf(lang, wlc);
+
+  elm.classList.toggle('in-deck', studyLevels.has(key)); // deck marker (both modes)
+
+  let color = null;
+  if (mode === 'studied') {
+    if (studyLevels.has(key)) color = colorLevel(studyLevels.get(key));
+  } else {
+    const c = seenCounts.get(key) || 0;
+    if (c > 0) color = colorSeen(c);
+  }
+  if (color) elm.style.setProperty('--seen-bg', color);
+  else elm.style.removeProperty('--seen-bg');
 }
-function recolor(lang, wlc) {
-  const sel = `.w[data-lang="${CSS.escape(lang)}"][data-w="${CSS.escape(wlc)}"]`;
-  document.querySelectorAll(sel).forEach((elm) => applyColor(elm, lang, wlc));
-}
+function recolorAll() { document.querySelectorAll('.w').forEach(applyColor); }
 function recolorLang(lang) {
-  document.querySelectorAll(`.w[data-lang="${CSS.escape(lang)}"]`).forEach((elm) => {
-    if (elm.dataset.w) applyColor(elm, lang, elm.dataset.w);
-  });
+  document.querySelectorAll(`.w[data-lang="${CSS.escape(lang)}"]`).forEach(applyColor);
 }
 
-// --- recording ------------------------------------------------------------
-const pending = new Set(); // keys queued for the next flush (dedup per window)
-let flushTimer = null;
-function scheduleFlush() {
-  if (flushTimer) return;
-  flushTimer = setTimeout(flush, 1200);
+// --- loading --------------------------------------------------------------
+async function loadStudy(lang) {
+  if (studyLoaded.has(lang) || !store.user) return;
+  studyLoaded.add(lang);
+  try {
+    const { familiarity } = await api.familiarity(lang);
+    for (const [w, l] of Object.entries(familiarity)) studyLevels.set(keyOf(lang, w), l);
+    recolorLang(lang);
+  } catch { studyLoaded.delete(lang); }
 }
+async function loadSeen(lang) {
+  if (seenLoaded.has(lang) || !store.user) return;
+  seenLoaded.add(lang);
+  try {
+    const { seen, policy } = await api.seenMap(lang);
+    if (policy) currentPolicy = policy;
+    for (const [w, c] of Object.entries(seen)) seenCounts.set(keyOf(lang, w), c);
+    recolorLang(lang);
+  } catch { seenLoaded.delete(lang); }
+}
+function ensureLoaded(lang) {
+  loadStudy(lang);              // always (deck marker + studied colour)
+  if (mode === 'seen') loadSeen(lang);
+}
+
+// --- sighting recording ---------------------------------------------------
+const pending = new Set();
+let flushTimer = null;
+function scheduleFlush() { if (!flushTimer) flushTimer = setTimeout(flush, 1200); }
 async function flush() {
   flushTimer = null;
   if (!pending.size) return;
   const byLang = {};
-  for (const key of pending) {
-    const [lang, wlc] = key.split('::');
-    (byLang[lang] ||= []).push(wlc);
-  }
+  for (const key of pending) { const [lang, wlc] = key.split('::'); (byLang[lang] ||= []).push(wlc); }
   pending.clear();
   for (const [lang, words] of Object.entries(byLang)) {
     try { await api.recordSeen({ lang, words, policy: currentPolicy }); } catch { /* ignore */ }
@@ -58,62 +95,62 @@ async function flush() {
 }
 function markSeen(lang, wlc) {
   const key = keyOf(lang, wlc);
-  if (pending.has(key)) return;            // count each word once per flush window
+  if (pending.has(key)) return;
   pending.add(key);
-  counts.set(key, (counts.get(key) || 0) + 1);
-  recolor(lang, wlc);
+  seenCounts.set(key, (seenCounts.get(key) || 0) + 1);
+  if (mode === 'seen') recolorLang(lang);
   scheduleFlush();
 }
 
-// --- observer (viewport policy) -------------------------------------------
 const observer = typeof IntersectionObserver !== 'undefined'
   ? new IntersectionObserver((entries) => {
       for (const e of entries) {
         if (!e.isIntersecting) continue;
-        const elm = e.target;
-        observer.unobserve(elm);
-        if (elm.dataset.seenCounted) continue;
-        elm.dataset.seenCounted = '1';
-        markSeen(elm.getAttribute('data-lang'), elm.dataset.w);
+        observer.unobserve(e.target);
+        if (e.target.dataset.seenCounted) continue;
+        e.target.dataset.seenCounted = '1';
+        markSeen(e.target.getAttribute('data-lang'), e.target.dataset.w);
       }
     }, { threshold: 0.5 })
   : null;
 
-// --- public: called from render.js for every word element -----------------
+// --- public API -----------------------------------------------------------
 export function registerSeen(elm, word, lang) {
   const wlc = word.toLowerCase();
   elm.dataset.w = wlc;
-  applyColor(elm, lang, wlc);
   ensureLoaded(lang);
-
-  if (currentPolicy === 'render-v1') {
-    markSeen(lang, wlc);
-  } else if (currentPolicy === 'click-v1') {
-    elm.addEventListener('click', () => markSeen(lang, wlc));
-  } else if (observer) {
-    observer.observe(elm);
-  }
+  applyColor(elm);
+  if (currentPolicy === 'render-v1') markSeen(lang, wlc);
+  else if (currentPolicy === 'click-v1') elm.addEventListener('click', () => markSeen(lang, wlc));
+  else if (observer) observer.observe(elm);
 }
 
-async function ensureLoaded(lang) {
-  if (loaded.has(lang) || !store.user) return;
-  loaded.add(lang);
-  try {
-    const { seen, policy } = await api.seenMap(lang);
-    if (policy) currentPolicy = policy;
-    for (const [wlc, c] of Object.entries(seen)) counts.set(keyOf(lang, wlc), c);
-    recolorLang(lang);
-  } catch { loaded.delete(lang); }
+// A top-bar toggle button to switch colouring mode.
+export function colorModeToggle() {
+  const label = () => (mode === 'studied' ? '🎴 Studied' : '👁 Seen');
+  const btn = el('button', { class: 'btn secondary small', title: 'Colour words by how often seen, or by study progress' }, label());
+  btn.addEventListener('click', () => {
+    mode = mode === 'studied' ? 'seen' : 'studied';
+    localStorage.setItem('ls_color_mode', mode);
+    btn.textContent = label();
+    // Make sure the data the new mode needs is loaded for on-screen languages.
+    new Set([...document.querySelectorAll('.w[data-lang]')].map((w) => w.getAttribute('data-lang')))
+      .forEach((lang) => ensureLoaded(lang));
+    recolorAll();
+  });
+  return btn;
 }
 
-// Reset when the signed-in user changes (login/logout).
+// Reset when the signed-in user changes.
 let lastUser = store.user?.id ?? null;
 store.subscribe((s) => {
   const uid = s.user?.id ?? null;
   if (uid !== lastUser) {
     lastUser = uid;
-    counts.clear();
-    loaded.clear();
-    document.querySelectorAll('.w').forEach((elm) => elm.style.removeProperty('--seen-bg'));
+    seenCounts.clear(); studyLevels.clear(); seenLoaded.clear(); studyLoaded.clear();
+    document.querySelectorAll('.w').forEach((elm) => {
+      elm.style.removeProperty('--seen-bg');
+      elm.classList.remove('in-deck');
+    });
   }
 });
