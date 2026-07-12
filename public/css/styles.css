@@ -524,4 +524,20 @@ label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.85rem; color: va
 @media (max-width: 680px) {
   .layout { grid-template-columns: 1fr; }
   .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  .view { padding: 1rem; }
 }
+
+/* Header reflows on narrow screens: brand+search+auth on top, nav below. */
+@media (max-width: 860px) {
+  .topbar { flex-wrap: wrap; gap: 0.5rem 0.75rem; padding: 0.6rem 0.9rem; }
+  .search-form { order: 2; flex: 1 1 120px; margin: 0; }
+  .auth-area { order: 3; margin-left: auto; }
+  .topnav {
+    order: 4; flex-basis: 100%; margin-left: 0; gap: 1.1rem;
+    overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.15rem;
+  }
+  .native-picker .who { display: none; }
+}
+/* Wide content (tables, word clouds) scrolls inside itself, never the page. */
+.ending-table, .bars { overflow-x: auto; }
