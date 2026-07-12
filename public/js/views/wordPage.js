@@ -34,13 +34,18 @@ export async function renderWordPage(langCode, text) {
   );
 
   if (data.word) {
-    // Definition (monolingual, in this word's own locale) — fully clickable.
-    box.append(
-      el('div', { class: 'meaning' },
-        data.word.meaning
-          ? renderText(data.word.meaning, langCode)
-          : el('span', { class: 'muted' }, 'No definition yet.'))
-    );
+    // Definitions — multiple candidate senses, upvotable, some accepted.
+    box.append(el('div', { class: 'links-title' }, 'Definitions'));
+    const defList = el('div', { class: 'definitions' });
+    if (!data.definitions?.length) {
+      defList.append(el('p', { class: 'muted' }, 'No definition yet.'));
+    } else {
+      for (const d of data.definitions) defList.append(definitionEl(d, langCode));
+    }
+    box.append(defList);
+    if (store.user) {
+      box.append(el('button', { class: 'btn small secondary', style: 'margin-top:0.5rem', onclick: () => openAddDefinition(data.word, langCode, defList) }, '+ Add definition'));
+    }
 
     // Translations & links
     box.append(el('div', { class: 'links-title' }, 'Translations & links'));
@@ -92,6 +97,50 @@ function languageName(code) {
   return store.languages.find((l) => l.code === code)?.name || code;
 }
 
+// One definition row: upvote control + text + accepted/source meta.
+function definitionEl(d, langCode) {
+  const count = el('span', {}, String(d.votes || 0));
+  const up = el('button', { class: `vote-btn${d.voted ? ' voted' : ''}`, title: store.user ? 'Upvote' : 'Sign in to vote' }, [el('span', { class: 'vote-arrow' }, '▲'), count]);
+  up.addEventListener('click', async () => {
+    if (!store.user) return;
+    up.disabled = true;
+    try {
+      const { voted, votes } = await api.voteDefinition(d.id);
+      d.voted = voted; d.votes = votes;
+      count.textContent = String(votes);
+      up.classList.toggle('voted', voted);
+    } catch { /* ignore */ } finally { up.disabled = false; }
+  });
+  return el('div', { class: 'definition' }, [
+    up,
+    el('div', { class: 'def-body' }, [
+      el('span', { class: 'def-text', lang: langCode }, renderText(d.text, langCode)),
+      el('div', { class: 'def-meta muted' }, [
+        d.accepted ? el('span', { class: 'def-accepted' }, '✓ accepted') : null,
+        d.source === 'wiktionary' ? el('span', {}, ' Wiktionary') : (d.author ? el('span', {}, ` @${d.author}`) : null),
+      ]),
+    ]),
+  ]);
+}
+
+function openAddDefinition(word, langCode, defList) {
+  const err = el('div', { class: 'error' });
+  const input = el('input', { type: 'text', placeholder: 'a definition or translation' });
+  const form = el('form', {
+    onsubmit: async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      try {
+        const { definition } = await api.addDefinition(word.id, { text: input.value });
+        defList.querySelector('.muted')?.remove();
+        defList.append(definitionEl(definition, langCode));
+        close();
+      } catch (ex) { err.textContent = ex.message; }
+    },
+  }, [el('label', {}, 'Definition'), input, err, el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Add')])]);
+  const close = openModal(el('div', {}, [el('h2', {}, `Define “${word.text}”`), form]));
+}
+
 // "I know this" / "Learning" toggle for a word, reflecting saved status.
 function progressControls(langCode, text) {
   const wrap = el('div', { class: 'progress-controls row', style: 'margin-top:1.25rem' });
@@ -129,7 +178,7 @@ async function openAddToDeck(langCode, data) {
     (l) => l.type === 'translation' && (l.language_code === store.nativeLang || l.language_code.split('-')[0] === nativeBase)
   );
   const back = el('input', { type: 'text', placeholder: 'meaning / translation' });
-  back.value = tr?.text || data.word?.meaning || '';
+  back.value = tr?.text || data.definitions?.[0]?.text || '';
 
   const deckSel = el('select', {});
   const nameInput = el('input', { type: 'text', placeholder: 'new deck name' });

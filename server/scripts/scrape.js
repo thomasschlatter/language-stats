@@ -13,8 +13,9 @@
 import './../db/index.js';
 import { listLanguages } from '../models/languages.js';
 import { topWords, totalCount } from '../models/frequency.js';
-import { findWord, upsertScrapedWord } from '../models/words.js';
-import { fetchDefinition } from '../lib/wiktionary.js';
+import { findWord, ensureWord, markWordScraped } from '../models/words.js';
+import { addDefinition, clearWiktionaryDefinitions } from '../models/definitions.js';
+import { fetchDefinitions } from '../lib/wiktionary.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -26,9 +27,12 @@ async function scrapeLanguage(language, limit, { force, delay }) {
     const existing = findWord(language.id, w.word);
     if (existing?.scraped_at && !force) { skipped += 1; continue; }
     try {
-      const def = await fetchDefinition(w.word, language.lang);
-      if (def) { upsertScrapedWord({ languageId: language.id, text: w.word, meaning: def }); updated += 1; }
-      else missed += 1;
+      const defs = await fetchDefinitions(w.word, language.lang);
+      const wordId = ensureWord(language.id, w.word);
+      if (force) clearWiktionaryDefinitions(wordId);
+      for (const d of defs) addDefinition({ wordId, text: d, source: 'wiktionary', accepted: true });
+      markWordScraped(wordId);
+      if (defs.length) updated += 1; else missed += 1;
     } catch { errors += 1; }
     if (i % 25 === 0) console.log(`  ${language.code}: ${i}/${words.length} (updated ${updated}, missed ${missed}, err ${errors})`);
     await sleep(delay);

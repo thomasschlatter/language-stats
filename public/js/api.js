@@ -49,6 +49,8 @@ export const api = {
     request('GET', `/words/resolve?text=${encodeURIComponent(text)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
   createWord: (b) => request('POST', '/words', b),
   linkWord: (id, b) => request('POST', `/words/${id}/links`, b),
+  addDefinition: (wordId, b) => request('POST', `/words/${wordId}/definitions`, b),
+  voteDefinition: (id) => request('POST', `/words/def/${id}/vote`),
 
   // --- tips ---
   tips: (lang) => request('GET', `/tips?lang=${encodeURIComponent(lang)}`),

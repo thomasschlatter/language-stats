@@ -181,6 +181,14 @@ a:hover { text-decoration: underline; }
 .word-detail .lang-tag { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .word-detail .headword { margin: 0.15rem 0 0.5rem; font-size: 2rem; }
 .word-detail .meaning { margin: 0.5rem 0 1rem; font-size: 1.1rem; }
+.definitions { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+.definition { display: flex; gap: 0.6rem; align-items: flex-start; }
+.def-body { flex: 1; min-width: 0; }
+.def-text { font-size: 1.05rem; line-height: 1.5; }
+.def-meta { font-size: 0.72rem; margin-top: 0.15rem; display: flex; gap: 0.4rem; align-items: center; }
+.def-accepted { color: var(--accent-2); font-weight: 600; }
+.vote-btn { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; gap: 0.1rem; min-width: 34px; padding: 0.2rem 0.3rem; }
+.vote-btn .vote-arrow { font-size: 0.7rem; }
 .links-title { margin-top: 1.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .links { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
 .link-row { display: flex; align-items: baseline; gap: 0.6rem; }

@@ -5,15 +5,23 @@ import {
   listWords,
   getWordById,
   getEntry,
+  ensureWord,
+  markWordScraped,
   findWord,
   createWord,
   updateWord,
-  upsertScrapedWord,
   getLinkedWords,
   linkExists,
   createLink,
 } from '../models/words.js';
-import { fetchDefinition } from '../lib/wiktionary.js';
+import {
+  addDefinition,
+  listDefinitions,
+  hasDefinitions,
+  getDefinition,
+  toggleDefinitionVote,
+} from '../models/definitions.js';
+import { fetchDefinitions } from '../lib/wiktionary.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -39,25 +47,52 @@ router.get('/entry', async (req, res) => {
   const word0 = String(text).trim();
   let word = getEntry(language.id, word0);
 
-  // On-demand definition: if we've never fetched this word (no entry, or an
-  // entry with no meaning and not yet scraped), pull it from Wiktionary now and
-  // cache the result (even a miss, so we don't refetch every view).
-  if (!word || (!word.meaning && !word.scraped_at)) {
+  // On-demand definitions: if we've never fetched this word (no entry, or an
+  // entry with no definitions and not yet scraped), pull them from Wiktionary
+  // now and cache (a miss is cached via scraped_at so we don't refetch).
+  const needFetch = !word || (!hasDefinitions(word.id) && !word.scraped_at);
+  if (needFetch) {
+    const wordId = ensureWord(language.id, word0);
     try {
-      const def = await fetchDefinition(word0, language.lang);
-      upsertScrapedWord({ languageId: language.id, text: word0, meaning: def || null });
-      word = getEntry(language.id, word0);
-    } catch { /* network hiccup — proceed without a definition */ }
+      const defs = await fetchDefinitions(word0, language.lang);
+      for (const d of defs) addDefinition({ wordId, text: d, source: 'wiktionary', accepted: true });
+    } catch { /* network hiccup */ }
+    markWordScraped(wordId);
+    word = getEntry(language.id, word0);
   }
 
+  // Migrate a legacy single meaning (from an earlier scrape) into definitions.
+  if (word && word.meaning && !hasDefinitions(word.id)) {
+    addDefinition({ wordId: word.id, text: word.meaning, source: 'wiktionary', accepted: true });
+  }
+
+  const definitions = word ? listDefinitions(word.id, req.user?.id) : [];
   const links = word ? getLinkedWords(word.id) : [];
   res.json({
     languageCode: language.code,
     languageName: language.name,
     text: word0,
     word: word || null,
+    definitions,
     links,
   });
+});
+
+// POST /api/words/:id/definitions  { text }  -> add a user definition
+router.post('/:id(\\d+)/definitions', requireAuth, (req, res) => {
+  const word = getWordById(Number(req.params.id));
+  if (!word) return res.status(404).json({ error: 'word not found' });
+  const { text } = req.body ?? {};
+  if (!text || !text.trim()) return res.status(400).json({ error: 'text is required' });
+  const id = addDefinition({ wordId: word.id, text: text.trim().slice(0, 500), source: 'user', createdBy: req.user.id });
+  res.status(201).json({ definition: listDefinitions(word.id, req.user.id).find((d) => d.id === id) });
+});
+
+// POST /api/words/def/:id/vote  -> upvote/unvote a definition
+router.post('/def/:id(\\d+)/vote', requireAuth, (req, res) => {
+  const def = getDefinition(Number(req.params.id));
+  if (!def) return res.status(404).json({ error: 'definition not found' });
+  res.json(toggleDefinitionVote(def.id, req.user.id));
 });
 
 // GET /api/words/resolve?text=ich&from=de&to=en

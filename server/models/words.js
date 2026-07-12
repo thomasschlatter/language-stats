@@ -42,7 +42,7 @@ export function findWord(languageId, text) {
     .get(languageId, text);
 }
 
-// Fetch a single word entry by language + text (case-insensitive).
+// Fetch a single word entry by language + text (case-SENSITIVE — "US" ≠ "us").
 export function getEntry(languageId, text) {
   return db
     .prepare(
@@ -50,9 +50,16 @@ export function getEntry(languageId, text) {
               l.code AS language_code, l.name AS language_name
        FROM words w
        JOIN languages l ON l.id = w.language_id
-       WHERE w.language_id = ? AND w.text = ? COLLATE NOCASE`
+       WHERE w.language_id = ? AND w.text = ?`
     )
     .get(languageId, text);
+}
+
+// Get the word's id, creating a bare entry if it doesn't exist yet.
+export function ensureWord(languageId, text) {
+  const existing = db.prepare('SELECT id FROM words WHERE language_id = ? AND text = ?').get(languageId, text);
+  if (existing) return existing.id;
+  return db.prepare('INSERT INTO words (language_id, text) VALUES (?, ?)').run(languageId, text).lastInsertRowid;
 }
 
 // Look a word up by its TEXT across every language (case-insensitive).
@@ -78,6 +85,10 @@ export function createWord({ languageId, text, meaning, notes, userId }) {
     )
     .run(languageId, text, meaning ?? null, notes ?? null, userId ?? null);
   return getWordById(info.lastInsertRowid);
+}
+
+export function markWordScraped(id) {
+  db.prepare("UPDATE words SET scraped_at = datetime('now') WHERE id = ?").run(id);
 }
 
 // Insert or refresh a word's definition (used by the Wiktionary scraper).

@@ -78,6 +78,25 @@ CREATE TABLE IF NOT EXISTS words (
 CREATE INDEX IF NOT EXISTS idx_words_language ON words(language_id);
 CREATE INDEX IF NOT EXISTS idx_words_text     ON words(text);
 
+-- Multiple candidate definitions per word (from Wiktionary or users), each
+-- upvotable and possibly "accepted". A word can have several accepted senses.
+CREATE TABLE IF NOT EXISTS word_definitions (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  word_id    INTEGER NOT NULL REFERENCES words(id) ON DELETE CASCADE,
+  text       TEXT NOT NULL,
+  source     TEXT,                                 -- 'wiktionary' | 'user' | 'seed'
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  accepted   INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_defs_word ON word_definitions(word_id);
+
+CREATE TABLE IF NOT EXISTS definition_votes (
+  definition_id INTEGER NOT NULL REFERENCES word_definitions(id) ON DELETE CASCADE,
+  user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  PRIMARY KEY (definition_id, user_id)
+);
+
 -- ---------------------------------------------------------------------------
 -- Word links = graph EDGES
 --
