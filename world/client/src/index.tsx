@@ -14,24 +14,53 @@ import Terms from './Terms'
 import Privacy from './Privacy'
 import Cookies from './Cookies'
 import Disclaimer from './Disclaimer'
+import { guardSingleWorld } from './singleInstance'
 
 const container = document.getElementById('root')
 const root = createRoot(container!)
-root.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <ThemeProvider theme={muiTheme}>
-        <Router>
-          <Routes>
-            <Route index element={<App />} />
-            <Route path="/terms/" element={<Terms />} />
-            <Route path="/privacy/" element={<Privacy />} />
-            <Route path="/cookies/" element={<Cookies />} />
-            <Route path="/disclaimer/" element={<Disclaimer />} />
-            <Route path="*" element={<App />} />
-          </Routes>
-        </Router>
-      </ThemeProvider>
-    </Provider>
-  </React.StrictMode>
-)
+
+const blockedStyle: React.CSSProperties = {
+  position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: '#222639', color: '#eee', fontFamily: 'system-ui, sans-serif', padding: 24, textAlign: 'center',
+}
+
+guardSingleWorld().then((ok) => {
+  if (!ok) {
+    root.render(
+      <div style={blockedStyle}>
+        <div style={{ maxWidth: 420 }}>
+          <h1>Already in the world</h1>
+          <p style={{ color: '#c2c2c2', lineHeight: 1.6 }}>
+            The world is already open in another window of this browser. Two at once collide,
+            so close the other one (or switch to it) and reload here.
+          </p>
+          <button
+            style={{ padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}
+            onClick={() => window.location.reload()}
+          >
+            Reload
+          </button>
+        </div>
+      </div>
+    )
+    return
+  }
+  root.render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <ThemeProvider theme={muiTheme}>
+          <Router>
+            <Routes>
+              <Route index element={<App />} />
+              <Route path="/terms/" element={<Terms />} />
+              <Route path="/privacy/" element={<Privacy />} />
+              <Route path="/cookies/" element={<Cookies />} />
+              <Route path="/disclaimer/" element={<Disclaimer />} />
+              <Route path="*" element={<App />} />
+            </Routes>
+          </Router>
+        </ThemeProvider>
+      </Provider>
+    </React.StrictMode>
+  )
+})
