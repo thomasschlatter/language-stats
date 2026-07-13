@@ -4,17 +4,43 @@
 import db from '../db/index.js';
 
 // Columns returned for a tip everywhere (list + single). user_id lets the
-// client show an "edit" control to the author.
+// client show an "edit" control to the author; votes powers upvote ranking.
 const TIP_COLS = `t.id, t.title, t.body, t.created_at, t.user_id,
-                  u.username AS author, bl.code AS body_lang`;
+                  u.username AS author, bl.code AS body_lang,
+                  (SELECT COUNT(*) FROM tip_votes tv WHERE tv.tip_id = t.id) AS votes`;
 const TIP_FROM = `FROM tips t
                   JOIN users u ON u.id = t.user_id
                   LEFT JOIN languages bl ON bl.id = t.body_lang_id`;
 
+// Tips ranked by upvotes (then most recent).
 export function listTips(languageId) {
   return db
-    .prepare(`SELECT ${TIP_COLS} ${TIP_FROM} WHERE t.language_id = ? ORDER BY t.created_at DESC`)
+    .prepare(`SELECT ${TIP_COLS} ${TIP_FROM} WHERE t.language_id = ? ORDER BY votes DESC, t.created_at DESC`)
     .all(languageId);
+}
+
+export function tipVoteCount(tipId) {
+  return db.prepare('SELECT COUNT(*) AS n FROM tip_votes WHERE tip_id = ?').get(tipId).n;
+}
+
+export function tipUserVoted(tipId, userId) {
+  return !!db.prepare('SELECT 1 FROM tip_votes WHERE tip_id = ? AND user_id = ?').get(tipId, userId);
+}
+
+export function tipVotedIds(userId, ids) {
+  if (!ids.length) return new Set();
+  const ph = ids.map(() => '?').join(',');
+  const rows = db.prepare(`SELECT tip_id FROM tip_votes WHERE user_id = ? AND tip_id IN (${ph})`).all(userId, ...ids);
+  return new Set(rows.map((r) => r.tip_id));
+}
+
+export function toggleTipVote(tipId, userId) {
+  if (tipUserVoted(tipId, userId)) {
+    db.prepare('DELETE FROM tip_votes WHERE tip_id = ? AND user_id = ?').run(tipId, userId);
+    return { voted: false, votes: tipVoteCount(tipId) };
+  }
+  db.prepare('INSERT INTO tip_votes (tip_id, user_id) VALUES (?, ?)').run(tipId, userId);
+  return { voted: true, votes: tipVoteCount(tipId) };
 }
 
 export function getTip(id) {

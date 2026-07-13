@@ -292,6 +292,14 @@ CREATE TABLE IF NOT EXISTS article_votes (
   PRIMARY KEY (article_id, user_id)
 );
 
+-- Tip upvotes — one vote per user per tip; tips are ranked by these.
+CREATE TABLE IF NOT EXISTS tip_votes (
+  tip_id     INTEGER NOT NULL REFERENCES tips(id) ON DELETE CASCADE,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (tip_id, user_id)
+);
+
 -- ---------------------------------------------------------------------------
 -- Lexicon: part-of-speech + gender per (lowercased) word form, aggregated from
 -- the Universal Dependencies German treebank. Used to break the frequency

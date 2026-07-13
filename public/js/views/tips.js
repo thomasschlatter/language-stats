@@ -11,6 +11,7 @@ import { parseArticle } from '../articleMarkup.js';
 import { languageTabs } from './tabs.js';
 import { signInPrompt } from '../auth.js';
 import { attachDeckButtons } from './listToDeck.js';
+import { voteButton } from './voteButton.js';
 import { navigate } from '../router.js';
 
 export async function renderTips(langCode) {
@@ -54,9 +55,12 @@ export async function renderTips(langCode) {
       el('div', { class: 'card' }, [
         el('div', { class: 'section-head', style: 'align-items:flex-start' }, [
           el('h3', {}, renderText(t.title, bodyLang)),
-          canEdit
-            ? el('button', { class: 'btn small secondary', onclick: () => openTipEditor(language, () => renderTips(langCode), t) }, 'Edit')
-            : null,
+          el('div', { class: 'row', style: 'gap:0.5rem; align-items:center' }, [
+            canEdit
+              ? el('button', { class: 'btn small secondary', onclick: () => openTipEditor(language, () => renderTips(langCode), t) }, 'Edit')
+              : null,
+            voteButton(t, api.voteTip),
+          ]),
         ]),
         bodyEl,
         el('div', { class: 'meta', style: 'margin-top:0.5rem' }, `by @${t.author} · written in ${bodyLang} · ${t.created_at}`),

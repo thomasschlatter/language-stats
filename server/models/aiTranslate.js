@@ -42,7 +42,9 @@ export async function aiTranslateBatch({ fromBase, toBase, texts }) {
   if (!texts.length) return [];
   if (fromBase === toBase) return texts.slice();
   const pipe = await getPipeline(fromBase, toBase);
-  const out = await pipe(texts, { max_new_tokens: 512 });
+  // Article segments are short sentences; a smaller token cap keeps CPU-only
+  // translation quick enough to finish within a request.
+  const out = await pipe(texts, { max_new_tokens: 220 });
   const arr = Array.isArray(out) ? out : [out];
   return arr.map((o) => o.translation_text);
 }

@@ -1,7 +1,7 @@
 // /api/tips — community language-learning tips.
 import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
-import { listTips, createTip, updateTip } from '../models/tips.js';
+import { listTips, createTip, updateTip, toggleTipVote, tipVotedIds } from '../models/tips.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -10,7 +10,17 @@ const router = Router();
 router.get('/', (req, res) => {
   const language = getLanguageByCode(req.query.lang);
   if (!language) return res.status(404).json({ error: 'unknown language' });
-  res.json({ tips: listTips(language.id) });
+  const tips = listTips(language.id);
+  if (req.user) {
+    const voted = tipVotedIds(req.user.id, tips.map((t) => t.id));
+    for (const t of tips) t.voted = voted.has(t.id);
+  }
+  res.json({ tips });
+});
+
+// POST /api/tips/:id/vote — toggle the current user's upvote.
+router.post('/:id(\\d+)/vote', requireAuth, (req, res) => {
+  res.json(toggleTipVote(Number(req.params.id), req.user.id));
 });
 
 // POST /api/tips  { languageCode, bodyLanguageCode?, title, body }
