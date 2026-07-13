@@ -74,25 +74,34 @@ export function unpredictableGenderNouns(languageId, threshold = 1, limit = 500)
   for (const [ending, counts] of buckets) predictedFor.set(ending, majority(counts).key);
 
   const ARTICLE = { m: 'der', f: 'die', n: 'das' };
-  // Inflectional suffixes; a form is treated as a duplicate of an already-listed
-  // noun only when stripping one of these yields a stem we've already added — so
-  // "Hause"→"Haus", "Kinder"→"Kind", "Jahren"→"Jahr" collapse to the singular,
-  // without ever merging two genuinely different nouns.
-  const SUFFIXES = ['nen', 'ern', 'en', 'er', 'e', 'n', 's'];
-  const seen = new Set();      // lowercased keys already emitted
+  // Collapse a noun's inflected forms onto one lemma by stripping a plural/case
+  // suffix to a shared stem ("Haus"/"Hause"→haus, "Kind"/"Kinder"→kind,
+  // "Jahr"/"Jahre"/"Jahren"→jahr). We deliberately DON'T strip -s (it's a root
+  // letter in Haus, Glas, Bus, not a plural marker in German). Among the forms
+  // of one lemma we keep the SHORTEST — i.e. the nominative singular, which also
+  // carries the correct gender ("das Kind", not the plural "das Kinder").
+  const stemOf = (fl) => {
+    for (const suf of ['nen', 'ern', 'en', 'er', 'e', 'n']) {
+      if (fl.length - suf.length >= 3 && fl.endsWith(suf)) return fl.slice(0, -suf.length);
+    }
+    return fl;
+  };
+  const byStem = new Map(); // stem -> index in out
   const out = [];
   for (const { lc, gender, form, meaning } of rows) {
     const ending = ENDINGS.find((e) => lc.length > e.length && lc.endsWith(e));
     if (ending && predictedFor.get(ending) === gender) continue; // rule already right
     const fl = form.toLowerCase();
-    if (seen.has(fl)) continue;
-    const inflectionOfSeen = SUFFIXES.some(
-      (suf) => fl.length - suf.length >= 3 && fl.endsWith(suf) && seen.has(fl.slice(0, -suf.length))
-    );
-    if (inflectionOfSeen) continue;
-    seen.add(fl);
-    out.push({ word: form, gender, article: ARTICLE[gender] || '', meaning: meaning || '' });
-    if (out.length >= limit) break;
+    const stem = stemOf(fl);
+    const card = { word: form, gender, article: ARTICLE[gender] || '', meaning: meaning || '' };
+    if (byStem.has(stem)) {
+      const idx = byStem.get(stem);
+      if (form.length < out[idx].word.length) out[idx] = card; // prefer the singular
+      continue;
+    }
+    if (out.length >= limit) continue; // keep collecting replacements, no new lemmas
+    byStem.set(stem, out.length);
+    out.push(card);
   }
   return out;
 }
