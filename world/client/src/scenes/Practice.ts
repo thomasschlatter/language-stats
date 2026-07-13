@@ -26,6 +26,33 @@ export default class Practice extends Phaser.Scene {
   private hudText!: Phaser.GameObjects.Text
   private info!: Phaser.GameObjects.Text
 
+  // Short synthesized tones (no audio assets to load). Rising blip = correct,
+  // low buzz = wrong. Uses Phaser's WebAudio context so it respects mute/autoplay.
+  private beep(kind: 'correct' | 'wrong') {
+    const mgr = this.sound as any
+    const ctx: AudioContext | undefined = mgr?.context
+    if (!ctx || ctx.state === 'suspended') return
+    const now = ctx.currentTime
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.18, now + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22)
+    if (kind === 'correct') {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(660, now)
+      osc.frequency.setValueAtTime(990, now + 0.09)
+    } else {
+      osc.type = 'square'
+      osc.frequency.setValueAtTime(200, now)
+      osc.frequency.exponentialRampToValueAtTime(110, now + 0.2)
+    }
+    osc.start(now)
+    osc.stop(now + 0.24)
+  }
+
   constructor() { super('practice') }
 
   init(data: { lang?: string }) {
@@ -158,10 +185,12 @@ export default class Practice extends Phaser.Scene {
       this.score += 1 + bonus
       zone.rect.setFillStyle(0x2e7d32, 0.95)
       this.info.setText(this.streak >= 2 ? `✅  Correct!   🔥 ${this.streak} streak` : '✅  Correct!')
+      this.beep('correct')
     } else {
       this.streak = 0
       this.lives -= 1
       zone.rect.setFillStyle(0x8e2f2f, 0.95)
+      this.beep('wrong')
       const right = this.zones.find((z) => z.choice === item.answer)
       if (right) right.rect.setFillStyle(0x2e7d32, 0.95)
       this.info.setText(`❌  It was:  ${item.answer}`)
@@ -213,7 +242,7 @@ export default class Practice extends Phaser.Scene {
     else if (vx > 0) { this.facing = 'right'; this.player.anims.play('adam_run_right', true) }
     else if (vy < 0) { this.facing = 'up'; this.player.anims.play('adam_run_up', true) }
     else if (vy > 0) { this.facing = 'down'; this.player.anims.play('adam_run_down', true) }
-    else this.player.anims.play('adam_idle_down', true)
+    else this.player.anims.play(`adam_idle_${this.facing}`, true) // idle facing the last-moved direction
 
     if (!this.busy && this.zones.length && Phaser.Input.Keyboard.JustDown(this.keySpace)) this.fire()
 
