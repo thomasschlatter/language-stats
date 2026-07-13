@@ -100,27 +100,38 @@ router.post('/:id(\\d+)/translate', requireAuth, async (req, res) => {
   const toBase = target.lang;
   if (fromBase === toBase) return res.status(400).json({ error: 'the card is already written in that language' });
 
-  // Collect translatable segments; protect {{…}} tokens behind placeholders.
+  // Split text into verbatim {{…}} tokens and translatable runs, translating
+  // ONLY the text between tokens (translation models mangle placeholder tokens,
+  // so we never feed them the tokens). Runs without any letters (pure
+  // punctuation like " — ") are kept verbatim too.
   const jobs = [];
-  const protect = (text) => {
-    const tokens = [];
-    const masked = text.replace(/\{\{[^}]*\}\}/g, (tok) => { tokens.push(tok); return ` TK${tokens.length - 1}TK `; });
-    return { idx: (jobs.push(masked) - 1), tokens };
+  const hasLetter = (s) => /\p{L}/u.test(s);
+  const toParts = (str) => {
+    const parts = [];
+    const re = /\{\{[^}]*\}\}/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(str))) {
+      if (m.index > last) parts.push({ text: str.slice(last, m.index) });
+      parts.push({ lit: m[0] });
+      last = m.index + m[0].length;
+    }
+    if (last < str.length) parts.push({ text: str.slice(last) });
+    for (const p of parts) if (p.text !== undefined && hasLetter(p.text)) p.idx = jobs.push(p.text) - 1;
+    return parts;
   };
-  const restore = (translated, tokens) =>
-    String(translated).replace(/TK\s*(\d+)\s*TK/g, (_, i) => tokens[Number(i)] ?? '');
 
-  const titleJob = protect(src.title);
-  const summaryJob = src.summary ? protect(src.summary) : null;
+  const titleParts = toParts(src.title);
+  const summaryParts = src.summary ? toParts(src.summary) : null;
 
-  const plan = []; // { literal } | { prefix, job }
+  const plan = []; // { literal } | { prefix, parts }
   for (const line of String(src.body).replace(/\r\n/g, '\n').split('\n')) {
     if (line.trim() === '' || /^\[[a-z-]+\]$/.test(line.trim())) { plan.push({ literal: line }); continue; }
     const m = line.match(/^(\s*(?:#+\s+|[-*]\s+|\d+[.)]\s+))?(.*)$/);
     const prefix = m[1] || '';
     const rest = m[2] || '';
     if (!rest.trim()) { plan.push({ literal: line }); continue; }
-    plan.push({ prefix, job: protect(rest) });
+    plan.push({ prefix, parts: toParts(rest) });
   }
 
   let translations;
@@ -132,10 +143,11 @@ router.post('/:id(\\d+)/translate', requireAuth, async (req, res) => {
   // Simplified → Traditional when the target is a Traditional Chinese locale.
   if (toBase === 'zh') translations = toChineseVariant(translations, target.code);
 
-  const done = (job) => restore(translations[job.idx], job.tokens);
-  const title = done(titleJob);
-  const summary = summaryJob ? done(summaryJob) : undefined;
-  const body = plan.map((p) => (p.literal !== undefined ? p.literal : p.prefix + done(p.job))).join('\n');
+  const assemble = (parts) =>
+    parts.map((p) => (p.lit !== undefined ? p.lit : p.idx !== undefined ? translations[p.idx] : p.text)).join('');
+  const title = assemble(titleParts);
+  const summary = summaryParts ? assemble(summaryParts) : undefined;
+  const body = plan.map((p) => (p.literal !== undefined ? p.literal : p.prefix + assemble(p.parts))).join('\n');
 
   let slug = `${src.slug}-${toBase}`;
   let n = 2;
