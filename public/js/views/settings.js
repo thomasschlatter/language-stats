@@ -76,7 +76,7 @@ export async function renderSettings() {
   // Character
   view.append(section('Your character', [
     el('div', { class: 'row', style: 'gap:1rem; align-items:center' }, [
-      avatarFor(prof.avatar, prof.username, 64),
+      avatarFor(prof.avatar, prof.username, 64, prof.avatar_image),
       el('button', { class: 'btn small', onclick: () => openCharacterCreator(prof.avatar, () => renderSettings()) },
         prof.avatar ? 'Edit character' : 'Create character'),
     ]),

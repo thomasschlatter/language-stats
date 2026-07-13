@@ -83,7 +83,9 @@ app.use('/api', (_req, res) => res.status(404).json({ error: 'not found' }));
 // --- Uploads (user avatar photos) ------------------------------------------
 // Served from the persistent data dir so they survive redeploys.
 const uploadsDir = join(process.env.DATA_DIR || join(__dirname, '..', 'data'), 'uploads');
-app.use('/uploads', express.static(uploadsDir, { maxAge: '1h' }));
+app.use('/uploads', express.static(uploadsDir, { maxAge: '1h', fallthrough: false }));
+// A missing upload should 404, not fall through to the SPA HTML.
+app.use('/uploads', (_req, res) => res.status(404).end());
 
 // --- Frontend --------------------------------------------------------------
 const publicDir = join(__dirname, '..', 'public');

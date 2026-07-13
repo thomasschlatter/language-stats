@@ -2,7 +2,7 @@
 import db from '../db/index.js';
 
 const MSG_COLS = `m.id, m.body, m.created_at,
-                  su.username AS sender, su.avatar AS sender_avatar,
+                  su.username AS sender, su.avatar AS sender_avatar, su.avatar_image AS sender_avatar_image,
                   ru.username AS recipient,
                   bl.code AS body_lang`;
 
@@ -57,10 +57,10 @@ export function conversations(userId) {
 
   return partners.map((p) => {
     const last = parseAvatar(db.prepare(`SELECT ${MSG_COLS} ${MSG_FROM} WHERE m.id = ?`).get(p.last_id));
-    const partner = db.prepare('SELECT username, avatar FROM users WHERE id = ?').get(p.partner_id);
+    const partner = db.prepare('SELECT username, avatar, avatar_image FROM users WHERE id = ?').get(p.partner_id);
     let partnerAvatar = null;
     try { partnerAvatar = partner?.avatar ? JSON.parse(partner.avatar) : null; } catch { partnerAvatar = null; }
-    return { partner: partner?.username, partner_avatar: partnerAvatar, last };
+    return { partner: partner?.username, partner_avatar: partnerAvatar, partner_avatar_image: partner?.avatar_image || null, last };
   });
 }
 

@@ -37,7 +37,7 @@ export async function renderMessages() {
     list.append(
       el('a', { class: 'card convo', href: `#/dm/${encodeURIComponent(c.partner)}` }, [
         el('div', { class: 'convo-top' }, [
-          avatarFor(c.partner_avatar, c.partner, 36),
+          avatarFor(c.partner_avatar, c.partner, 36, c.partner_avatar_image),
           el('strong', {}, `@${c.partner}`),
         ]),
         el('div', { class: 'muted convo-preview' }, preview),

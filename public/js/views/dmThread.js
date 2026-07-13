@@ -106,7 +106,7 @@ function messageEl(m) {
   const wrap = el('div', { class: 'chat-msg-main' });
 
   row.append(
-    el('a', { class: 'chat-avatar-link', href: `#/u/${encodeURIComponent(m.sender)}` }, avatarFor(m.sender_avatar, m.sender, 32)),
+    el('a', { class: 'chat-avatar-link', href: `#/u/${encodeURIComponent(m.sender)}` }, avatarFor(m.sender_avatar, m.sender, 32, m.sender_avatar_image)),
     wrap
   );
 
