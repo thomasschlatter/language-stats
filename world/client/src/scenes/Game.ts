@@ -493,6 +493,47 @@ export default class Game extends Phaser.Scene {
       }
     }
 
+    // --- grassy effect: swaying grass tufts sprinkled over the open meadow ---
+    // These are lightweight decorative sprites (not tiles) so each can rock back
+    // and forth. The sway delay is keyed to the tile position, so neighbouring
+    // tufts lean together and a gentle "wind gust" ripples across the field.
+    // (Tuft frames are the grass-blade tiles from the sheet; 173 cols → col/row.)
+    const GRASS_TUFTS: Array<[number, number]> = [[57, 6], [137, 19], [119, 20], [120, 20]]
+    GRASS_TUFTS.forEach(([c, r], i) => buildObjTex(`grass_tuft_${i}`, c, r, 1, 1))
+    const tuftKeys = GRASS_TUFTS.map((_, i) => `grass_tuft_${i}`)
+    const tuftCells = new Set<number>()
+    let tuftCount = 0
+    let tuftTries = 0
+    while (tuftCount < 170 && tuftTries++ < 4000) {
+      const x = 1 + Math.floor(rng() * (W - 2))
+      const y = 1 + Math.floor(rng() * (H - 2))
+      if (!isGrass(x, y) || used[y][x]) continue // skip water, props, tree footprints
+      const cell = y * W + x
+      if (tuftCells.has(cell)) continue // one tuft per tile
+      tuftCells.add(cell)
+      // jitter the sprite within its tile so tufts don't sit on a rigid grid
+      const px = x * 32 + 6 + Math.floor(rng() * 20)
+      const py = y * 32 + 30
+      const tuft = this.add
+        .image(px, py, tuftKeys[Math.floor(rng() * tuftKeys.length)])
+        .setOrigin(0.5, 1) // pivot at the base so it sways like a rooted blade
+        .setScale(0.85 + rng() * 0.45)
+        .setDepth(py - 2) // sort by foot, just like the player/trees
+      const amp = 3 + rng() * 5 // degrees of lean
+      const dir = rng() < 0.5 ? 1 : -1
+      tuft.setAngle(-amp * dir)
+      this.tweens.add({
+        targets: tuft,
+        angle: amp * dir,
+        duration: 1400 + Math.floor(rng() * 1400),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.InOut',
+        delay: ((x + y) % 8) * 140 + Math.floor(rng() * 260), // wind-wave sweep
+      })
+      tuftCount++
+    }
+
     // tree trunks + chunky objects stop the player; ground detail is walkable
     deco.setCollision([TREE_TRUNK, ...OBJ_SOLID])
 
