@@ -184,7 +184,8 @@ body:not(.authed) .auth-only { display: none !important; }
 .sidebar-title:hover { color: var(--text); }
 .sidebar-title .caret { transition: transform 0.12s; }
 .sidebar-title.collapsed .caret { transform: rotate(-90deg); }
-.language-list { display: flex; flex-direction: row; align-items: center; gap: 0.4rem; }
+/* Horizontal padding keeps the first/last pill clear of the viewport fade mask. */
+.language-list { display: flex; flex-direction: row; align-items: center; gap: 0.4rem; padding: 2px 14px; }
 .language-list a {
   display: block;
   padding: 0.3rem 0.7rem;
@@ -225,21 +226,35 @@ body:not(.authed) .auth-only { display: none !important; }
 .lang-add:hover { border-color: var(--accent); color: var(--text); }
 
 /* Language picker modal */
-.lang-picker { max-width: 460px; }
+.lang-picker { width: 100%; }
 .lang-picker-list {
-  display: flex; flex-direction: column; gap: 6px;
-  max-height: 50vh; overflow-y: auto; margin: 0.6rem 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  max-height: 50vh;
+  overflow-y: auto;
+  margin: 0.6rem 0;
 }
+.lang-picker-list > p { grid-column: 1 / -1; }
 .lang-picker-item {
-  display: flex; justify-content: space-between; align-items: center;
-  width: 100%; text-align: left; background: var(--surface-2);
+  display: flex; justify-content: space-between; align-items: center; gap: 0.4rem;
+  width: 100%; box-sizing: border-box; text-align: left; background: var(--surface-2);
   border: 1px solid var(--border); border-radius: 8px;
-  padding: 0.5rem 0.75rem; cursor: pointer; color: var(--text); font: inherit;
+  padding: 0.45rem 0.6rem; cursor: pointer; color: var(--text); font: inherit; font-size: 0.9rem;
 }
 .lang-picker-item:hover { border-color: var(--accent); color: var(--accent); }
 .lang-picker-custom {
-  background: none; border: none; color: var(--accent);
+  display: block; background: none; border: none; color: var(--accent);
   cursor: pointer; font: inherit; padding: 0.4rem 0;
+}
+@media (max-width: 480px) { .lang-picker-list { grid-template-columns: 1fr; } }
+
+/* Progress: note shown when a language has no frequency data */
+.coverage-note {
+  margin-top: 1rem; padding: 0.75rem 1rem;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent); border-radius: 8px;
+  font-size: 0.9rem;
 }
 
 /* Tips read as a comfortable column, not the full page width. */

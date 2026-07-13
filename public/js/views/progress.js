@@ -50,6 +50,19 @@ export async function renderProgress(langCode) {
     ])
   );
 
+  // --- explain missing coverage data ---
+  if (!summary.hasFrequency) {
+    body.append(
+      el('div', { class: 'coverage-note' }, [
+        el('strong', {}, 'Conversation-coverage stats aren’t available for this language yet.'),
+        el('p', { style: 'margin:0.35rem 0 0' },
+          `They need a word-frequency list, which is currently only loaded for German. ` +
+          `You can still mark ${language.name} words as known — the coverage bar and “learn next” ` +
+          `suggestions will switch on once its frequency data is added.`),
+      ])
+    );
+  }
+
   // --- coverage bar with milestones ---
   if (summary.hasFrequency) {
     const pct = summary.coveragePct || 0;
