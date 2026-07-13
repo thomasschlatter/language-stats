@@ -38,7 +38,7 @@ function majority(counts) {
 // ending — no gender-predictive suffix, or an exception to their suffix's
 // majority rule. These are the ones a learner must memorise. Returned most-
 // frequent-first with cased form, gender, article and (if known) a gloss.
-export function unpredictableGenderNouns(languageId, threshold = 1, limit = 500) {
+export function unpredictableGenderNouns(languageId, threshold = 1, limit = Infinity) {
   const total = totalCount(languageId);
   if (!total) return [];
   const target = threshold * total;

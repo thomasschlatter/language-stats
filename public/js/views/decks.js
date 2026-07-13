@@ -47,6 +47,12 @@ export async function renderDecks() {
             d.due > 0
               ? el('a', { class: 'btn small', href: `#/study/${d.id}` }, `Study (${d.due})`)
               : el('span', { class: 'muted', style: 'font-size:0.82rem' }, 'All caught up'),
+            d.total > 0
+              ? el('a', { class: 'btn small secondary', href: `/api/flashcards/decks/${d.id}/export?format=anki`, download: '', title: 'Download as Anki text (.txt)' }, 'Anki')
+              : null,
+            d.total > 0
+              ? el('a', { class: 'btn small secondary', href: `/api/flashcards/decks/${d.id}/export?format=csv`, download: '', title: 'Download as CSV' }, 'CSV')
+              : null,
             el('button', { class: 'btn small secondary', onclick: () => removeDeck(d) }, 'Delete'),
           ]),
         ]),

@@ -44,7 +44,8 @@ router.get('/gender-nouns', (req, res) => {
   if (!totalCount(language.id)) {
     return res.status(404).json({ error: 'no frequency data for this language' });
   }
-  const limit = Math.min(Math.max(Number(req.query.limit) || 500, 1), 1000);
+  // No size cap — the coverage level (t) bounds how many nouns there are.
+  const limit = req.query.limit ? Math.max(Number(req.query.limit), 1) : Infinity;
   const nouns = unpredictableGenderNouns(language.id, parseThreshold(req.query.t), limit);
   res.json({ languageCode: language.code, nouns });
 });

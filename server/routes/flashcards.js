@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
 import {
   createDeck, getDeck, listDecks, deleteDeck,
-  addCards, dueCards, reviewCard, familiarityMap,
+  addCards, dueCards, reviewCard, familiarityMap, listCards,
 } from '../models/flashcards.js';
 import { topWords, totalCount } from '../models/frequency.js';
 import { unpredictableGenderNouns } from '../models/analysis.js';
@@ -116,14 +116,16 @@ router.post('/generate', requireAuth, async (req, res) => {
   res.status(201).json({ deck, added });
 });
 
-// POST /api/flashcards/gender-deck  { languageCode, name? }
+// POST /api/flashcards/gender-deck  { languageCode, t?, name? }
 // Builds a deck of the nouns whose gender can't be guessed from the ending,
 // straight from the live frequency data (front = noun, back = der/die/das + gloss).
+// `t` is the coverage level (0.5 / 0.75 / 0.9 / 0.95 / 1); no size cap.
 router.post('/gender-deck', requireAuth, (req, res) => {
   const { languageCode, name } = req.body ?? {};
   const language = getLanguageByCode(languageCode);
   if (!language) return res.status(404).json({ error: 'unknown language' });
-  const nouns = unpredictableGenderNouns(language.id, 1, 500);
+  const t = (() => { const n = Number(req.body?.t); return Number.isFinite(n) && n > 0 && n <= 1 ? n : 1; })();
+  const nouns = unpredictableGenderNouns(language.id, t);
   if (!nouns.length) return res.status(400).json({ error: 'no gender data for this language' });
 
   const rows = nouns.map((n) => ({
@@ -132,10 +134,36 @@ router.post('/gender-deck', requireAuth, (req, res) => {
   }));
   const deck = createDeck({
     userId: req.user.id, languageId: language.id,
-    name: name?.trim() || `${language.name} noun genders`, source: 'gender',
+    name: name?.trim() || `${language.name} noun genders (${Math.round(t * 100)}%)`, source: 'gender',
   });
   const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows });
   res.status(201).json({ deck, added });
+});
+
+// GET /api/flashcards/decks/:id/export?format=csv|anki  — download a deck.
+router.get('/decks/:id(\\d+)/export', requireAuth, (req, res) => {
+  const deck = getDeck(Number(req.params.id), req.user.id);
+  if (!deck) return res.status(404).json({ error: 'deck not found' });
+  const cards = listCards(deck.id, req.user.id);
+  const safe = (deck.name || 'deck').replace(/[^\w.-]+/g, '_').slice(0, 60) || 'deck';
+
+  let body, type, ext;
+  if (req.query.format === 'csv') {
+    const esc = (s) => `"${String(s ?? '').replace(/"/g, '""')}"`;
+    body = '﻿' + cards.map((c) => `${esc(c.front)},${esc(c.back)}`).join('\r\n') + '\r\n';
+    type = 'text/csv; charset=utf-8';
+    ext = 'csv';
+  } else {
+    // Anki text import: tab-separated front<TAB>back, newlines→<br>.
+    const esc = (s) => String(s ?? '').replace(/\t/g, ' ').replace(/\r?\n/g, '<br>');
+    body = '#separator:tab\n#html:true\n' +
+      cards.map((c) => `${esc(c.front)}\t${esc(c.back)}`).join('\n') + '\n';
+    type = 'text/plain; charset=utf-8';
+    ext = 'txt';
+  }
+  res.setHeader('Content-Type', type);
+  res.setHeader('Content-Disposition', `attachment; filename="${safe}.${ext}"`);
+  res.send(body);
 });
 
 // POST /api/flashcards/import-apkg  { languageCode, name, data (base64) }

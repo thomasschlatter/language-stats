@@ -67,6 +67,13 @@ export function dueCards(userId, deckId, limit = 40) {
     .all(userId, limit);
 }
 
+// All cards in a deck (owner-checked), in insertion order — used for export.
+export function listCards(deckId, userId) {
+  return db
+    .prepare('SELECT front, back FROM cards WHERE deck_id = ? AND user_id = ? ORDER BY id')
+    .all(deckId, userId);
+}
+
 export function getCard(id, userId) {
   return db.prepare('SELECT * FROM cards WHERE id = ? AND user_id = ?').get(id, userId);
 }
