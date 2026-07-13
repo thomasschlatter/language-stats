@@ -5,7 +5,7 @@ import { createCharacterAnims } from '../anims/CharacterAnims'
 // multiplayer worlds and Colyseus). A word from the player's decks appears; walk
 // your character onto the correct meaning and press SPACE. Wrong answers cost a
 // life. Difficulty/word source comes from the app API (the player's decks).
-type QuizItem = { id?: number; front: string; answer: string; choices: string[] }
+type QuizItem = { id?: number; front: string; answer: string; choices: string[]; frontChoices?: string[] }
 
 export default class Practice extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite
@@ -18,6 +18,8 @@ export default class Practice extends Phaser.Scene {
   private streak = 0
   private busy = true
   private listening = false // current question hides the word — answer by ear
+  private reverse = false // current question is recall: meaning shown, pick the word
+  private correctAnswer = '' // the right choice for the current question/mode
   private lang = 'de-DE'
   private facing: 'up' | 'down' | 'left' | 'right' = 'down'
   private shots: { obj: Phaser.GameObjects.Arc; vx: number; vy: number }[] = []
@@ -78,6 +80,9 @@ export default class Practice extends Phaser.Scene {
     this.lives = 3
     this.streak = 0
     this.busy = true
+    this.listening = false
+    this.reverse = false
+    this.correctAnswer = ''
     this.facing = 'down'
     this.shots = []
     this.walls = []
@@ -92,7 +97,7 @@ export default class Practice extends Phaser.Scene {
 
     this.wordText = this.add.text(W / 2, 56, 'Loading…', { fontSize: '40px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5).setDepth(10)
       .setInteractive({ useHandCursor: true })
-    this.wordText.on('pointerdown', () => this.speak(this.items[this.idx]?.front || ''))
+    this.wordText.on('pointerdown', () => { if (!this.reverse) this.speak(this.items[this.idx]?.front || '') })
     this.add.text(W / 2, 104, 'Arrow keys to move · SPACE to shoot · 🔊 tap the word to hear it', { fontSize: '15px', color: '#9fb0d8' }).setOrigin(0.5).setDepth(10)
     this.hudText = this.add.text(16, 16, '', { fontSize: '18px', color: '#ffffff' }).setDepth(10)
     this.info = this.add.text(W / 2, H - 44, '', { fontSize: '20px', color: '#ffd479' }).setOrigin(0.5).setDepth(10)
@@ -170,18 +175,39 @@ export default class Practice extends Phaser.Scene {
     const item = this.items[this.idx]
     const W = this.scale.width
     const H = this.scale.height
-    // ~1 in 3 questions are listening-only (word hidden) when TTS is available —
-    // train the ear, then reveal the spelling on answer.
-    this.listening = !!window.speechSynthesis && this.idx > 0 && Math.random() < 0.34
-    this.wordText.setText(this.listening ? '🔊  Listen…' : item.front)
-    this.speak(item.front) // auto-play pronunciation each new question
+
+    // Pick a question mode (never on the very first question, to ease players in):
+    //  · reverse — show the meaning, pick the word (production recall)
+    //  · listen  — hide the word, answer by ear (listening comprehension)
+    //  · normal  — show the word, pick the meaning (recognition)
+    const canReverse = !!item.frontChoices && item.frontChoices.length >= 4
+    const canListen = !!window.speechSynthesis
+    const r = Math.random()
+    this.reverse = this.idx > 0 && canReverse && r < 0.3
+    this.listening = !this.reverse && this.idx > 0 && canListen && r < 0.6
+
+    let prompt: string
+    let choices: string[]
+    if (this.reverse) {
+      prompt = item.answer // the meaning
+      choices = item.frontChoices!
+      this.correctAnswer = item.front
+    } else {
+      prompt = item.front
+      choices = item.choices
+      this.correctAnswer = item.answer
+    }
+    this.wordText.setText(this.listening ? '🔊  Listen…' : prompt)
+    if (!this.reverse) this.speak(item.front) // auto-play the word (recognition/listening)
+
     const streakTxt = this.streak >= 2 ? `   🔥 ${this.streak}` : ''
-    this.hudText.setText(`Score ${this.score}    ${'♥'.repeat(this.lives)}    ${this.idx + 1}/${this.items.length}${streakTxt}`)
+    const modeTxt = this.reverse ? '   ✎ pick the word' : ''
+    this.hudText.setText(`Score ${this.score}    ${'♥'.repeat(this.lives)}    ${this.idx + 1}/${this.items.length}${streakTxt}${modeTxt}`)
     this.info.setText('')
 
     const bw = Math.min(280, W * 0.42)
     const spots = [[W * 0.26, H * 0.36], [W * 0.74, H * 0.36], [W * 0.26, H * 0.74], [W * 0.74, H * 0.74]]
-    item.choices.forEach((choice, i) => {
+    choices.forEach((choice, i) => {
       const [x, y] = spots[i] || [W / 2, H / 2]
       const rect = this.add.rectangle(x, y, bw, 92, 0x2c3f66, 0.92)
         .setStrokeStyle(2, 0x4a5f8f).setDepth(3)
@@ -199,7 +225,7 @@ export default class Practice extends Phaser.Scene {
     if (this.busy) return
     this.busy = true
     const item = this.items[this.idx]
-    const correct = zone.choice === item.answer
+    const correct = zone.choice === this.correctAnswer
     if (this.listening) this.wordText.setText(item.front) // reveal the spelling
     // Feed the result into the real SRS schedule (correct = "good", wrong = "again").
     if (item.id != null) {
@@ -222,9 +248,9 @@ export default class Practice extends Phaser.Scene {
       this.lives -= 1
       zone.rect.setFillStyle(0x8e2f2f, 0.95)
       this.beep('wrong')
-      const right = this.zones.find((z) => z.choice === item.answer)
+      const right = this.zones.find((z) => z.choice === this.correctAnswer)
       if (right) right.rect.setFillStyle(0x2e7d32, 0.95)
-      this.info.setText(`❌  It was:  ${item.answer}`)
+      this.info.setText(`❌  It was:  ${this.correctAnswer}`)
     }
     this.idx += 1
     this.time.delayedCall(950, () => this.showQuestion())

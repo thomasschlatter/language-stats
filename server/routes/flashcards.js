@@ -158,9 +158,18 @@ router.get('/quiz', requireAuth, (req, res) => {
   }
   const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const backs = [...new Set(pool.map((c) => c.back))];
+  const fronts = [...new Set(pool.map((c) => c.front))];
   const items = pool.slice(0, n).map((c) => {
     const distractors = shuffle(backs.filter((b) => b !== c.back)).slice(0, 3);
-    return { id: c.id, front: c.front, answer: c.back, choices: shuffle([c.back, ...distractors]) };
+    // frontChoices powers the reverse/recall mode (meaning -> pick the word).
+    const frontDistractors = shuffle(fronts.filter((f) => f !== c.front)).slice(0, 3);
+    return {
+      id: c.id,
+      front: c.front,
+      answer: c.back,
+      choices: shuffle([c.back, ...distractors]),
+      frontChoices: shuffle([c.front, ...frontDistractors]),
+    };
   });
   res.json({ items, languageCode: language.code });
 });
