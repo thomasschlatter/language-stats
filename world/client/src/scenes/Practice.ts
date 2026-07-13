@@ -28,7 +28,20 @@ export default class Practice extends Phaser.Scene {
 
   constructor() { super('practice') }
 
-  init(data: { lang?: string }) { this.lang = data?.lang || 'de-DE' }
+  init(data: { lang?: string }) {
+    // Runs on every start AND restart — reset all game state so "Play again" works.
+    this.lang = data?.lang || 'de-DE'
+    this.items = []
+    this.idx = 0
+    this.score = 0
+    this.lives = 3
+    this.streak = 0
+    this.busy = true
+    this.facing = 'down'
+    this.shots = []
+    this.walls = []
+    this.zones = []
+  }
 
   async create() {
     createCharacterAnims(this.anims)
@@ -72,15 +85,17 @@ export default class Practice extends Phaser.Scene {
     this.keySpace = this.input.keyboard.addKey('SPACE')
     this.input.keyboard.addCapture('UP,DOWN,LEFT,RIGHT,SPACE')
 
-    // Use the player's first learning language (falls back to the default).
+    // Use the player's first learning language + scale length to their level.
+    let n = 10
     try {
       const me = await fetch('/api/auth/me', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null))
       const learning = me?.user?.learning
       if (learning && learning.length) this.lang = learning[0]
-    } catch { /* keep default */ }
+      n = ({ a1: 8, a2: 10, b1: 12, b2: 14, c1: 16, c2: 20 } as Record<string, number>)[me?.user?.level] || 10
+    } catch { /* keep defaults */ }
 
     try {
-      const res = await fetch(`/api/flashcards/quiz?lang=${encodeURIComponent(this.lang)}&n=10`, { credentials: 'same-origin' })
+      const res = await fetch(`/api/flashcards/quiz?lang=${encodeURIComponent(this.lang)}&n=${n}`, { credentials: 'same-origin' })
       if (!res.ok) {
         const e = await res.json().catch(() => ({}))
         throw new Error(e.error || 'could not load a quiz')
@@ -166,8 +181,16 @@ export default class Practice extends Phaser.Scene {
     this.clearZones()
     this.wordText.setText(this.lives <= 0 ? 'Out of lives!' : 'Level complete! 🎉')
     this.hudText.setText('')
-    this.info.setText(`Score ${this.score}/${this.items.length}   ·   Esc to exit`)
+    this.info.setText(`Score ${this.score}   ·   ${this.idx}/${this.items.length} answered`)
     this.busy = true
+
+    const W = this.scale.width
+    const H = this.scale.height
+    const again = this.add.text(W / 2, H * 0.56, '↻  Play again', {
+      fontSize: '24px', color: '#ffffff', backgroundColor: '#2e7d32', padding: { x: 20, y: 12 },
+    }).setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true })
+    again.on('pointerdown', () => this.scene.restart())
+    this.input.keyboard.addKey('ENTER').once('down', () => this.scene.restart())
   }
 
   private exit() {
