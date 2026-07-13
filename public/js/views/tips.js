@@ -32,6 +32,24 @@ export async function renderTips(langCode) {
     ])
   );
 
+  // Compact progress strip above the tips (for signed-in learners).
+  if (store.user) {
+    const strip = el('a', { class: 'tips-progress', href: `#/lang/${langCode}/progress` },
+      el('span', { class: 'muted' }, 'Loading your progress…'));
+    view.append(strip);
+    api.progress(langCode)
+      .then(({ summary }) => {
+        clear(strip).append(
+          el('span', {}, [el('strong', {}, String(summary.known)), ' words known']),
+          summary.hasFrequency
+            ? el('span', {}, [el('strong', {}, `${summary.coveragePct || 0}%`), ' of conversation'])
+            : el('span', { class: 'muted' }, 'coverage n/a here'),
+          el('span', { class: 'tips-progress-link' }, 'Full progress →')
+        );
+      })
+      .catch(() => strip.remove());
+  }
+
   const list = el('div', { class: 'tips-list' });
   view.append(list);
   list.append(el('p', { class: 'muted' }, 'Loading…'));
