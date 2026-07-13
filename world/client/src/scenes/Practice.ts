@@ -253,6 +253,7 @@ export default class Practice extends Phaser.Scene {
       this.lives -= 1
       zone.rect.setFillStyle(0x8e2f2f, 0.95)
       this.beep('wrong')
+      this.cameras.main.shake(150, 0.006) // tactile "wrong" feedback
       const right = this.zones.find((z) => z.choice === this.correctAnswer)
       if (right) right.rect.setFillStyle(0x2e7d32, 0.95)
       this.info.setText(`❌  It was:  ${this.correctAnswer}`)
