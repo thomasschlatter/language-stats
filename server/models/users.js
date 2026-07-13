@@ -1,5 +1,6 @@
 // User queries + password hashing helpers.
 import bcrypt from 'bcryptjs';
+import crypto from 'node:crypto';
 import db from '../db/index.js';
 
 export function createUser({ email, username, password }) {
@@ -7,6 +8,26 @@ export function createUser({ email, username, password }) {
   const info = db
     .prepare('INSERT INTO users (email, username, password_hash) VALUES (?, ?, ?)')
     .run(email, username, password_hash);
+  return getUserById(info.lastInsertRowid);
+}
+
+// Find a user by their linked LINE account id.
+export function getUserByLineId(lineId) {
+  return db.prepare('SELECT * FROM users WHERE line_user_id = ?').get(lineId);
+}
+
+// Create a user linked to a LINE account. They sign in via LINE, so the password
+// is a throwaway random value. Username/email are made unique.
+export function createLineUser({ lineId, displayName, email }) {
+  const password_hash = bcrypt.hashSync(crypto.randomBytes(24).toString('hex'), 10);
+  let base = String(displayName || 'user').normalize('NFKD').replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 24);
+  if (base.length < 2) base = 'user';
+  let username = base;
+  while (getUserByUsername(username)) username = `${base}_${crypto.randomBytes(2).toString('hex')}`.slice(0, 30);
+  const mail = email || `line_${lineId}@line.local`;
+  const info = db
+    .prepare('INSERT INTO users (email, username, password_hash, line_user_id) VALUES (?, ?, ?, ?)')
+    .run(mail, username, password_hash, lineId);
   return getUserById(info.lastInsertRowid);
 }
 

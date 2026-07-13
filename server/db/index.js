@@ -27,4 +27,12 @@ db.pragma('foreign_keys = ON');
 const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
+// --- lightweight column migrations (ALTER TABLE has no IF NOT EXISTS) ---
+const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+if (!userCols.includes('line_user_id')) {
+  db.exec('ALTER TABLE users ADD COLUMN line_user_id TEXT');
+}
+// UNIQUE index tolerates many NULLs but keeps LINE ids one-per-account.
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_line_user_id ON users(line_user_id)');
+
 export default db;

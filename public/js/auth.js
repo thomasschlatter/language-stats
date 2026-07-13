@@ -137,5 +137,15 @@ function openAuthModal(mode) {
     ]),
   ].filter(Boolean).forEach((child) => form.append(child));
 
-  const close = openModal(el('div', {}, [title, form]));
+  // Social login: hand off to the server's LINE OAuth flow (full-page redirect).
+  const lineBtn = el('button', {
+    class: 'btn line-btn', type: 'button',
+    onclick: () => { window.location.href = '/api/auth/line'; },
+  }, [el('span', { class: 'line-badge' }, 'LINE'), ' Log in with LINE']);
+
+  const close = openModal(el('div', {}, [
+    title, form,
+    el('div', { class: 'auth-divider' }, 'or'),
+    lineBtn,
+  ]));
 }

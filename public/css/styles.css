@@ -249,6 +249,24 @@ body:not(.authed) .auth-only { display: none !important; }
 }
 @media (max-width: 480px) { .lang-picker-list { grid-template-columns: 1fr; } }
 
+/* LINE Login button + "or" divider in the auth modal */
+.auth-divider {
+  display: flex; align-items: center; gap: 0.6rem;
+  color: var(--muted); font-size: 0.8rem; margin: 1rem 0 0.75rem;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.line-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  background: #06c755; border-color: #06c755; color: #fff; font-weight: 600;
+}
+.line-btn:hover { background: #05b34c; border-color: #05b34c; }
+.line-btn .line-badge {
+  font-weight: 800; font-size: 0.72rem; letter-spacing: 0.02em;
+  background: #fff; color: #06c755; border-radius: 4px; padding: 0.05rem 0.28rem;
+}
+
 /* Top-bar character avatar (replaces the username link) */
 .me-avatar {
   display: inline-flex;

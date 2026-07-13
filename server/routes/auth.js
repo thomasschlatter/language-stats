@@ -1,9 +1,12 @@
-// /api/auth — sign up, sign in, sign out, current user.
+// /api/auth — sign up, sign in, sign out, current user, LINE Login.
 import { Router } from 'express';
+import crypto from 'node:crypto';
 import {
   createUser,
   getUserByEmail,
   getUserById,
+  getUserByLineId,
+  createLineUser,
   verifyPassword,
   changePassword,
   deleteUser,
@@ -13,6 +16,82 @@ import { issueToken, clearToken, requireAuth } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rateLimit.js';
 
 const router = Router();
+
+// ---- LINE Login (OAuth 2.0 / OpenID Connect v2.1, web) --------------------
+const LINE_AUTH_URL = 'https://access.line.me/oauth2/v2.1/authorize';
+const LINE_TOKEN_URL = 'https://api.line.me/oauth2/v2.1/token';
+const LINE_PROFILE_URL = 'https://api.line.me/v2/profile';
+const isProd = () => process.env.NODE_ENV === 'production';
+
+function lineRedirectUri(req) {
+  return process.env.LINE_REDIRECT_URI
+    || `${req.protocol}://${req.get('host')}/api/auth/line/callback`;
+}
+
+// GET /api/auth/line — kick off the LINE login flow.
+router.get('/line', (req, res) => {
+  const channelId = process.env.LINE_CHANNEL_ID;
+  if (!channelId) return res.status(503).send('LINE login is not configured.');
+  const state = crypto.randomBytes(16).toString('hex');
+  res.cookie('line_oauth_state', state, {
+    httpOnly: true, sameSite: 'lax', secure: isProd(), maxAge: 10 * 60 * 1000,
+  });
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: channelId,
+    redirect_uri: lineRedirectUri(req),
+    state,
+    scope: 'profile openid',
+  });
+  res.redirect(`${LINE_AUTH_URL}?${params.toString()}`);
+});
+
+// GET /api/auth/line/callback — LINE redirects back here with a code.
+router.get('/line/callback', async (req, res) => {
+  const { code, state, error } = req.query;
+  if (error) return res.redirect('/#/?login=cancelled');
+  if (!code || !state || state !== req.cookies?.line_oauth_state) {
+    return res.status(400).send('Invalid login state — please try again.');
+  }
+  res.clearCookie('line_oauth_state');
+  try {
+    const tokenResp = await fetch(LINE_TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: String(code),
+        redirect_uri: lineRedirectUri(req),
+        client_id: process.env.LINE_CHANNEL_ID,
+        client_secret: process.env.LINE_CHANNEL_SECRET,
+      }),
+    });
+    const tok = await tokenResp.json();
+    if (!tok.access_token) throw new Error(tok.error_description || 'token exchange failed');
+
+    const profResp = await fetch(LINE_PROFILE_URL, {
+      headers: { Authorization: `Bearer ${tok.access_token}` },
+    });
+    const prof = await profResp.json();
+    if (!prof.userId) throw new Error('could not fetch LINE profile');
+
+    // Email only comes through the id_token (email scope + approval); optional.
+    let email = null;
+    if (tok.id_token) {
+      try {
+        const payload = JSON.parse(Buffer.from(tok.id_token.split('.')[1], 'base64').toString('utf8'));
+        email = payload.email || null;
+      } catch { /* ignore */ }
+    }
+
+    let user = getUserByLineId(prof.userId);
+    if (!user) user = createLineUser({ lineId: prof.userId, displayName: prof.displayName, email });
+    issueToken(res, user);
+    res.redirect('/#/');
+  } catch {
+    res.redirect('/#/?login=failed');
+  }
+});
 
 // POST /api/auth/signup
 router.post('/signup', rateLimit({ max: 8 }), (req, res) => {
