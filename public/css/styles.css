@@ -333,6 +333,11 @@ body:not(.authed) .auth-only { display: none !important; }
 .list-deck-status.err { color: var(--danger); }
 .list-deck-link { font-weight: 600; white-space: nowrap; }
 
+/* [gender-nouns] preview list */
+.gender-noun-list { column-count: 2; column-gap: 1.5rem; margin-bottom: 0.4rem; }
+.gender-noun-list li { break-inside: avoid; }
+@media (max-width: 680px) { .gender-noun-list { column-count: 1; } }
+
 /* ---- Coverage widget ---- */
 .coverage {
   background: var(--surface);

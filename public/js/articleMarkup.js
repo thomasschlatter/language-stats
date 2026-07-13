@@ -49,6 +49,11 @@ export function parseArticle(src, defaultLang) {
       blocks.push(el('div', { class: 'gender-mount' }));
       continue;
     }
+    if (line === '[gender-nouns]') {
+      flushPara(); flushList();
+      blocks.push(el('div', { class: 'gender-nouns-mount' }));
+      continue;
+    }
     if (line.startsWith('# ')) {
       flushPara(); flushList();
       blocks.push(el('h2', { class: 'article-h' }, inline(line.slice(2))));

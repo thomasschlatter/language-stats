@@ -34,6 +34,54 @@ function majority(counts) {
   return { key: best, n: bestN, total };
 }
 
+// The nouns in the coverage set whose gender CANNOT be guessed from their
+// ending — no gender-predictive suffix, or an exception to their suffix's
+// majority rule. These are the ones a learner must memorise. Returned most-
+// frequent-first with cased form, gender, article and (if known) a gloss.
+export function unpredictableGenderNouns(languageId, threshold = 1, limit = 500) {
+  const total = totalCount(languageId);
+  if (!total) return [];
+  const target = threshold * total;
+
+  const rows = db
+    .prepare(
+      `SELECT f.word AS lc, l.gender AS gender, COALESCE(l.form, f.word) AS form,
+              (SELECT w.meaning FROM words w
+                 WHERE w.language_id = f.language_id AND lower(w.text) = f.word
+                   AND w.meaning IS NOT NULL AND w.meaning <> '' LIMIT 1) AS meaning
+         FROM word_frequencies f
+         JOIN lexicon l ON l.language_id = f.language_id AND l.word_lc = f.word
+        WHERE f.language_id = ? AND (f.cum - f.count) < ?
+          AND l.pos = 'NOUN' AND l.gender IS NOT NULL
+        ORDER BY f.count DESC`
+    )
+    .all(languageId, target);
+
+  // Majority gender per ending, over every gendered noun in the set.
+  const buckets = new Map();
+  for (const { lc, gender } of rows) {
+    const ending = ENDINGS.find((e) => lc.length > e.length && lc.endsWith(e));
+    if (!ending) continue;
+    if (!buckets.has(ending)) buckets.set(ending, { m: 0, f: 0, n: 0 });
+    buckets.get(ending)[gender] += 1;
+  }
+  const predictedFor = new Map();
+  for (const [ending, counts] of buckets) predictedFor.set(ending, majority(counts).key);
+
+  const ARTICLE = { m: 'der', f: 'die', n: 'das' };
+  const seen = new Set();
+  const out = [];
+  for (const { lc, gender, form, meaning } of rows) {
+    const ending = ENDINGS.find((e) => lc.length > e.length && lc.endsWith(e));
+    if (ending && predictedFor.get(ending) === gender) continue; // rule already right
+    if (seen.has(lc)) continue;
+    seen.add(lc);
+    out.push({ word: form, gender, article: ARTICLE[gender] || '', meaning: meaning || '' });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
 export function coverageAnalysis(languageId, threshold) {
   const total = totalCount(languageId);
   if (!total) return null;

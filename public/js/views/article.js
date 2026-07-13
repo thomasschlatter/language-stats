@@ -8,6 +8,7 @@ import { tokenizeTree } from '../render.js';
 import { parseArticle } from '../articleMarkup.js';
 import { coverageWidget } from './coverageWidget.js';
 import { genderStatsWidget } from './genderStatsWidget.js';
+import { genderNounsWidget } from './genderNounsWidget.js';
 import { voteButton } from './voteButton.js';
 import { attachDeckButtons } from './listToDeck.js';
 
@@ -47,6 +48,9 @@ export async function renderArticle(id) {
   }
   for (const mount of container.querySelectorAll('.gender-mount')) {
     mount.append(genderStatsWidget(article.language_code));
+  }
+  for (const mount of container.querySelectorAll('.gender-nouns-mount')) {
+    mount.append(genderNounsWidget(article.language_code));
   }
 
   // Let the reader turn any list in the article into a flashcard deck.

@@ -6,6 +6,7 @@ import {
   addCards, dueCards, reviewCard, familiarityMap,
 } from '../models/flashcards.js';
 import { topWords, totalCount } from '../models/frequency.js';
+import { unpredictableGenderNouns } from '../models/analysis.js';
 import { aiTranslate } from '../models/aiTranslate.js';
 import { parseApkg } from '../lib/anki.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -110,6 +111,28 @@ router.post('/generate', requireAuth, async (req, res) => {
   const deck = createDeck({
     userId: req.user.id, languageId: language.id,
     name: name?.trim() || `Top ${n} ${language.name} words`, source: 'ai',
+  });
+  const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows });
+  res.status(201).json({ deck, added });
+});
+
+// POST /api/flashcards/gender-deck  { languageCode, name? }
+// Builds a deck of the nouns whose gender can't be guessed from the ending,
+// straight from the live frequency data (front = noun, back = der/die/das + gloss).
+router.post('/gender-deck', requireAuth, (req, res) => {
+  const { languageCode, name } = req.body ?? {};
+  const language = getLanguageByCode(languageCode);
+  if (!language) return res.status(404).json({ error: 'unknown language' });
+  const nouns = unpredictableGenderNouns(language.id, 1, 500);
+  if (!nouns.length) return res.status(400).json({ error: 'no gender data for this language' });
+
+  const rows = nouns.map((n) => ({
+    front: n.word,
+    back: `${n.article}${n.meaning ? ` (${n.meaning})` : ''}`.trim(),
+  }));
+  const deck = createDeck({
+    userId: req.user.id, languageId: language.id,
+    name: name?.trim() || `${language.name} noun genders`, source: 'gender',
   });
   const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows });
   res.status(201).json({ deck, added });

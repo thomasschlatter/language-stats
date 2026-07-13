@@ -68,6 +68,7 @@ export const api = {
   // --- frequency coverage (% of conversation) ---
   coverage: (lang, t) => request('GET', `/frequency/coverage?lang=${encodeURIComponent(lang)}&t=${t}`),
   analysis: (lang, t) => request('GET', `/frequency/analysis?lang=${encodeURIComponent(lang)}&t=${t}`),
+  genderNouns: (lang, t = 1, limit = 500) => request('GET', `/frequency/gender-nouns?lang=${encodeURIComponent(lang)}&t=${t}&limit=${limit}`),
 
   // --- chat ---
   messages: (lang, since = 0) =>
@@ -117,6 +118,7 @@ export const api = {
   importDeck: (b) => request('POST', '/flashcards/import', b),
   importApkg: (b) => request('POST', '/flashcards/import-apkg', b),
   generateDeck: (b) => request('POST', '/flashcards/generate', b),
+  genderDeck: (b) => request('POST', '/flashcards/gender-deck', b),
   study: (deckId) => request('GET', `/flashcards/study${deckId ? `?deck=${deckId}` : ''}`),
   review: (b) => request('POST', '/flashcards/review', b),
   familiarity: (lang) => request('GET', `/flashcards/familiarity?lang=${encodeURIComponent(lang)}`),
