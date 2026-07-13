@@ -7,6 +7,7 @@ import { el, clear, openModal } from './dom.js';
 import { tokenizeTree } from './render.js';
 import { loadCurrentUser, renderAuthArea } from './auth.js';
 import { startRouter } from './router.js';
+import { byImportance } from './langOrder.js';
 import { guardSingleInstance } from './singleInstance.js';
 
 // Make the persistent chrome (language bar, top-bar labels) clickable too.
@@ -70,23 +71,6 @@ function setupLangCarousel() {
   view.addEventListener('scroll', update, { passive: true });
   window.addEventListener('resize', update);
   update();
-}
-
-// Rough global importance (by number of speakers) for the base language, so the
-// long tail of not-yet-learned languages leads with the major ones; anything
-// unranked falls back to alphabetical by name.
-const LANG_IMPORTANCE = [
-  'en', 'zh', 'hi', 'es', 'ar', 'fr', 'bn', 'pt', 'ru', 'ur', 'id', 'de', 'ja',
-  'sw', 'tr', 'ta', 'vi', 'ko', 'it', 'fa', 'pl', 'uk', 'th', 'nl', 'ms', 'ro',
-  'el', 'cs', 'sv', 'hu', 'he', 'da', 'fi', 'sk', 'nb', 'no', 'hr', 'bg', 'sr',
-  'ca', 'lt', 'sl', 'lv', 'et', 'ga', 'is', 'af', 'tl',
-];
-function langImportance(lang) {
-  const i = LANG_IMPORTANCE.indexOf(lang.lang);
-  return i < 0 ? LANG_IMPORTANCE.length : i;
-}
-function byImportance(a, b) {
-  return langImportance(a) - langImportance(b) || a.name.localeCompare(b.name);
 }
 
 function renderSidebar() {

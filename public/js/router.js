@@ -8,6 +8,7 @@
 
 import { store } from './store.js';
 import { el, clear } from './dom.js';
+import { byImportance } from './langOrder.js';
 import { signInPrompt } from './auth.js';
 import { renderArticles } from './views/articles.js';
 import { renderArticle } from './views/article.js';
@@ -58,10 +59,16 @@ export function startRouter() {
 function render() {
   const hash = window.location.hash || '#/';
 
-  // Default route -> first available language's reader.
+  // Default route -> a language you're learning (never your native language),
+  // preferred over the alphabetically-first catalogue entry.
   if (hash === '#/' || hash === '') {
-    const first = store.languages[0];
-    if (first) return navigate(`#/lang/${encodeURIComponent(first.code)}`);
+    const learning = store.languages
+      .filter((l) => store.isLearning(l.code) && l.code !== store.nativeLang)
+      .sort(byImportance);
+    const target = learning[0]
+      || store.languages.find((l) => l.code !== store.nativeLang)
+      || store.languages[0];
+    if (target) return navigate(`#/lang/${encodeURIComponent(target.code)}`);
   }
 
   for (const { pattern, handler, auth } of routes) {
