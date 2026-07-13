@@ -47,6 +47,7 @@ export async function renderWorld() {
         el('span', { class: 'muted', style: 'margin-left:0.6rem; font-size:0.85rem' }, 'A shared, walkable space. Move with the arrow keys; meet others by video.'),
       ]),
       el('div', { class: 'row', style: 'gap:0.5rem' }, [
+        el('a', { class: 'btn small', href: `${base}${query ? query + '&' : '?'}mode=practice`, target: '_blank', rel: 'noopener' }, '🎯 Word game'),
         el('a', { class: 'btn small secondary', href: src, target: '_blank', rel: 'noopener' }, 'Open in new tab'),
       ]),
     ])
