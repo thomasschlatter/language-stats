@@ -42,26 +42,20 @@ export function findWord(languageId, text) {
     .get(languageId, text);
 }
 
-const ENTRY_SQL =
-  `SELECT w.id, w.language_id, w.text, w.meaning, w.notes, w.scraped_at,
-          l.code AS language_code, l.name AS language_name
-   FROM words w
-   JOIN languages l ON l.id = w.language_id
-   WHERE w.language_id = ? AND w.text = ?`;
-
-// Fetch a single word entry by language + text. Case-sensitive first (so a
-// capitalised noun like "Tisch" keeps its own entry), but if that misses and the
-// word starts with a capital, retry with a lowercased first letter — this
-// resolves a word capitalised only because it began a sentence, e.g. clicking
-// "Schreib" finds the dictionary's "schreib".
+// Fetch a single word entry by language + text (case-SENSITIVE — "US" ≠ "us").
+// Sentence-initial capitalisation is handled client-side (see render.js), which
+// knows a word's position; the server keeps exact matching so a capitalised noun
+// is never conflated with a lowercase homograph.
 export function getEntry(languageId, text) {
-  const stmt = db.prepare(ENTRY_SQL);
-  const exact = stmt.get(languageId, text);
-  if (exact) return exact;
-  if (text && text[0] !== text[0].toLowerCase()) {
-    return stmt.get(languageId, text[0].toLowerCase() + text.slice(1));
-  }
-  return undefined;
+  return db
+    .prepare(
+      `SELECT w.id, w.language_id, w.text, w.meaning, w.notes, w.scraped_at,
+              l.code AS language_code, l.name AS language_name
+       FROM words w
+       JOIN languages l ON l.id = w.language_id
+       WHERE w.language_id = ? AND w.text = ?`
+    )
+    .get(languageId, text);
 }
 
 // Get the word's id, creating a bare entry if it doesn't exist yet.

@@ -27,7 +27,12 @@ export function renderText(text, langCode) {
   for (const m of text.matchAll(WORD_RE)) {
     const start = m.index;
     if (start > last) frag.append(document.createTextNode(text.slice(last, start)));
-    frag.append(wordEl(m[0], langCode));
+    // Is this word at the start of a sentence? (nothing before it, or the last
+    // non-space/quote char is a sentence terminator). Used to decide whether a
+    // leading capital is meaningful (a noun) or just sentence-initial.
+    const before = text.slice(0, start).replace(/[\s"'”’«»()[\]]+$/u, '');
+    const sentenceInitial = before === '' || /[.!?…]$/u.test(before);
+    frag.append(wordEl(m[0], langCode, sentenceInitial));
     last = start + m[0].length;
   }
   if (last < text.length) frag.append(document.createTextNode(text.slice(last)));
@@ -76,7 +81,7 @@ function nearestLang(elm, root) {
 }
 
 // A single clickable, language-tagged word.
-export function wordEl(word, langCode) {
+export function wordEl(word, langCode, sentenceInitial = false) {
   const span = el(
     'span',
     {
@@ -84,7 +89,7 @@ export function wordEl(word, langCode) {
       'data-lang': langCode,
       lang: langCode,
       title: `${word} · ${langCode}`,
-      onclick: () => goToTranslation(word, langCode),
+      onclick: () => goToTranslation(word, langCode, sentenceInitial),
     },
     word
   );
@@ -93,14 +98,24 @@ export function wordEl(word, langCode) {
   return span;
 }
 
-// Resolve a click to the right destination and navigate there.
-async function goToTranslation(word, fromLang) {
+// Resolve a click to the right destination and navigate there. A word that is
+// capitalised only because it starts a sentence is looked up in lowercase first
+// (so "Schreib." → the dictionary's "schreib"), then in its original form;
+// mid-sentence words (incl. capitalised nouns) use their exact form. If neither
+// resolves, we fall back to the original word's own page.
+async function goToTranslation(word, fromLang, sentenceInitial = false) {
   const native = store.nativeLang;
-  try {
-    const { target } = await api.resolve(word, fromLang, native);
-    navigate(`#/w/${encodeURIComponent(target.languageCode)}/${encodeURIComponent(target.text)}`);
-  } catch {
-    // Fall back to the word's own page if resolution fails.
-    navigate(`#/w/${encodeURIComponent(fromLang)}/${encodeURIComponent(word)}`);
+  const candidates = [];
+  if (sentenceInitial && word[0] !== word[0].toLowerCase()) {
+    candidates.push(word[0].toLowerCase() + word.slice(1));
   }
+  candidates.push(word);
+  for (const w of candidates) {
+    try {
+      const { target } = await api.resolve(w, fromLang, native);
+      navigate(`#/w/${encodeURIComponent(target.languageCode)}/${encodeURIComponent(target.text)}`);
+      return;
+    } catch { /* try the next candidate */ }
+  }
+  navigate(`#/w/${encodeURIComponent(fromLang)}/${encodeURIComponent(word)}`);
 }
