@@ -249,6 +249,20 @@ body:not(.authed) .auth-only { display: none !important; }
 }
 @media (max-width: 480px) { .lang-picker-list { grid-template-columns: 1fr; } }
 
+/* Top-bar character avatar (replaces the username link) */
+.me-avatar {
+  display: inline-flex;
+  width: 34px; height: 34px;
+  border-radius: 50%; overflow: hidden;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.me-avatar:hover { border-color: var(--accent); }
+.me-avatar canvas, .me-avatar .avatar { display: block; width: 100%; height: 100%; }
+/* Native-language setting on the profile page */
+.prof-setting { margin: 0.9rem 0; }
+.prof-setting .native-picker { display: inline-flex; align-items: center; gap: 0.5rem; }
+
 /* Progress: note shown when a language has no frequency data */
 .coverage-note {
   margin-top: 1rem; padding: 0.75rem 1rem;

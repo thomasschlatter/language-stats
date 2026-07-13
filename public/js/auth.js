@@ -4,6 +4,7 @@ import { api } from './api.js';
 import { store } from './store.js';
 import { el, openModal, clear } from './dom.js';
 import { colorModeToggle } from './seen.js';
+import { avatarFor } from './avatar.js';
 
 // Load the current user on startup (if a valid cookie exists).
 export async function loadCurrentUser() {
@@ -16,8 +17,8 @@ export async function loadCurrentUser() {
 }
 
 // A "My native language" picker — clicking any word translates INTO this
-// locale. Lives in the top bar so it's always one glance away.
-function nativeSelector() {
+// locale. Now lives on the profile page.
+export function nativeSelector() {
   const select = el(
     'select',
     { class: 'native-select', title: 'Your native language — words translate into this', onchange: (e) => store.setNative(e.target.value) },
@@ -25,21 +26,22 @@ function nativeSelector() {
       el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)
     )
   );
-  return el('span', { class: 'native-picker' }, [el('span', { class: 'who' }, 'Native:'), select]);
+  return el('span', { class: 'native-picker' }, [el('span', { class: 'who' }, 'Native language:'), select]);
 }
 
-// Render the top-right controls (native picker + auth) based on store.user.
+// Render the top-right controls based on store.user. Kept minimal: signed-in
+// users just see their character (→ profile), where native language, progress
+// and sign-out now live. (Colour mode stays here as a quick display toggle.)
 export function renderAuthArea() {
   // Gate account-only sections (nav links marked .auth-only) on login state.
   document.body.classList.toggle('authed', !!store.user);
   const area = clear(document.getElementById('auth-area'));
-  area.append(nativeSelector());
   if (store.user) {
-    area.append(
-      colorModeToggle(),
-      el('a', { class: 'who', href: `#/u/${encodeURIComponent(store.user.username)}`, title: 'Your profile' }, `@${store.user.username}`),
-      el('button', { class: 'btn secondary small', onclick: doLogout }, 'Sign out')
-    );
+    const link = el('a', {
+      class: 'me-avatar', href: `#/u/${encodeURIComponent(store.user.username)}`,
+      title: `${store.user.username} — your profile`,
+    }, avatarFor(store.user.avatar, store.user.username, 34));
+    area.append(colorModeToggle(), link);
   } else {
     area.append(
       el('button', { class: 'btn secondary small', onclick: () => openAuthModal('login') }, 'Sign in'),
@@ -48,9 +50,11 @@ export function renderAuthArea() {
   }
 }
 
-async function doLogout() {
+// Sign out — moved off the top bar; called from the profile page.
+export async function logout() {
   await api.logout();
   store.set({ user: null });
+  window.location.hash = '#/';
 }
 
 // Open the sign-in modal directly (used by inline prompts).

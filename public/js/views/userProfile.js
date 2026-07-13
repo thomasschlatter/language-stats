@@ -6,6 +6,7 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { avatarFor } from '../avatar.js';
+import { nativeSelector, logout } from '../auth.js';
 import { openCharacterCreator } from './characterCreator.js';
 
 export async function renderUserProfile(username) {
@@ -44,6 +45,7 @@ export async function renderUserProfile(username) {
           ? el('div', { class: 'row' }, [
               el('button', { class: 'btn small', onclick: () => openCharacterCreator(prof.avatar, () => renderUserProfile(prof.username)) }, prof.avatar ? 'Edit character' : 'Create character'),
               el('button', { class: 'btn small secondary', onclick: () => openEdit(prof) }, 'Edit profile'),
+              el('button', { class: 'btn small secondary', onclick: () => logout() }, 'Sign out'),
             ])
           : (store.user
               ? el('div', { class: 'row' }, [
@@ -69,6 +71,11 @@ export async function renderUserProfile(username) {
         : null,
     ])
   );
+
+  // Your reading/translation settings live here now (was the top bar).
+  if (isMe) {
+    view.append(el('div', { class: 'prof-setting' }, nativeSelector()));
+  }
 
   // Word-familiarity rundown (only on your own profile).
   if (isMe) {
