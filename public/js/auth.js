@@ -61,7 +61,7 @@ export function promptSignIn() {
 // One-time getting-started shown right after signup.
 function showWelcome() {
   const close = openModal(el('div', {}, [
-    el('h2', {}, 'Welcome to Language Stats 👋'),
+    el('h2', {}, 'Welcome to Groupifier 👋'),
     el('p', { class: 'muted' }, 'A quick way to get going:'),
     el('ol', { class: 'welcome-steps' }, [
       el('li', {}, 'Set the languages you speak and are learning, and make your character.'),

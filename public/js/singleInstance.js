@@ -40,7 +40,7 @@ export function guardSingleInstance() {
       overlay.innerHTML =
         '<div class="single-card">' +
         '<h1>Already open</h1>' +
-        '<p>Language&nbsp;Stats is already open in another window of this browser. ' +
+        '<p>Groupifier is already open in another window of this browser. ' +
         'Using two at once collides in the World. Switch to that window, or close it and reload here.</p>' +
         '<button id="single-reload" class="btn">Reload this window</button>' +
         '</div>';
