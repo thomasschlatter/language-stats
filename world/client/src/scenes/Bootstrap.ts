@@ -151,11 +151,11 @@ export default class Bootstrap extends Phaser.Scene {
     store.dispatch(setRoomJoined(true))
   }
 
-  // Single-player practice mini-game — no network/Colyseus needed.
+  // Single-player word games hub — no network/Colyseus needed.
   launchPractice() {
     if (!this.preloadComplete) return
     this.scene.stop('background')
-    this.scene.launch('practice', {})
+    this.scene.launch('gamemenu', {})
     store.dispatch(setPracticeMode(true))
   }
 

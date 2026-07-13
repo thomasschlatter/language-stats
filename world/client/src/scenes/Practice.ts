@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { createCharacterAnims } from '../anims/CharacterAnims'
+import { recordResult } from '../game/progress'
 
 // A self-contained, single-player language mini-game (independent of the
 // multiplayer worlds and Colyseus). A word from the player's decks appears; walk
@@ -16,6 +17,7 @@ export default class Practice extends Phaser.Scene {
   private score = 0
   private lives = 3
   private streak = 0
+  private maxStreak = 0 // best streak this run (for level tasks)
   private busy = true
   private listening = false // current question hides the word — answer by ear
   private reverse = false // current question is recall: meaning shown, pick the word
@@ -86,6 +88,7 @@ export default class Practice extends Phaser.Scene {
     this.score = 0
     this.lives = 3
     this.streak = 0
+    this.maxStreak = 0
     this.busy = true
     this.listening = false
     this.reverse = false
@@ -109,7 +112,7 @@ export default class Practice extends Phaser.Scene {
     this.hudText = this.add.text(16, 16, '', { fontSize: '18px', color: '#ffffff' }).setDepth(10)
     this.info = this.add.text(W / 2, H - 44, '', { fontSize: '20px', color: '#ffd479' }).setOrigin(0.5).setDepth(10)
 
-    const exit = this.add.text(W - 16, 16, '✕ Exit', { fontSize: '18px', color: '#9fb0d8' })
+    const exit = this.add.text(W - 16, 16, '✕ Menu', { fontSize: '18px', color: '#9fb0d8' })
       .setOrigin(1, 0).setDepth(10).setInteractive({ useHandCursor: true })
     exit.on('pointerdown', () => this.exit())
     this.input.keyboard.addKey('ESC').on('down', () => this.exit())
@@ -249,6 +252,7 @@ export default class Practice extends Phaser.Scene {
     }
     if (correct) {
       this.streak += 1
+      if (this.streak > this.maxStreak) this.maxStreak = this.streak
       const bonus = Math.floor(this.streak / 3)
       this.score += 1 + bonus
       zone.rect.setFillStyle(0x2e7d32, 0.95)
@@ -290,7 +294,11 @@ export default class Practice extends Phaser.Scene {
 
   private finish() {
     this.clearZones()
-    this.wordText.setText(this.lives <= 0 ? 'Out of lives!' : 'Level complete! 🎉')
+    this.busy = true
+
+    // Report to the level ladder (may advance the current level).
+    const prog = recordResult({ game: 'shooter', score: this.score, bestStreak: this.maxStreak, won: this.lives > 0 })
+    this.wordText.setText(prog.advanced ? `Level ${prog.level!.id} complete! 🎉` : (this.lives <= 0 ? 'Out of lives!' : 'Round complete! 🎉'))
     this.hudText.setText('')
 
     // Persistent per-language best score (localStorage), with a "new best" nod.
@@ -301,20 +309,22 @@ export default class Practice extends Phaser.Scene {
     if (isBest) { try { localStorage.setItem(bestKey, String(this.score)) } catch { /* ignore */ } }
     const bestTxt = isBest ? '🏆 New best!' : `Best ${Math.max(best, this.score)}`
     this.info.setText(`Score ${this.score}   ·   ${this.idx}/${this.items.length} answered   ·   ${bestTxt}`)
-    this.busy = true
 
     const W = this.scale.width
     const H = this.scale.height
-    const again = this.add.text(W / 2, H * 0.56, '↻  Play again', {
+    const again = this.add.text(W / 2, H * 0.54, '↻  Play again', {
       fontSize: '24px', color: '#ffffff', backgroundColor: '#2e7d32', padding: { x: 20, y: 12 },
     }).setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true })
     again.on('pointerdown', () => this.scene.restart())
     this.input.keyboard.addKey('ENTER').once('down', () => this.scene.restart())
+    const menu = this.add.text(W / 2, H * 0.64, '≡  Menu', { fontSize: '20px', color: '#9fb0d8' })
+      .setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true })
+    menu.on('pointerdown', () => this.scene.start('gamemenu'))
   }
 
   private exit() {
-    // Back to the world's room selection.
-    window.location.reload()
+    // Back to the games hub.
+    this.scene.start('gamemenu')
   }
 
   update(_t: number, dt: number) {
