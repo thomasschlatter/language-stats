@@ -132,6 +132,11 @@ export default class Game extends Phaser.Scene {
     this.cameras.main.zoom = 1.2
     this.cameras.main.startFollow(this.myPlayer, true)
     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
+    // Keep players inside the map (belt-and-braces with the walls).
+    this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
+    const clampToWorld = (b: any) => b && b.setCollideWorldBounds && b.setCollideWorldBounds(true)
+    clampToWorld(this.myPlayer.body)
+    clampToWorld((this.myPlayer.playerContainer as any).body)
     for (const c of this.worldColliders)
       this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], c)
 
@@ -178,7 +183,12 @@ export default class Game extends Phaser.Scene {
       if (!ts || !key) continue
       const x = obj.x! + obj.width! * 0.5
       const y = obj.y! - obj.height! * 0.5
-      group.get(x, y, key, obj.gid - ts.firstgid).setDepth(y)
+      const sprite = group.get(x, y, key, obj.gid - ts.firstgid) as Phaser.Physics.Arcade.Sprite
+      sprite.setDepth(y)
+      // Static bodies don't follow a repositioned sprite — recompute the body at
+      // its final spot so the collider actually sits on the tile (else the player
+      // walks straight through the walls).
+      if (collidable && sprite.refreshBody) sprite.refreshBody()
     }
     if (collidable) this.worldColliders.push(group)
   }
@@ -236,8 +246,9 @@ export default class Game extends Phaser.Scene {
 
     this.spawnX = 705
     this.spawnY = 500
-    this.botX = 585
-    this.botY = 500
+    // Foxy just below the spawn, on open floor (not embedded in a wall).
+    this.botX = 705
+    this.botY = 564
   }
 
   // Procedurally generated grass-biome worlds (meadow, village). Seeded by the
