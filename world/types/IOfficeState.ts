@@ -30,4 +30,6 @@ export interface IOfficeState extends Schema {
   computers: MapSchema<IComputer>
   whiteboards: MapSchema<IWhiteboard>
   chatMessages: ArraySchema<IChatMessage>
+  teamScore: number
+  teamGoal: number
 }

@@ -52,6 +52,11 @@ export class OfficeState extends Schema implements IOfficeState {
 
   @type([ChatMessage])
   chatMessages = new ArraySchema<ChatMessage>();
+
+  // Cooperative team task: everyone in the room chips in correct word answers
+  // toward a shared goal (see SCORE_POINT). The goal steps up each time it's met.
+  @type("number") teamScore = 0;
+  @type("number") teamGoal = 30;
 }
 
 export const whiteboardRoomIds = new Set<string>();

@@ -22,6 +22,7 @@ import {
   setAvailableRooms,
   addAvailableRooms,
   removeAvailableRooms,
+  setTeamTask,
 } from "../stores/RoomStore";
 import {
   pushChatMessage,
@@ -143,6 +144,18 @@ export default class Network {
         });
       };
     };
+
+    // Cooperative team task: mirror the shared score/goal into Redux for the HUD.
+    // Guarded so we only dispatch when it actually changes (state patches are frequent).
+    let lastTeamScore = -1;
+    let lastTeamGoal = -1;
+    this.room.onStateChange((state) => {
+      if (state.teamScore !== lastTeamScore || state.teamGoal !== lastTeamGoal) {
+        lastTeamScore = state.teamScore;
+        lastTeamGoal = state.teamGoal;
+        store.dispatch(setTeamTask({ score: state.teamScore, goal: state.teamGoal }));
+      }
+    });
 
     // an instance removed from the players MapSchema
     this.room.state.players.onRemove = (player: IPlayer, key: string) => {
@@ -311,6 +324,11 @@ export default class Network {
   // peers can composite the same character locally.
   updatePlayerAvatar(avatar: string) {
     this.room?.send(Message.UPDATE_PLAYER_AVATAR, { avatar });
+  }
+
+  // chip a correct answer into the room's cooperative team task.
+  sendScorePoint() {
+    this.room?.send(Message.SCORE_POINT);
   }
 
   // method to send ready-to-connect signal to Colyseus server

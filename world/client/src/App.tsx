@@ -12,6 +12,7 @@ import Chat from "./components/Chat";
 import HelperButtonGroup from "./components/HelperButtonGroup";
 import MobileVirtualJoystick from "./components/MobileVirtualJoystick";
 import CharacterCreation from "./components/CharacterCreation";
+import TeamTask from "./components/TeamTask";
 
 const Backdrop = styled.div`
   position: absolute;
@@ -49,6 +50,8 @@ function App() {
         /* Render Chat or VideoConnectionDialog if no dialogs are opened. */
         <>
           <Chat />
+          {/* Cooperative team task banner (shared word goal for the room). */}
+          <TeamTask />
           {/* Render VideoConnectionDialog if user is not connected to a webcam. */}
           {!videoConnected && <VideoConnectionDialog />}
           <MobileVirtualJoystick />

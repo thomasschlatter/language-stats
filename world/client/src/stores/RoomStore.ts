@@ -23,8 +23,14 @@ export const roomSlice = createSlice({
     roomName: "",
     roomDescription: "",
     availableRooms: new Array<RoomAvailable>(),
+    teamScore: 0,
+    teamGoal: 30,
   },
   reducers: {
+    setTeamTask: (state, action: PayloadAction<{ score: number; goal: number }>) => {
+      state.teamScore = action.payload.score;
+      state.teamGoal = action.payload.goal;
+    },
     setLobbyJoined: (state, action: PayloadAction<boolean>) => {
       state.lobbyJoined = action.payload;
     },
@@ -73,6 +79,7 @@ export const {
   setLobbyJoined,
   setRoomJoined,
   setPracticeMode,
+  setTeamTask,
   setJoinedRoomData,
   setAvailableRooms,
   addAvailableRooms,

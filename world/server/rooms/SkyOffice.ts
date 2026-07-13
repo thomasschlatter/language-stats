@@ -208,6 +208,18 @@ export class SkyOffice extends Room<OfficeState> {
       }
     );
 
+    // Cooperative team task: a correct word answer chips in a point. When the
+    // shared goal is met, celebrate and raise the bar for the next round.
+    this.onMessage(Message.SCORE_POINT, (client) => {
+      this.state.teamScore += 1;
+      if (this.state.teamScore >= this.state.teamGoal) {
+        this.broadcast(Message.ADD_BOT_CHAT_MESSAGE, {
+          content: `🎉 Team goal reached — ${this.state.teamGoal} words together! Next goal: ${this.state.teamGoal + 30}.`,
+        });
+        this.state.teamGoal += 30;
+      }
+    });
+
     // when a player is ready to connect, call the PlayerReadyToConnectCommand
     this.onMessage(Message.READY_TO_CONNECT, (client) => {
       const player = this.state.players.get(client.sessionId);
