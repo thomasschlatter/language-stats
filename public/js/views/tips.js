@@ -11,6 +11,7 @@ import { parseArticle } from '../articleMarkup.js';
 import { languageTabs } from './tabs.js';
 import { signInPrompt } from '../auth.js';
 import { attachDeckButtons } from './listToDeck.js';
+import { navigate } from '../router.js';
 
 export async function renderTips(langCode) {
   const view = clear(document.getElementById('view'));
@@ -77,6 +78,14 @@ function openTipEditor(language, onDone, tip = null) {
     placeholder: 'Share your trick for learning…\n\nMarkdown: # heading, "- " for bullet lists, blank line = new paragraph.\nTip: any list can be turned into a flashcard deck.',
   });
   body.value = tip?.body || '';
+  // "Written for" = the language the tip is ABOUT (defaults to the current
+  // page's language). Only offered on create — updating which language a tip
+  // belongs to isn't supported.
+  const writtenFor = el('select', {},
+    store.languages.map((l) =>
+      el('option', { value: l.code, selected: l.code === language.code ? '' : null }, l.name))
+  );
+  // "Written in" = the language the prose is written in (defaults to native).
   const writtenIn = el('select', {},
     store.languages.map((l) => {
       const selected = l.code === (tip?.body_lang || store.nativeLang);
@@ -95,16 +104,20 @@ function openTipEditor(language, onDone, tip = null) {
             body: body.value,
             bodyLanguageCode: writtenIn.value,
           });
+          close();
+          onDone();
         } else {
           await api.createTip({
-            languageCode: language.code,
+            languageCode: writtenFor.value,
             bodyLanguageCode: writtenIn.value,
             title: title.value,
             body: body.value,
           });
+          close();
+          // If the tip is about another language, jump to that language's tips.
+          if (writtenFor.value !== language.code) navigate(`#/lang/${writtenFor.value}/tips`);
+          else onDone();
         }
-        close();
-        onDone();
       } catch (ex) {
         err.textContent = ex.message;
       }
@@ -116,7 +129,8 @@ function openTipEditor(language, onDone, tip = null) {
     body,
     el('div', { class: 'muted', style: 'font-size:0.78rem; margin-top:0.3rem' },
       'Use "- " for bullet lists and "# " for headings. Readers can turn any list into a flashcard deck.'),
-    el('label', {}, 'Written in'),
+    ...(editing ? [] : [el('label', {}, 'Written for (the language this tip is about)'), writtenFor]),
+    el('label', {}, 'Written in (the language you’re writing in)'),
     writtenIn,
     err,
     el('div', { class: 'row', style: 'margin-top:1rem' }, [
