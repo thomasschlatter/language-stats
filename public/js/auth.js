@@ -5,6 +5,7 @@ import { store } from './store.js';
 import { el, openModal, clear } from './dom.js';
 import { colorModeToggle } from './seen.js';
 import { avatarFor } from './avatar.js';
+import { byImportance } from './langOrder.js';
 
 // Load the current user on startup (if a valid cookie exists).
 export async function loadCurrentUser() {
@@ -62,6 +63,44 @@ export function promptSignIn() {
   openAuthModal('login');
 }
 
+// First-run language setup — pick your native language and what you're learning.
+// Shown right after signing up (email or LINE).
+export function openLanguageSetup(onDone = () => {}) {
+  const err = el('div', { class: 'error' });
+  const nativeSel = el('select', {},
+    store.languages.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)));
+  const langs = [...store.languages].sort(byImportance);
+  const checklist = el('div', { class: 'lang-picker' }, langs.map((l) => {
+    const cb = el('input', { type: 'checkbox', value: l.code });
+    if (store.isLearning(l.code)) cb.checked = true;
+    return el('label', { class: 'lang-check' }, [cb, ` ${l.name}`]);
+  }));
+
+  const form = el('form', {
+    onsubmit: async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      const native = nativeSel.value;
+      const learning = [...checklist.querySelectorAll('input:checked')].map((i) => i.value).filter((c) => c !== native);
+      store.setNative(native);
+      store.setLearning(learning);
+      if (store.user) { try { await api.updateProfile({ native: [native], learning }); } catch { /* ignore */ } }
+      close();
+      onDone();
+    },
+  }, [
+    el('label', {}, 'Your native language'),
+    el('div', { class: 'muted', style: 'font-size:0.78rem; margin-bottom:0.3rem' }, 'Words you click translate into this language.'),
+    nativeSel,
+    el('label', { style: 'margin-top:0.75rem' }, 'Languages you want to learn'),
+    checklist,
+    err,
+    el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Start learning')]),
+  ]);
+
+  const close = openModal(el('div', {}, [el('h2', {}, 'Welcome! Set up your languages 🌍'), form]));
+}
+
 // One-time getting-started shown right after signup.
 function showWelcome() {
   const close = openModal(el('div', {}, [
@@ -108,7 +147,7 @@ function openAuthModal(mode) {
         const { user } = mode === 'signup' ? await api.signup(payload) : await api.login(payload);
         store.set({ user });
         close();
-        if (mode === 'signup') showWelcome();
+        if (mode === 'signup') openLanguageSetup(showWelcome);
       } catch (ex) {
         err.textContent = ex.message;
       }

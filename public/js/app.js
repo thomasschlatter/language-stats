@@ -5,7 +5,7 @@ import { api } from './api.js';
 import { store } from './store.js';
 import { el, clear, openModal } from './dom.js';
 import { tokenizeTree } from './render.js';
-import { loadCurrentUser, renderAuthArea } from './auth.js';
+import { loadCurrentUser, renderAuthArea, openLanguageSetup } from './auth.js';
 import { startRouter } from './router.js';
 import { byImportance } from './langOrder.js';
 import { guardSingleInstance } from './singleInstance.js';
@@ -189,6 +189,14 @@ async function init() {
   setupSearch();
   startRouter();
   updateDueBadge();
+
+  // First-run language setup for brand-new accounts (e.g. after LINE signup,
+  // which redirects here with ?welcome=1).
+  if (store.user && new URLSearchParams(window.location.search).get('welcome') === '1') {
+    const url = window.location.pathname + window.location.hash;
+    window.history.replaceState(null, '', url); // drop the ?welcome param
+    openLanguageSetup();
+  }
 
   // Highlight the active top-nav item, and hide the language carousel inside the
   // immersive World (clicking a language there would yank you out of the world).

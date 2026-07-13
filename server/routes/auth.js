@@ -85,9 +85,14 @@ router.get('/line/callback', async (req, res) => {
     }
 
     let user = getUserByLineId(prof.userId);
-    if (!user) user = createLineUser({ lineId: prof.userId, displayName: prof.displayName, email });
+    let isNew = false;
+    if (!user) {
+      user = createLineUser({ lineId: prof.userId, displayName: prof.displayName, email });
+      isNew = true;
+    }
     issueToken(res, user);
-    res.redirect('/#/');
+    // New accounts land on a first-run language setup (see app.js).
+    res.redirect(isNew ? '/?welcome=1#/' : '/#/');
   } catch {
     res.redirect('/#/?login=failed');
   }
