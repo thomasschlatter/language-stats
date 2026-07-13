@@ -1,4 +1,4 @@
-/* Butterfly intro splash — plays the Groupifier logo on load, then fades to
+/* Groupifier intro splash — plays the logo on load, then fades to
    reveal the app. Single baked logo (navy upper wings + cyan lower wings) that
    pops in and gently flaps. Controlled by /js/intro.js. */
 
@@ -31,14 +31,23 @@
 }
 
 /* wings gently flap (fake 3D fold) */
-.bf-logo img {
-  display: block;
+.bf-mark {
+  position: relative;
   width: 190px;
-  height: auto;
+  height: 119px;
   transform-origin: center 56%;
   filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.35));
   animation: bf-flap 2.8s ease-in-out 1s infinite;
 }
+.bf-piece {
+  position: absolute;
+  display: block;
+  height: auto;
+}
+.bf-piece-1 { width: 92px; left: 0; top: 0; }
+.bf-piece-2 { width: 92px; right: 0; top: 0; }
+.bf-piece-3 { width: 62px; left: 30px; top: 62px; }
+.bf-piece-4 { width: 62px; right: 30px; top: 62px; }
 @keyframes bf-flap {
   0%, 100% { transform: perspective(520px) scaleX(1) rotateX(0deg); }
   50%      { transform: perspective(520px) scaleX(0.84) rotateX(13deg); }
@@ -69,6 +78,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bf-logo, .bf-logo img, .bf-wordmark, .bf-skip { animation: none; }
+  .bf-logo, .bf-mark, .bf-wordmark, .bf-skip { animation: none; }
   .bf-logo { opacity: 1; transform: none; }
 }

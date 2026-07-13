@@ -1,4 +1,4 @@
-// Butterfly intro splash controller. Plays once per browser session; auto-hides
+// Groupifier intro splash controller. Plays once per browser session; auto-hides
 // after the animation, or on click/tap to skip.
 (function () {
   var splash = document.getElementById('intro-splash');
