@@ -40,6 +40,15 @@ export default class Game extends Phaser.Scene {
   isNearBot = false
   userHasInteracted = true
 
+  // Set by the per-world builders, consumed by setupPlayerAndNetwork().
+  private spawnX = 0
+  private spawnY = 0
+  private botX = 0
+  private botY = 0
+  private worldColliders: Array<
+    Phaser.Tilemaps.TilemapLayer | Phaser.Physics.Arcade.StaticGroup
+  > = []
+
   constructor() {
     super('game')
   }
@@ -98,6 +107,147 @@ export default class Game extends Phaser.Scene {
     }
 
     createCharacterAnims(this.anims)
+
+    // Dispatch to the right map builder based on the world the player picked.
+    const worldMap = (this.network as any).worldMap || 'meadow'
+    if (worldMap === 'cafe') this.buildInterior('tilemap')
+    else if (worldMap === 'lounge') this.buildInterior('lobbyMap')
+    else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
+    else this.buildProcedural(worldMap)
+
+    this.setupPlayerAndNetwork()
+  }
+
+  // Shared across every world: spawn the player + bot, set up the camera,
+  // colliders (built up in worldColliders) and network listeners.
+  private setupPlayerAndNetwork() {
+    this.myPlayer = this.add.myPlayer(this.spawnX, this.spawnY, 'adam', this.network.mySessionId)
+    this.myPlayer.setDepth(this.myPlayer.y)
+    this.playerSelector = new PlayerSelector(this, 0, 0, 16, 16)
+    this.otherPlayers = this.physics.add.group({ classType: OtherPlayer })
+
+    this.botPlayer = this.add.otherPlayer(this.botX, this.botY, 'fox', 'bot', 'Foxy', 1)
+    this.botPlayer.setScale(2)
+
+    this.cameras.main.zoom = 1.2
+    this.cameras.main.startFollow(this.myPlayer, true)
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
+    for (const c of this.worldColliders)
+      this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], c)
+
+    this.physics.add.overlap(this.myPlayer, this.otherPlayers, this.handlePlayersOverlap, undefined, this)
+    this.physics.add.overlap(this.myPlayer, this.botPlayer, this.handleBotOverlap, undefined, this)
+
+    this.network.onPlayerJoined(this.handlePlayerJoined, this)
+    this.network.onPlayerLeft(this.handlePlayerLeft, this)
+    this.network.onMyPlayerReady(this.handleMyPlayerReady, this)
+    this.network.onMyPlayerVideoConnected(this.handleMyVideoConnected, this)
+    this.network.onPlayerUpdated(this.handlePlayerUpdated, this)
+    this.network.onItemUserAdded(this.handleItemUserAdded, this)
+    this.network.onItemUserRemoved(this.handleItemUserRemoved, this)
+    this.network.onChatMessageAdded(this.handleChatMessageAdded, this)
+    this.network.onBotChatMessageAdded(this.handleBotMessagesAdded, this)
+  }
+
+  // Map a Tiled tileset name to its loaded Phaser texture key.
+  private tilesetKey: Record<string, string> = {
+    FloorAndGround: 'tiles_wall',
+    Modern_Office_Black_Shadow: 'office',
+    Generic: 'generic',
+    Basement: 'basement',
+    chair: 'chairs',
+    computer: 'computers',
+    whiteboard: 'whiteboards',
+    vendingmachine: 'vendingmachines',
+    Modern_Exteriors: 'complete_exterior_tileset',
+  }
+
+  // Render a Tiled object layer as static, depth-sorted sprites. The tileset
+  // (and thus texture + frame) is resolved per-object from its gid, so layers
+  // that mix tilesets render correctly. Collidable layers are collected into
+  // worldColliders for setupPlayerAndNetwork().
+  private addTiled(layerName: string, collidable: boolean) {
+    const layer = this.map.getObjectLayer(layerName)
+    if (!layer) return
+    const group = this.physics.add.staticGroup()
+    const tilesets = [...this.map.tilesets].sort((a, b) => b.firstgid - a.firstgid)
+    for (const obj of layer.objects) {
+      if (obj.gid === undefined) continue
+      const ts = tilesets.find((t) => obj.gid! >= t.firstgid)
+      const key = ts && this.tilesetKey[ts.name]
+      if (!ts || !key) continue
+      const x = obj.x! + obj.width! * 0.5
+      const y = obj.y! - obj.height! * 0.5
+      group.get(x, y, key, obj.gid - ts.firstgid).setDepth(y)
+    }
+    if (collidable) this.worldColliders.push(group)
+  }
+
+  // A designed exterior Tiled map (the island / beach world).
+  private buildExteriorTiled(key: string) {
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key })
+    const ext = this.map.addTilesetImage('Modern_Exteriors', 'complete_exterior_tileset')!
+    this.addTiled('ObjectsUnder', false)
+    const ground = this.map.createLayer('Ground', ext, 0, 0)!
+    ground.setCollisionByProperty({ collides: true })
+    this.worldColliders.push(ground)
+    const ground2 = this.map.createLayer('Ground 2', ext, 0, 0)
+    if (ground2) {
+      ground2.setCollisionByProperty({ collides: true })
+      this.worldColliders.push(ground2)
+    }
+    this.addTiled('Objects', false)
+    this.addTiled('ObjectsOnCollide', true)
+    this.addTiled('ObjectsOnCollide 2', true)
+    this.spawnX = 705
+    this.spawnY = 500
+    this.botX = 330
+    this.botY = 300
+  }
+
+  // A designed indoor Tiled map (café = the office map, lounge = the lobby map).
+  private buildInterior(key: string) {
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key })
+    const floor = this.map.addTilesetImage('FloorAndGround', 'tiles_wall')
+    const office = this.map.addTilesetImage('Modern_Office_Black_Shadow', 'office')
+    const generic = this.map.addTilesetImage('Generic', 'generic')
+    const basement = this.map.addTilesetImage('Basement', 'basement')
+    this.map.addTilesetImage('chair', 'chairs')
+    this.map.addTilesetImage('computer', 'computers')
+    this.map.addTilesetImage('whiteboard', 'whiteboards')
+    this.map.addTilesetImage('vendingmachine', 'vendingmachines')
+    const ext = this.map.addTilesetImage('Modern_Exteriors', 'complete_exterior_tileset')
+
+    const groundTilesets = [floor, office, generic, basement, ext].filter(Boolean) as Phaser.Tilemaps.Tileset[]
+    this.map.createLayer('Ground', groundTilesets, 0, 0)
+
+    this.addTiled('Wall', true)
+    this.addTiled('Basement', true)
+    this.addTiled('Objects', false)
+    this.addTiled('ObjectsOnCollide', true)
+    this.addTiled('GenericObjects', false)
+    this.addTiled('GenericObjectsOnCollide', true)
+    this.addTiled('VendingMachine', true)
+    this.addTiled('Chair', false)
+    this.addTiled('Computer', false)
+    this.addTiled('Whiteboard', false)
+
+    this.spawnX = 705
+    this.spawnY = 500
+    this.botX = 585
+    this.botY = 500
+  }
+
+  // Procedurally generated grass-biome worlds (meadow, village). Seeded by the
+  // room id so everyone in the same room gets the SAME map.
+  private buildProcedural(worldMap: string) {
+    // Per-world knobs: the village is house-heavy with barely any water; the
+    // meadow is balanced with ponds and groves.
+    const cfg = worldMap === 'village'
+      ? { ponds: 1, trees: 12, houses: 8 }
+      : { ponds: 6, trees: 34, houses: 2 }
 
     // --- Procedurally generate a unique world, seeded by the room id so every
     // player in the same room gets the SAME map, and different rooms differ. ---
@@ -221,7 +371,7 @@ export default class Game extends Phaser.Scene {
                        () => [3 + Math.floor(rng() * 2), 3 + Math.floor(rng() * 2)]]
     let pondCount = 0
     let pondTries = 300
-    while (pondCount < 6 && pondTries-- > 0) {
+    while (pondCount < cfg.ponds && pondTries-- > 0) {
       const [w, h] = pondKinds[Math.floor(rng() * pondKinds.length)]()
       const x0 = 2 + Math.floor(rng() * Math.max(1, W - 4 - w))
       const y0 = 2 + Math.floor(rng() * Math.max(1, H - 4 - h))
@@ -407,7 +557,7 @@ export default class Game extends Phaser.Scene {
     const H_FOOT = 8
     let houseCount = 0
     let houseTries = 120
-    while (houseCount < 2 && houseTries-- > 0) {
+    while (houseCount < cfg.houses && houseTries-- > 0) {
       const hx = 2 + Math.floor(rng() * Math.max(1, W - HOUSE_W - 2))
       const hy = 2 + Math.floor(rng() * Math.max(1, H - HOUSE_H - 2))
       let ok = true
@@ -446,7 +596,7 @@ export default class Game extends Phaser.Scene {
     }
     let treeTotal = 0
     let groveTries = 60
-    while (treeTotal < 34 && groveTries-- > 0) {
+    while (treeTotal < cfg.trees && groveTries-- > 0) {
       const gcx = 3 + Math.floor(rng() * (W - 8))
       const gcy = 3 + Math.floor(rng() * (H - 8))
       const target = 4 + Math.floor(rng() * 5)
@@ -497,13 +647,6 @@ export default class Game extends Phaser.Scene {
     // tree trunks + chunky objects stop the player; ground detail is walkable
     deco.setCollision([TREE_TRUNK, ...OBJ_SOLID])
 
-    this.myPlayer = this.add.myPlayer(spawnTX * 32, spawnTY * 32, 'adam', this.network.mySessionId)
-    this.myPlayer.setDepth(this.myPlayer.y) // sort with trees before the first move
-    this.playerSelector = new PlayerSelector(this, 0, 0, 16, 16)
-  
-    this.otherPlayers = this.physics.add.group({ classType: OtherPlayer })
-
-
     // Bot — place Foxy on the nearest clear grass tile to its usual spot so it
     // never ends up standing in a pond (or inside a tree/prop).
     const foxTargetX = 10, foxTargetY = 9
@@ -517,49 +660,12 @@ export default class Game extends Phaser.Scene {
           if (grid[y][x] === GRASS && !used[y][x]) { foxX = x; foxY = y; break ringSearch }
         }
     }
-    this.botPlayer = this.add.otherPlayer(
-      foxX * 32,
-      foxY * 32,
-      "fox",
-      "bot",
-      "Foxy",
-      1
-    )
-    this.botPlayer.setScale(2)
 
-    this.cameras.main.zoom = 1.2
-    this.cameras.main.startFollow(this.myPlayer, true)
-
-    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
-    this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], groundLayer)
-    this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], deco)
-
-    this.physics.add.overlap(
-      this.myPlayer,
-      this.otherPlayers,
-      this.handlePlayersOverlap,
-      undefined,
-      this
-    )
-
-    this.physics.add.overlap(
-      this.myPlayer,
-      this.botPlayer,
-      this.handleBotOverlap,
-      undefined,
-      this
-    )
-
-    // register network event listeners
-    this.network.onPlayerJoined(this.handlePlayerJoined, this)
-    this.network.onPlayerLeft(this.handlePlayerLeft, this)
-    this.network.onMyPlayerReady(this.handleMyPlayerReady, this)
-    this.network.onMyPlayerVideoConnected(this.handleMyVideoConnected, this)
-    this.network.onPlayerUpdated(this.handlePlayerUpdated, this)
-    this.network.onItemUserAdded(this.handleItemUserAdded, this)
-    this.network.onItemUserRemoved(this.handleItemUserRemoved, this)
-    this.network.onChatMessageAdded(this.handleChatMessageAdded, this)
-    this.network.onBotChatMessageAdded(this.handleBotMessagesAdded, this)
+    this.spawnX = spawnTX * 32
+    this.spawnY = spawnTY * 32
+    this.botX = foxX * 32
+    this.botY = foxY * 32
+    this.worldColliders = [groundLayer, deco]
   }
 
   private handleItemSelectorOverlap(playerSelector, selectionItem) {
@@ -577,43 +683,6 @@ export default class Game extends Phaser.Scene {
     // set selected item and set up new dialog
     playerSelector.selectedItem = selectionItem
     selectionItem.onOverlapDialog()
-  }
-
-  private addObjectFromTiled(
-    group: Phaser.Physics.Arcade.StaticGroup,
-    object: Phaser.Types.Tilemaps.TiledObject,
-    key: string,
-    tilesetName: string
-  ) {
-    const actualX = object.x! + object.width! * 0.5
-    const actualY = object.y! - object.height! * 0.5
-    const obj = group
-      .get(actualX, actualY, key, object.gid! - this.map.getTileset(tilesetName).firstgid)
-      .setDepth(actualY)
-    return obj
-  }
-
-  private addGroupFromTiled(
-    objectLayerName: string,
-    key: string,
-    tilesetName: string,
-    collidable: boolean
-  ) {
-    const group = this.physics.add.staticGroup()
-    const objectLayer = this.map.getObjectLayer(objectLayerName)
-    objectLayer.objects.forEach((object) => {
-      const actualX = object.x! + object.width! * 0.5
-      const actualY = object.y! - object.height! * 0.5
-      group
-        .get(actualX, actualY, key, object.gid! - this.map.getTileset(tilesetName).firstgid)
-        .setDepth(actualY)
-    })
-    if (objectLayerName === 'ObjectsUnder')
-    group.setDepth(1)
-    if (objectLayerName === 'Objects')
-    group.setDepth(1000)
-    if (this.myPlayer && collidable)
-      this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], group)
   }
 
   // function to add new player to the otherPlayer group

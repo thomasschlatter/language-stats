@@ -1,5 +1,4 @@
 import { useState } from "react";
-import logo from "../images/logo.png";
 import styled from "styled-components";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -13,6 +12,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CustomRoomTable } from "./CustomRoomTable";
 import { CreateRoomForm } from "./CreateRoomForm";
 import { useAppSelector } from "../hooks";
+import { WORLDS, WorldInfo } from "../../../types/Rooms";
 
 import phaserGame from "../PhaserGame";
 import Bootstrap from "../scenes/Bootstrap";
@@ -75,17 +75,50 @@ const Title = styled.h1`
   text-align: center;
 `;
 
-const Content = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin: 20px 0;
-  align-items: center;
-  justify-content: center;
+const WorldGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+  margin: 8px 0 4px;
+`;
 
-  img {
-    border-radius: 8px;
-    height: 120px;
+const WorldCard = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: #2c3050;
+  border: 1px solid #3a3f66;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  color: #eee;
+  transition: transform 0.08s ease, border-color 0.12s ease, background 0.12s ease;
+
+  &:hover {
+    background: #333858;
+    border-color: #33ac96;
+    transform: translateY(-2px);
+  }
+
+  .emoji {
+    font-size: 34px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .info h3 {
+    margin: 0 0 3px;
+    font-size: 18px;
+    color: #fff;
+  }
+
+  .info p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: #b7bcda;
   }
 `;
 
@@ -108,45 +141,17 @@ export default function RoomSelectionDialog() {
   const [showCreateRoomForm, setShowCreateRoomForm] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const lobbyJoined = useAppSelector((state) => state.room.lobbyJoined);
-  const availableRooms = useAppSelector((state) => state.room.availableRooms);
 
-  const handleConnect = () => {
-    if (lobbyJoined) {
-      const bootstrap = phaserGame.scene.keys.bootstrap as Bootstrap;
-      // browse through all rooms and check if there are more than 5 players,
-      // if so, create a new room
-      if (availableRooms.length > 0) {
-        const room = availableRooms[0];
-        if (room.clients < 6) {
-          bootstrap.network
-            .joinCustomById(room.roomId, "")
-            .then(() => bootstrap.launchGameWithoutBackground())
-            .catch((error) => console.error(error));
-        } else {
-          bootstrap.network
-            .createCustom({
-              name: "test",
-              description: "test",
-              password: null,
-              autoDispose: true,
-            })
-            .then(() => bootstrap.launchGameWithoutBackground())
-            .catch((error) => console.error(error));
-        }
-      } else {
-        bootstrap.network
-          .createCustom({
-            name: "test",
-            description: "test",
-            password: null,
-            autoDispose: true,
-          })
-          .then(() => bootstrap.launchGameWithoutBackground())
-          .catch((error) => console.error(error));
-      }
-    } else {
+  const handleJoinWorld = (world: WorldInfo) => {
+    if (!lobbyJoined) {
       setShowSnackbar(true);
+      return;
     }
+    const bootstrap = phaserGame.scene.keys.bootstrap as Bootstrap;
+    bootstrap.network
+      .joinWorld(world.id, world.map)
+      .then(() => bootstrap.launchGameWithoutBackground())
+      .catch((error) => console.error(error));
   };
 
   return (
@@ -216,18 +221,28 @@ export default function RoomSelectionDialog() {
             </CustomRoomWrapper>
           ) : (
             <>
-              <Title>You have been stranded!</Title>
-              <Content>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={handleConnect}
-                >
-                  Find out who stranded with you
-                </Button>
-                <img src={logo} alt="logo" width="120" />
-                By Thomas Schlatter
-              </Content>
+              <Title>Choose a world</Title>
+              <WorldGrid>
+                {WORLDS.map((world) => (
+                  <WorldCard
+                    key={world.id}
+                    onClick={() => handleJoinWorld(world)}
+                  >
+                    <span className="emoji">{world.emoji}</span>
+                    <div className="info">
+                      <h3>{world.name}</h3>
+                      <p>{world.description}</p>
+                    </div>
+                  </WorldCard>
+                ))}
+              </WorldGrid>
+              <Button
+                variant="text"
+                color="secondary"
+                onClick={() => setShowCustomRoom(true)}
+              >
+                or browse custom rooms
+              </Button>
             </>
           )}
         </Wrapper>

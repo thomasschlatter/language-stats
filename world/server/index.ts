@@ -7,7 +7,7 @@ import express from "express";
 import cors from "cors";
 import { Server, LobbyRoom } from "colyseus";
 import { monitor } from "@colyseus/monitor";
-import { RoomType } from "../types/Rooms";
+import { RoomType, WORLDS } from "../types/Rooms";
 import { SkyOffice } from "./rooms/SkyOffice";
 
 const port = Number(process.env.PORT || 2567);
@@ -42,13 +42,17 @@ const gameServer = new Server({
 });
 
 gameServer.define(RoomType.LOBBY, LobbyRoom);
-gameServer.define(RoomType.PUBLIC, SkyOffice, {
-  name: "Public Lobby",
-  description:
-    "For making friends and familiarizing yourself with the controls",
-  password: null,
-  autoDispose: false,
-});
+// One persistent public room per selectable world (WORLDS[0].id === 'skyoffice'
+// keeps the old default). autoDispose:false so a world stays alive between
+// visitors, and everyone who picks the same world lands in the same room.
+for (const world of WORLDS) {
+  gameServer.define(world.id, SkyOffice, {
+    name: world.name,
+    description: world.description,
+    password: null,
+    autoDispose: false,
+  });
+}
 gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing();
 
 app.use("/colyseus", monitor());

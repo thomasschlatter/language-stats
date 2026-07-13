@@ -37,6 +37,8 @@ export default class Network {
   webRTC?: WebRTC;
 
   mySessionId!: string;
+  // which world map the joined room should render (see WORLDS in types/Rooms)
+  worldMap = "meadow";
 
   constructor() {
     const protocol = window.location.protocol.replace("http", "ws");
@@ -80,6 +82,14 @@ export default class Network {
   // method to join the public lobby
   async joinOrCreatePublic() {
     this.room = await this.client.joinOrCreate(RoomType.PUBLIC);
+    this.initialize();
+  }
+
+  // join (or create) the persistent room for a selectable world, and remember
+  // which map the Game scene should render.
+  async joinWorld(roomType: string, map: string) {
+    this.worldMap = map;
+    this.room = await this.client.joinOrCreate(roomType);
     this.initialize();
   }
 
