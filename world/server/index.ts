@@ -46,12 +46,17 @@ gameServer.define(RoomType.LOBBY, LobbyRoom);
 // keeps the old default). autoDispose:false so a world stays alive between
 // visitors, and everyone who picks the same world lands in the same room.
 for (const world of WORLDS) {
-  gameServer.define(world.id, SkyOffice, {
-    name: world.name,
-    description: world.description,
-    password: null,
-    autoDispose: false,
-  });
+  gameServer
+    .define(world.id, SkyOffice, {
+      name: world.name,
+      description: world.description,
+      password: null,
+      autoDispose: false,
+    })
+    // Group people learning the same language together: joinOrCreate only
+    // matches a room whose `language` equals the joiner's (falls back to a
+    // shared "any" bucket when the client sends none).
+    .filterBy(["language"]);
 }
 gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing();
 

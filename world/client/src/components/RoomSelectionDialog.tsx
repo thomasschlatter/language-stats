@@ -174,14 +174,26 @@ export default function RoomSelectionDialog() {
   const [showSnackbar, setShowSnackbar] = useState(false);
   const lobbyJoined = useAppSelector((state) => state.room.lobbyJoined);
 
-  const handleJoinWorld = (world: WorldInfo) => {
+  const handleJoinWorld = async (world: WorldInfo) => {
     if (!lobbyJoined) {
       setShowSnackbar(true);
       return;
     }
+    // Group with others learning the same language (server filterBy). Falls back
+    // to the shared bucket if the profile fetch fails or no language is set.
+    let language: string | undefined;
+    try {
+      const me = await fetch("/api/auth/me", { credentials: "same-origin" }).then(
+        (r) => (r.ok ? r.json() : null)
+      );
+      const learning = me?.user?.learning;
+      if (learning && learning.length) language = learning[0];
+    } catch {
+      /* fall back to the shared bucket */
+    }
     const bootstrap = phaserGame.scene.keys.bootstrap as Bootstrap;
     bootstrap.network
-      .joinWorld(world.id, world.map)
+      .joinWorld(world.id, world.map, language)
       .then(() => bootstrap.launchGameWithoutBackground())
       .catch((error) => console.error(error));
   };
