@@ -109,9 +109,24 @@ body:not(.authed) .auth-only { display: none !important; }
 
 /* ---- Layout ---- */
 .layout {
-  display: grid;
-  grid-template-columns: 230px 1fr;
   min-height: calc(100vh - 57px);
+}
+/* Languages: a horizontal bar under the header (was a left sidebar). */
+.lang-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 2rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.lang-bar-label {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 .sidebar {
   background: var(--surface);
@@ -137,17 +152,17 @@ body:not(.authed) .auth-only { display: none !important; }
 .sidebar-title:hover { color: var(--text); }
 .sidebar-title .caret { transition: transform 0.12s; }
 .sidebar-title.collapsed .caret { transform: rotate(-90deg); }
-.language-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.language-list { display: flex; flex-direction: row; align-items: center; gap: 0.4rem; }
 .language-list a {
   display: block;
-  padding: 0.5rem 0.65rem;
-  border-radius: var(--radius);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
   color: var(--text);
+  white-space: nowrap;
 }
 .language-list a:hover { background: var(--surface-2); text-decoration: none; }
 .language-list a.active { background: var(--accent); color: #fff; }
-.lang-row { display: flex; align-items: center; gap: 0.35rem; }
-.lang-row > a { flex: 1; min-width: 0; }
+.lang-row { display: inline-flex; align-items: center; gap: 0.2rem; flex-shrink: 0; }
 .lang-native-tag {
   font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;
   color: var(--accent-2); border: 1px solid var(--accent-2); border-radius: 999px;
@@ -540,9 +555,8 @@ label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.85rem; color: va
 .modal .close { float: right; }
 
 @media (max-width: 680px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
   .view { padding: 1rem; }
+  .lang-bar { padding: 0.4rem 1rem; }
 }
 
 /* Header reflows on narrow screens: brand+search+auth on top, nav below. */

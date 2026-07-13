@@ -9,9 +9,9 @@ import { loadCurrentUser, renderAuthArea } from './auth.js';
 import { startRouter } from './router.js';
 import { guardSingleInstance } from './singleInstance.js';
 
-// Make the persistent chrome (sidebar heading, top-bar labels) clickable too.
+// Make the persistent chrome (language bar, top-bar labels) clickable too.
 function tokenizeChrome() {
-  tokenizeTree(document.querySelector('.sidebar'));
+  tokenizeTree(document.querySelector('.lang-bar'));
   tokenizeTree(document.getElementById('auth-area'));
 }
 

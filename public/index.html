@@ -61,15 +61,13 @@
       <div id="auth-area" class="auth-area"><!-- filled by auth.js --></div>
     </header>
 
-    <div class="layout">
-      <!-- Left column: languages -->
-      <aside class="sidebar">
-        <button class="sidebar-title" id="lang-toggle" aria-expanded="true">
-          <span>Languages</span><span class="caret">▾</span>
-        </button>
-        <nav id="language-list" class="language-list"></nav>
-      </aside>
+    <!-- Languages: a horizontal bar under the header (was a left sidebar) -->
+    <div class="lang-bar" aria-label="Languages">
+      <span class="lang-bar-label">Languages</span>
+      <nav id="language-list" class="language-list"></nav>
+    </div>
 
+    <div class="layout">
       <!-- Main content: rendered by the router -->
       <main id="view" class="view"></main>
     </div>
