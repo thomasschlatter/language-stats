@@ -394,4 +394,10 @@ function seedDemo() {
 
 seedDemo();
 
+// Starter chatter for the public rooms (skips rooms that already have messages).
+import('./chat-seed.js').then(({ seedChatRooms }) => {
+  const n = seedChatRooms();
+  if (n) console.log(`Seeded starter chat into ${n} room(s).`);
+});
+
 console.log('Seed complete: languages, words, frequencies, lexicon and articles ready.');

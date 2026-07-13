@@ -49,8 +49,11 @@ export async function renderChat(langCode) {
     ])
   );
   view.append(
-    el('p', { class: 'muted', style: 'margin-top:-0.5rem' },
-      `Public room for people learning ${language.name}. Every word is clickable — click for its translation.`)
+    el('p', { class: 'muted', style: 'margin-top:-0.5rem' }, [
+      `Public room — everyone learning ${language.name} can read and reply here. Looking for a 1-on-1? `,
+      el('a', { href: '#/community' }, 'find a partner in Community'),
+      '.',
+    ])
   );
 
   const list = el('div', { class: 'chat-list' });
@@ -87,7 +90,12 @@ export async function renderChat(langCode) {
     const { messages } = await api.messages(langCode);
     clear(list);
     if (!messages.length) {
-      emptyNote = el('p', { class: 'muted' }, 'No messages yet. Say hello!');
+      emptyNote = el('div', { class: 'chat-empty' }, [
+        el('div', { class: 'chat-empty-emoji' }, '💬'),
+        el('p', {}, `No one has posted in the ${language.name} room yet.`),
+        el('p', { class: 'muted' }, 'Post below to break the ice — anyone learning ' +
+          `${language.name} will see it and can jump in. Or switch rooms with the selector above.`),
+      ]);
       list.append(emptyNote);
     }
     messages.forEach(add);
