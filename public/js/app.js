@@ -72,26 +72,56 @@ function setupLangCarousel() {
   update();
 }
 
+// Rough global importance (by number of speakers) for the base language, so the
+// long tail of not-yet-learned languages leads with the major ones; anything
+// unranked falls back to alphabetical by name.
+const LANG_IMPORTANCE = [
+  'en', 'zh', 'hi', 'es', 'ar', 'fr', 'bn', 'pt', 'ru', 'ur', 'id', 'de', 'ja',
+  'sw', 'tr', 'ta', 'vi', 'ko', 'it', 'fa', 'pl', 'uk', 'th', 'nl', 'ms', 'ro',
+  'el', 'cs', 'sv', 'hu', 'he', 'da', 'fi', 'sk', 'nb', 'no', 'hr', 'bg', 'sr',
+  'ca', 'lt', 'sl', 'lv', 'et', 'ga', 'is', 'af', 'tl',
+];
+function langImportance(lang) {
+  const i = LANG_IMPORTANCE.indexOf(lang.lang);
+  return i < 0 ? LANG_IMPORTANCE.length : i;
+}
+function byImportance(a, b) {
+  return langImportance(a) - langImportance(b) || a.name.localeCompare(b.name);
+}
+
 function renderSidebar() {
   const nav = clear(document.getElementById('language-list'));
   const currentCode = decodeURIComponent((window.location.hash.match(/#\/lang\/([^/]+)/) || [])[1] || '');
 
-  for (const lang of store.languages) {
-    const row = el('div', { class: 'lang-row' }, [
-      el('a', { href: `#/lang/${lang.code}`, class: lang.code === currentCode ? 'active' : '' }, lang.name),
+  const learning = store.languages.filter((l) => store.isLearning(l.code)).sort(byImportance);
+  const rest = store.languages.filter((l) => !store.isLearning(l.code)).sort(byImportance);
+
+  const makePill = (lang, isLearning) => {
+    const row = el('div', { class: `lang-row${isLearning ? '' : ' not-learning'}` }, [
+      el('a', {
+        href: `#/lang/${lang.code}`,
+        class: lang.code === currentCode ? 'active' : '',
+        title: isLearning ? lang.name : `Add ${lang.name} to your languages`,
+        // Clicking a not-yet-learned language adds it (then navigation proceeds).
+        onclick: isLearning ? null : () => store.addLearning(lang.code),
+      }, lang.name),
     ]);
     if (lang.code === store.nativeLang) {
       row.append(el('span', { class: 'lang-native-tag', title: 'Your native language' }, 'native'));
     }
-    if (store.user) {
+    if (isLearning) {
       row.append(el('button', {
-        class: 'lang-remove', title: `Remove ${lang.name}`,
-        onclick: (e) => { e.preventDefault(); confirmRemoveLanguage(lang); },
+        class: 'lang-remove', title: `Remove ${lang.name} from your languages`,
+        onclick: (e) => { e.preventDefault(); store.removeLearning(lang.code); },
       }, '×'));
     }
-    nav.append(row);
-  }
+    return row;
+  };
+
   if (!store.languages.length) nav.append(el('span', { class: 'muted' }, 'No languages yet.'));
+  for (const lang of learning) nav.append(makePill(lang, true));
+  if (learning.length && rest.length) nav.append(el('span', { class: 'lang-divider', 'aria-hidden': 'true' }));
+  for (const lang of rest) nav.append(makePill(lang, false));
   if (store.user) {
     nav.append(el('button', { class: 'lang-add', onclick: openAddLanguage }, '+ Add language'));
   }
@@ -142,6 +172,7 @@ function openAddLanguage() {
       try {
         await api.createLanguage({ code: c, lang: base, country, name: name.value.trim() });
         await reloadLanguages();
+        store.addLearning(c);
         renderSidebar();
         close();
         window.location.hash = `#/lang/${c}`;

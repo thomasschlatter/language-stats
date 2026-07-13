@@ -3,6 +3,12 @@
 
 const listeners = new Set();
 const NATIVE_KEY = 'ls_native_lang';
+const LEARNING_KEY = 'ls_learning_langs';
+
+function loadLearning() {
+  try { return new Set(JSON.parse(localStorage.getItem(LEARNING_KEY) || '[]')); }
+  catch { return new Set(); }
+}
 
 export const store = {
   user: null,        // { id, email, username } or null
@@ -10,6 +16,8 @@ export const store = {
   // The reader's native locale. Clicking a word takes you to its translation
   // in THIS locale. Persisted in localStorage so it survives reloads.
   nativeLang: localStorage.getItem(NATIVE_KEY) || 'en-US',
+  // The set of language codes the user is learning (shown first in the carousel).
+  learning: loadLearning(),
 
   set(patch) {
     Object.assign(this, patch);
@@ -18,6 +26,22 @@ export const store = {
   setNative(code) {
     localStorage.setItem(NATIVE_KEY, code);
     this.set({ nativeLang: code });
+  },
+  isLearning(code) {
+    return this.learning.has(code);
+  },
+  setLearning(codes) {
+    const next = new Set(codes);
+    localStorage.setItem(LEARNING_KEY, JSON.stringify([...next]));
+    this.set({ learning: next });
+  },
+  addLearning(code) {
+    if (this.learning.has(code)) return;
+    this.setLearning([...this.learning, code]);
+  },
+  removeLearning(code) {
+    if (!this.learning.has(code)) return;
+    this.setLearning([...this.learning].filter((c) => c !== code));
   },
   subscribe(fn) {
     listeners.add(fn);

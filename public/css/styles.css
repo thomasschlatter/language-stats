@@ -195,6 +195,17 @@ body:not(.authed) .auth-only { display: none !important; }
 .language-list a:hover { background: var(--surface-2); text-decoration: none; }
 .language-list a.active { background: var(--accent); color: #fff; }
 .lang-row { display: inline-flex; align-items: center; gap: 0.2rem; flex-shrink: 0; }
+/* Languages you're not (yet) learning: dimmed, click a pill to add it. */
+.lang-row.not-learning a { color: var(--muted); }
+.lang-row.not-learning a:hover { color: var(--text); background: var(--surface-2); }
+/* Divider between your languages and the rest of the catalogue. */
+.lang-divider {
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 1px;
+  margin: 0.15rem 0.35rem;
+  background: var(--border);
+}
 .lang-native-tag {
   font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;
   color: var(--accent-2); border: 1px solid var(--accent-2); border-radius: 999px;
