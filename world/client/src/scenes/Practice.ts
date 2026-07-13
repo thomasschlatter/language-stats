@@ -5,7 +5,7 @@ import { createCharacterAnims } from '../anims/CharacterAnims'
 // multiplayer worlds and Colyseus). A word from the player's decks appears; walk
 // your character onto the correct meaning and press SPACE. Wrong answers cost a
 // life. Difficulty/word source comes from the app API (the player's decks).
-type QuizItem = { front: string; answer: string; choices: string[] }
+type QuizItem = { id?: number; front: string; answer: string; choices: string[] }
 
 export default class Practice extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite
@@ -179,7 +179,17 @@ export default class Practice extends Phaser.Scene {
     if (this.busy) return
     this.busy = true
     const item = this.items[this.idx]
-    if (zone.choice === item.answer) {
+    const correct = zone.choice === item.answer
+    // Feed the result into the real SRS schedule (correct = "good", wrong = "again").
+    if (item.id != null) {
+      fetch('/api/flashcards/review', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId: item.id, rating: correct ? 3 : 1 }),
+      }).catch(() => { /* practice still counts locally even if the sync fails */ })
+    }
+    if (correct) {
       this.streak += 1
       const bonus = Math.floor(this.streak / 3)
       this.score += 1 + bonus

@@ -160,7 +160,7 @@ router.get('/quiz', requireAuth, (req, res) => {
   const backs = [...new Set(pool.map((c) => c.back))];
   const items = pool.slice(0, n).map((c) => {
     const distractors = shuffle(backs.filter((b) => b !== c.back)).slice(0, 3);
-    return { front: c.front, answer: c.back, choices: shuffle([c.back, ...distractors]) };
+    return { id: c.id, front: c.front, answer: c.back, choices: shuffle([c.back, ...distractors]) };
   });
   res.json({ items, languageCode: language.code });
 });

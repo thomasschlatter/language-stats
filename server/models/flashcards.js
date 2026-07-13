@@ -37,7 +37,7 @@ export function deleteDeck(id, userId) {
 // the source for the practice mini-game's questions and its distractor pool.
 export function quizCards(userId, languageId, limit = 40) {
   return db.prepare(
-    `SELECT c.front, c.back
+    `SELECT c.id, c.front, c.back
        FROM cards c JOIN decks d ON d.id = c.deck_id
       WHERE c.user_id = ? AND d.language_id = ? AND c.back IS NOT NULL AND TRIM(c.back) <> ''
       ORDER BY RANDOM() LIMIT ?`
