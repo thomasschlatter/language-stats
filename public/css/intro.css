@@ -1,0 +1,74 @@
+/* Butterfly intro splash — plays the Groupifier logo on load, then fades to
+   reveal the app. Single baked logo (navy upper wings + cyan lower wings) that
+   pops in and gently flaps. Controlled by /js/intro.js. */
+
+#intro-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: #0f1220;
+  transition: opacity 0.6s ease;
+  cursor: pointer;
+}
+#intro-splash.intro-hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* whole logo pops + fades in */
+.bf-logo {
+  opacity: 0;
+  transform: scale(0.3) translateY(14px);
+  animation: bf-pop 0.8s cubic-bezier(0.2, 0.9, 0.25, 1.15) 0.1s forwards;
+}
+@keyframes bf-pop {
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* wings gently flap (fake 3D fold) */
+.bf-logo img {
+  display: block;
+  width: 190px;
+  height: auto;
+  transform-origin: center 56%;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.35));
+  animation: bf-flap 2.8s ease-in-out 1s infinite;
+}
+@keyframes bf-flap {
+  0%, 100% { transform: perspective(520px) scaleX(1) rotateX(0deg); }
+  50%      { transform: perspective(520px) scaleX(0.84) rotateX(13deg); }
+}
+
+.bf-wordmark {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 800;
+  font-size: 2.2rem;
+  letter-spacing: 0.04em;
+  color: #f4f6fb;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: bf-word 0.7s ease 0.6s forwards;
+}
+.bf-wordmark b { color: #00e5cc; }
+@keyframes bf-word {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bf-skip {
+  position: fixed;
+  bottom: 22px;
+  font-size: 0.8rem;
+  color: rgba(244, 246, 251, 0.4);
+  opacity: 0;
+  animation: bf-word 0.5s ease 1.2s forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-logo, .bf-logo img, .bf-wordmark, .bf-skip { animation: none; }
+  .bf-logo { opacity: 1; transform: none; }
+}

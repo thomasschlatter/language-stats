@@ -12,3 +12,4 @@ data/*.db-*
 # world (STRANDED companion) build output
 world/client/dist/
 world/**/*.tsbuildinfo
+.claude/
