@@ -91,6 +91,30 @@ test('flashcard import → study → review grows the interval', async () => {
   assert.ok(r2.data.card.interval > r1.data.card.interval);
 });
 
+test('quiz needs 4+ cards and returns recognition + recall choices', async () => {
+  const up = await api('/api/auth/signup', { method: 'POST', body: { email: 'q@test.io', username: 'quinn', password: 'secret6' } });
+  const cookie = up.cookie;
+
+  // Too few cards → 400 with a helpful message.
+  const small = await api('/api/flashcards/import', { method: 'POST', cookie, body: { languageCode: 'de-DE', name: 'Small', text: 'ja\tyes\nnein\tno' } });
+  assert.equal(small.status, 201);
+  const tooFew = await api('/api/flashcards/quiz?lang=de-DE&n=4', { cookie });
+  assert.equal(tooFew.status, 400);
+
+  // With 5 cards the quiz is playable.
+  await api('/api/flashcards/import', { method: 'POST', cookie, body: { languageCode: 'de-DE', name: 'Big', text: 'Hund\tdog\nKatze\tcat\nHaus\thouse\nBaum\ttree\nAuto\tcar' } });
+  const quiz = await api('/api/flashcards/quiz?lang=de-DE&n=4', { cookie });
+  assert.equal(quiz.status, 200);
+  assert.ok(quiz.data.items.length >= 1);
+  for (const it of quiz.data.items) {
+    assert.ok(Number.isInteger(it.id));
+    assert.equal(it.choices.length, 4);
+    assert.ok(it.choices.includes(it.answer), 'choices must contain the answer');
+    assert.equal(it.frontChoices.length, 4);
+    assert.ok(it.frontChoices.includes(it.front), 'frontChoices must contain the word');
+  }
+});
+
 test('auth required for protected routes', async () => {
   const protectedPaths = [
     '/api/flashcards/decks',
