@@ -196,10 +196,14 @@ async function openAddToDeck(langCode, data) {
   deckSel.addEventListener('change', syncName);
   syncName();
 
+  const submit = el('button', { class: 'btn', type: 'submit' }, 'Add card');
+  let allowDuplicate = false; // set true after the user confirms a duplicate
+
   const form = el('form', {
     onsubmit: async (e) => {
       e.preventDefault();
       err.textContent = '';
+      err.className = 'error';
       try {
         let deckId;
         if (deckSel.value === 'new') {
@@ -209,11 +213,21 @@ async function openAddToDeck(langCode, data) {
         } else {
           deckId = Number(deckSel.value);
         }
-        await api.addCard(deckId, { front: data.text, back: back.value });
+        await api.addCard(deckId, { front: data.text, back: back.value, allowDuplicate });
         noteCardAdded(langCode, data.text);
         window.dispatchEvent(new Event('ls:decks-changed'));
         close();
-      } catch (ex) { err.textContent = ex.message; }
+      } catch (ex) {
+        if (ex.status === 409 && ex.data?.duplicate) {
+          // Already in the deck — warn and let them add a duplicate on purpose.
+          err.className = 'muted';
+          err.textContent = `${ex.message} Press “Add anyway” to add it again.`;
+          allowDuplicate = true;
+          submit.textContent = 'Add anyway';
+        } else {
+          err.textContent = ex.message;
+        }
+      }
     },
   }, [
     el('label', {}, 'Deck'), deckSel,
@@ -221,8 +235,10 @@ async function openAddToDeck(langCode, data) {
     el('label', {}, 'Front'), el('div', { class: 'muted', style: 'font-size:1.05rem' }, data.text),
     el('label', {}, 'Back'), back,
     err,
-    el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Add card')]),
+    el('div', { class: 'row', style: 'margin-top:1rem' }, [submit]),
   ]);
+  // Changing the target deck resets the duplicate confirmation.
+  deckSel.addEventListener('change', () => { allowDuplicate = false; submit.textContent = 'Add card'; err.textContent = ''; });
 
   const close = openModal(el('div', {}, [el('h2', {}, `Add “${data.text}” to a deck`), form]));
 }

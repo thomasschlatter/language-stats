@@ -33,6 +33,11 @@ export function deleteDeck(id, userId) {
 }
 
 // Bulk-add cards. rows: [{ front, back }]. New cards are due immediately.
+// Whether a deck already contains a card with this (lowercased) front word.
+export function deckHasCard(deckId, wordLc) {
+  return !!db.prepare('SELECT 1 FROM cards WHERE deck_id = ? AND word_lc = ? LIMIT 1').get(deckId, wordLc);
+}
+
 export function addCards({ deckId, userId, languageId, rows }) {
   const stmt = db.prepare(
     `INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, due_at)

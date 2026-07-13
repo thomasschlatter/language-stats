@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
 import {
   createDeck, getDeck, listDecks, deleteDeck,
-  addCards, dueCards, reviewCard, familiarityMap, listCards,
+  addCards, dueCards, reviewCard, familiarityMap, listCards, deckHasCard,
 } from '../models/flashcards.js';
 import { topWords, totalCount } from '../models/frequency.js';
 import { unpredictableGenderNouns } from '../models/analysis.js';
@@ -54,6 +54,11 @@ router.post('/decks/:id(\\d+)/cards', requireAuth, (req, res) => {
   if (!deck) return res.status(404).json({ error: 'deck not found' });
   const { front, back } = req.body ?? {};
   if (!front || !front.trim()) return res.status(400).json({ error: 'front is required' });
+  // Warn (and skip) if the word is already in this deck — unless the client
+  // explicitly confirms a duplicate is wanted (?allowDuplicate / body flag).
+  if (!req.body?.allowDuplicate && deckHasCard(deck.id, front.trim().toLowerCase())) {
+    return res.status(409).json({ error: `“${front.trim()}” is already in “${deck.name}”.`, duplicate: true });
+  }
   const added = addCards({
     deckId: deck.id, userId: req.user.id, languageId: deck.language_id,
     rows: [{ front, back }],
