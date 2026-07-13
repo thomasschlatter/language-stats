@@ -26,6 +26,16 @@ Log: `/var/log/gf-deploy.log`. Manual run: `gf-deploy.sh`.
 ## Data
 - SQLite DB at `/var/data/language-stats/language-stats.db` (persists across deploys).
 - Daily backup via `/etc/cron.daily/backup-language-stats` → `/var/data/language-stats/backups/` (keeps 14).
+- Schema is applied on every app start (`server/db/schema.sql`, all `IF NOT EXISTS`),
+  so new tables (e.g. `tip_votes`) are created automatically on the next restart.
+
+## On-device AI translation
+- Deck generation and article translation use `@huggingface/transformers` (OPUS-MT,
+  CPU) — no external API. Models lazy-download on first use per language pair
+  (~150MB each) into `node_modules/@huggingface/transformers/.cache/` and are then
+  reused. First translate of a pair blocks ~30s; subsequent calls are fast.
+- Chinese output is Simplified; `opencc-js` converts to Traditional for zh-TW/HK/MO.
+- Quality is model-dependent: en→es/fr are good; en→zh is weak for technical text.
 
 ## Manual world client rebuild
 `world/client/build-prod.sh` (bakes base `/game/` + the Colyseus wss endpoint).
