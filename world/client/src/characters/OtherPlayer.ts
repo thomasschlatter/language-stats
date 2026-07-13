@@ -31,37 +31,6 @@ export default class OtherPlayer extends Player {
   }
 
 
-  loadPlayerSprite(spritesheet_uuid: string) {
-    let sprite = this.scene.textures.get(spritesheet_uuid)
-    if (sprite) {
-      sprite.destroy()
-    }
-    //console.log('loading sprite', spritesheet_uuid)
-    this.scene.load.spritesheet(spritesheet_uuid, `https://strndd.s3.amazonaws.com/media/${spritesheet_uuid}.png`, {
-      frameWidth: 32,
-      frameHeight: 48,
-    })
-    this.scene.load.start();
-    this.scene.load.once('complete', () => {
-      //console.log('sprite loaded')
-      for (let i = 0; i < Object.keys(FRAMES).length; i++) {
-        // create animation for each frame
-        this.anims.create({
-          key: `${spritesheet_uuid}_${Object.keys(FRAMES)[i]}`,
-          frames: this.anims.generateFrameNames(spritesheet_uuid, {
-            start: FRAMES[Object.keys(FRAMES)[i]].start,
-            end: FRAMES[Object.keys(FRAMES)[i]].end,
-          }),
-          repeat: FRAMES[Object.keys(FRAMES)[i]].repeat,
-          frameRate: FRAMES[Object.keys(FRAMES)[i]].frameRate,
-        })
-      }
-      this.setTexture(spritesheet_uuid)
-      this.anims.play(`${spritesheet_uuid}_idle_down`, true)
-    })
-  }
-
-
   makeCall(myPlayer: MyPlayer, webRTC: WebRTC) {
     this.myPlayer = myPlayer
     const myPlayerId = myPlayer.playerId
@@ -101,11 +70,16 @@ export default class OtherPlayer extends Player {
 
       case 'anim':
         if (typeof value === 'string') {
-          if (!this.anims.exists(value)) {
-            this.loadPlayerSprite(value.split('_')[0])
-            return
+          if (this.anims.exists(value)) {
+            this.anims.play(value, true)
+          } else {
+            // Custom characters used to stream from an external asset bucket
+            // that no longer exists (loading it 404s and crashes the renderer).
+            // Fall back to the default character's matching animation instead.
+            const suffix = value.split('_').slice(1).join('_') || 'idle_down'
+            const fallback = `adam_${suffix}`
+            if (this.anims.exists(fallback)) this.anims.play(fallback, true)
           }
-          this.anims.play(value, true)
         }
         break
 

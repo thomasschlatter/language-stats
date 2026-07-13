@@ -44,7 +44,7 @@ export async function renderWorld() {
     el('div', { class: 'world-bar' }, [
       el('div', {}, [
         el('strong', {}, 'World'),
-        el('span', { class: 'muted', style: 'margin-left:0.6rem; font-size:0.85rem' }, 'A shared, walkable space (STRANDED). Move with arrow keys; meet others by video.'),
+        el('span', { class: 'muted', style: 'margin-left:0.6rem; font-size:0.85rem' }, 'A shared, walkable space. Move with the arrow keys; meet others by video.'),
       ]),
       el('div', { class: 'row', style: 'gap:0.5rem' }, [
         el('a', { class: 'btn small secondary', href: src, target: '_blank', rel: 'noopener' }, 'Open in new tab'),
