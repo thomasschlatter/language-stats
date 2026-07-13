@@ -80,7 +80,15 @@ const WorldGrid = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   width: 100%;
-  margin: 8px 0 4px;
+`;
+
+// Vertical stack for the picker (world grid + buttons) with a uniform gap.
+const PickerStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  margin-top: 12px;
 `;
 
 const WorldCard = styled.button`
@@ -252,30 +260,32 @@ export default function RoomSelectionDialog() {
           ) : (
             <>
               <Title>Choose a world</Title>
-              <WorldGrid>
-                {WORLDS.map((world) => (
-                  <WorldCard
-                    key={world.id}
-                    onClick={() => handleJoinWorld(world)}
-                  >
-                    <span className="emoji">{world.emoji}</span>
-                    <div className="info">
-                      <h3>{world.name}</h3>
-                      <p>{world.description}</p>
-                    </div>
-                  </WorldCard>
-                ))}
-              </WorldGrid>
-              <PracticeButton onClick={handlePractice}>
-                🎯 Solo word practice (beta)
-              </PracticeButton>
-              <Button
-                variant="text"
-                color="secondary"
-                onClick={() => setShowCustomRoom(true)}
-              >
-                or browse custom rooms
-              </Button>
+              <PickerStack>
+                <WorldGrid>
+                  {WORLDS.map((world) => (
+                    <WorldCard
+                      key={world.id}
+                      onClick={() => handleJoinWorld(world)}
+                    >
+                      <span className="emoji">{world.emoji}</span>
+                      <div className="info">
+                        <h3>{world.name}</h3>
+                        <p>{world.description}</p>
+                      </div>
+                    </WorldCard>
+                  ))}
+                </WorldGrid>
+                <PracticeButton onClick={handlePractice}>
+                  🎯 Solo word practice (beta)
+                </PracticeButton>
+                <Button
+                  variant="text"
+                  color="secondary"
+                  onClick={() => setShowCustomRoom(true)}
+                >
+                  or browse custom rooms
+                </Button>
+              </PickerStack>
             </>
           )}
         </Wrapper>

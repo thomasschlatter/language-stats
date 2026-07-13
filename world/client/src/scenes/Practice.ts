@@ -20,6 +20,7 @@ export default class Practice extends Phaser.Scene {
   private lang = 'de-DE'
   private facing: 'up' | 'down' | 'left' | 'right' = 'down'
   private shots: { obj: Phaser.GameObjects.Arc; vx: number; vy: number }[] = []
+  private walls: Phaser.GameObjects.Rectangle[] = []
   private zones: { rect: Phaser.GameObjects.Rectangle; label: Phaser.GameObjects.Text; choice: string }[] = []
   private wordText!: Phaser.GameObjects.Text
   private hudText!: Phaser.GameObjects.Text
@@ -49,6 +50,23 @@ export default class Practice extends Phaser.Scene {
     this.player.setCollideWorldBounds(true)
     this.physics.world.setBounds(0, 0, W, H)
     this.player.anims.play('adam_idle_down', true)
+
+    // Obstacles: a loose central "maze" of isolated blocks. You navigate around
+    // them, and they block your shots — so line up a clear lane before firing.
+    // Kept small and spaced so the player can never be trapped, and clear of the
+    // four answer positions (the corners).
+    const wallSpecs: [number, number, number, number][] = [
+      [W * 0.5, H * 0.32, W * 0.18, 18],
+      [W * 0.5, H * 0.68, W * 0.18, 18],
+      [W * 0.34, H * 0.5, 18, H * 0.16],
+      [W * 0.66, H * 0.5, 18, H * 0.16],
+    ]
+    for (const [x, y, w, h] of wallSpecs) {
+      const wall = this.add.rectangle(x, y, w, h, 0x3a4a72).setStrokeStyle(1, 0x556296).setDepth(2)
+      this.physics.add.existing(wall, true)
+      this.physics.add.collider(this.player, wall)
+      this.walls.push(wall)
+    }
 
     this.cursors = this.input.keyboard.createCursorKeys()
     this.keySpace = this.input.keyboard.addKey('SPACE')
@@ -184,7 +202,11 @@ export default class Practice extends Phaser.Scene {
       s.obj.x += s.vx * (dt / 1000)
       s.obj.y += s.vy * (dt / 1000)
       let hit = false
-      if (!this.busy) {
+      // Walls stop shots.
+      for (const wall of this.walls) {
+        if (Phaser.Geom.Rectangle.Contains(wall.getBounds(), s.obj.x, s.obj.y)) { hit = true; break }
+      }
+      if (!hit && !this.busy) {
         for (const z of this.zones) {
           if (Phaser.Geom.Rectangle.Contains(z.rect.getBounds(), s.obj.x, s.obj.y)) { this.answer(z); hit = true; break }
         }
