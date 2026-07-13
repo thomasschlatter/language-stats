@@ -7,6 +7,8 @@ import {
   getUserById,
   getUserByLineId,
   createLineUser,
+  linkLineId,
+  getUserLanguages,
   verifyPassword,
   changePassword,
   deleteUser,
@@ -86,6 +88,11 @@ router.get('/line/callback', async (req, res) => {
 
     let user = getUserByLineId(prof.userId);
     let isNew = false;
+    // If the (verified) LINE email matches an existing account, link them.
+    if (!user && email) {
+      const existing = getUserByEmail(email);
+      if (existing && !existing.line_user_id) user = linkLineId(existing.id, prof.userId);
+    }
     if (!user) {
       user = createLineUser({ lineId: prof.userId, displayName: prof.displayName, email });
       isNew = true;
@@ -149,7 +156,8 @@ router.post('/logout', (req, res) => {
 router.get('/me', requireAuth, (req, res) => {
   const user = getUserById(req.user.id);
   const avatar = user.avatar ? JSON.parse(user.avatar) : null;
-  res.json({ user: { ...publicUser(user), avatar, avatar_image: user.avatar_image || null } });
+  const learning = getUserLanguages(req.user.id).filter((l) => l.role === 'learning').map((l) => l.code);
+  res.json({ user: { ...publicUser(user), avatar, avatar_image: user.avatar_image || null, learning } });
 });
 
 // POST /api/auth/change-password  { currentPassword, newPassword }

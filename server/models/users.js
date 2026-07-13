@@ -16,15 +16,24 @@ export function getUserByLineId(lineId) {
   return db.prepare('SELECT * FROM users WHERE line_user_id = ?').get(lineId);
 }
 
+// Link a LINE account to an existing user (used when the verified LINE email
+// matches an existing account). Returns the updated user.
+export function linkLineId(userId, lineId) {
+  db.prepare('UPDATE users SET line_user_id = ? WHERE id = ?').run(lineId, userId);
+  return getUserById(userId);
+}
+
 // Create a user linked to a LINE account. They sign in via LINE, so the password
-// is a throwaway random value. Username/email are made unique.
+// is a throwaway random value. Username/email are made unique — if the LINE
+// email is already taken we fall back to a synthesized address (so the INSERT
+// never fails on the UNIQUE(email) constraint).
 export function createLineUser({ lineId, displayName, email }) {
   const password_hash = bcrypt.hashSync(crypto.randomBytes(24).toString('hex'), 10);
   let base = String(displayName || 'user').normalize('NFKD').replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 24);
   if (base.length < 2) base = 'user';
   let username = base;
   while (getUserByUsername(username)) username = `${base}_${crypto.randomBytes(2).toString('hex')}`.slice(0, 30);
-  const mail = email || `line_${lineId}@line.local`;
+  const mail = (email && !getUserByEmail(email)) ? email : `line_${lineId}@line.local`;
   const info = db
     .prepare('INSERT INTO users (email, username, password_hash, line_user_id) VALUES (?, ?, ?, ?)')
     .run(mail, username, password_hash, lineId);

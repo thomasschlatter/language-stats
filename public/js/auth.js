@@ -12,6 +12,10 @@ export async function loadCurrentUser() {
   try {
     const { user } = await api.me();
     store.set({ user });
+    // Server is the source of truth for the learning set (syncs the carousel
+    // across devices). Only override if the server actually has languages, so a
+    // returning user's local carousel isn't wiped by an empty server list.
+    if (user.learning && user.learning.length) store.setLearning(user.learning);
   } catch {
     store.set({ user: null });
   }

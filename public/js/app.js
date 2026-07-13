@@ -20,6 +20,13 @@ function reloadLanguages() {
   return api.languages().then(({ languages }) => store.set({ languages })).catch(() => {});
 }
 
+// Persist the learning set to the server (logged-in users) so the carousel
+// stays in sync across devices, not just in localStorage.
+function persistLearning() {
+  if (!store.user) return;
+  api.updateProfile({ learning: [...store.learning].filter((c) => c !== store.nativeLang) }).catch(() => {});
+}
+
 // Show a badge with total due cards on the Flashcards nav item.
 async function updateDueBadge() {
   const link = document.querySelector('.topnav a[href="#/decks"]');
@@ -88,7 +95,7 @@ function renderSidebar() {
       el('a', { href: `#/lang/${lang.code}`, class: lang.code === currentCode ? 'active' : '' }, lang.name),
       el('button', {
         class: 'lang-remove', title: `Remove ${lang.name} from your languages`,
-        onclick: (e) => { e.preventDefault(); store.removeLearning(lang.code); },
+        onclick: (e) => { e.preventDefault(); store.removeLearning(lang.code); persistLearning(); },
       }, '×'),
     ]));
   }
@@ -115,7 +122,7 @@ function openLanguagePicker() {
     for (const lang of available) {
       listWrap.append(el('button', {
         class: 'lang-picker-item', type: 'button',
-        onclick: () => { store.addLearning(lang.code); renderList(); },
+        onclick: () => { store.addLearning(lang.code); persistLearning(); renderList(); },
       }, [
         el('span', {}, lang.name),
         el('span', { class: 'muted', style: 'font-size:0.72rem' }, '+ add'),

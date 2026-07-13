@@ -157,6 +157,14 @@ async function removeAvatarImage(prof) {
   } catch (ex) { console.error(ex.message); }
 }
 
+// Persist the current learning set (carousel) to the server so it survives
+// across devices, not just in localStorage.
+function persistLearning() {
+  if (!store.user) return;
+  const learning = [...store.learning].filter((c) => c !== store.nativeLang);
+  api.updateProfile({ learning }).catch(() => {});
+}
+
 // Manage the languages you're learning (the top-bar carousel set) from your
 // profile. Add/remove here mirrors the carousel; native language is excluded.
 function learningLanguagesSetting() {
@@ -176,14 +184,14 @@ function learningLanguagesSetting() {
               l.name,
               el('button', {
                 class: 'lang-pill-x', title: `Remove ${l.name}`,
-                onclick: () => store.removeLearning(l.code),
+                onclick: () => { store.removeLearning(l.code); persistLearning(); },
               }, '×'),
             ]))
         : el('span', { class: 'muted' }, 'None yet — add one below.')
     ),
     el('select', {
       class: 'native-select',
-      onchange: (e) => { if (e.target.value) store.addLearning(e.target.value); },
+      onchange: (e) => { if (e.target.value) { store.addLearning(e.target.value); persistLearning(); } },
     }, [
       el('option', { value: '' }, '+ Add a language…'),
       ...available.map((l) => el('option', { value: l.code }, l.name)),
