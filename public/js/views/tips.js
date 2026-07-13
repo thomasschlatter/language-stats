@@ -13,62 +13,46 @@ import { attachDeckButtons } from './listToDeck.js';
 import { voteButton } from './voteButton.js';
 import { navigate } from '../router.js';
 
-// Render the Tips section into `view` (part of the unified language page).
-// `onChange` re-renders the page after a tip is added/edited.
-export async function appendTips(view, langCode, onChange = () => {}) {
-  const language = store.languages.find((l) => l.code === langCode);
-  if (!language) return;
+// A tip's own page (a "card" in the unified list links here). Same layout as an
+// article: title, vote, author-only edit, markdown body with clickable words and
+// list→deck buttons.
+export async function renderTip(id) {
+  const view = clear(document.getElementById('view'));
+  view.append(el('p', { class: 'muted' }, 'Loading…'));
 
-  view.append(
-    el('div', { class: 'section-head', style: 'margin-top:2.25rem' }, [
-      el('h2', {}, 'Tips'),
-      store.user
-        ? el('button', { class: 'btn small', onclick: () => openTipEditor(language, onChange) }, '+ Share a tip')
-        : signInPrompt('to share tips'),
-    ])
-  );
-
-  const list = el('div', { class: 'tips-list' });
-  view.append(list);
-  list.append(el('p', { class: 'muted' }, 'Loading…'));
-
-  const { tips } = await api.tips(langCode);
-  clear(list);
-  if (!tips.length) {
-    list.append(el('p', { class: 'muted' }, 'No tips yet. Be the first to share one!'));
+  let tip;
+  try {
+    tip = (await api.tip(id)).tip;
+  } catch (ex) {
+    clear(view).append(el('p', { class: 'error' }, ex.message));
     return;
   }
 
-  const bodies = []; // { bodyEl, name } — deck buttons attached after tokenizing
-  for (const t of tips) {
-    const bodyLang = t.body_lang || store.nativeLang;
-    const canEdit = store.user && store.user.id === t.user_id;
-    const bodyEl = el('div', { class: 'tip-body article-body', lang: bodyLang }, parseArticle(t.body, bodyLang));
-    bodies.push({ bodyEl, name: t.title });
+  clear(view);
+  const bodyLang = tip.body_lang || store.nativeLang;
+  const canEdit = store.user && store.user.id === tip.user_id;
+  const language = store.languages.find((l) => l.code === tip.language_code);
 
-    list.append(
-      el('div', { class: 'card' }, [
-        el('div', { class: 'section-head', style: 'align-items:flex-start' }, [
-          el('h3', {}, renderText(t.title, bodyLang)),
-          el('div', { class: 'row', style: 'gap:0.5rem; align-items:center' }, [
-            canEdit
-              ? el('button', { class: 'btn small secondary', onclick: () => openTipEditor(language, onChange, t) }, 'Edit')
-              : null,
-            voteButton(t, api.voteTip),
-          ]),
-        ]),
-        bodyEl,
-        el('div', { class: 'meta', style: 'margin-top:0.5rem' }, `by @${t.author} · written in ${bodyLang} · ${t.created_at}`),
-      ])
-    );
-  }
-  tokenizeTree(list);
-  // After tokenizing (so buttons aren't tokenized), offer a deck per list.
-  for (const { bodyEl, name } of bodies) attachDeckButtons(bodyEl, langCode, name);
+  const container = el('article', { class: 'article', lang: bodyLang }, [
+    el('a', { href: `#/lang/${encodeURIComponent(tip.language_code)}`, class: 'muted back' }, `← ${tip.language_name}`),
+    el('div', { class: 'article-head' }, [
+      el('h1', {}, renderText(tip.title, bodyLang)),
+      el('div', { class: 'row', style: 'gap:0.5rem; align-items:center' }, [
+        canEdit ? el('button', { class: 'btn small secondary', onclick: () => openTipEditor(language, () => renderTip(id), tip) }, 'Edit') : null,
+        voteButton(tip, api.voteTip),
+      ]),
+    ]),
+    el('div', { class: 'article-meta' }, `by @${tip.author} · about ${tip.language_name} · written in ${bodyLang}`),
+    el('div', { class: 'article-body tip-body', lang: bodyLang }, parseArticle(tip.body, bodyLang)),
+  ]);
+  view.append(container);
+
+  tokenizeTree(container);
+  attachDeckButtons(container, tip.language_code, tip.title);
 }
 
 // Create (tip omitted) or edit (tip given) a tip. Markdown-aware.
-function openTipEditor(language, onDone, tip = null) {
+export function openTipEditor(language, onDone, tip = null) {
   const editing = !!tip;
   const err = el('div', { class: 'error' });
   const title = el('input', { type: 'text', placeholder: 'short title', value: tip?.title || '' });

@@ -13,6 +13,7 @@ import { signInPrompt } from './auth.js';
 import { renderArticles } from './views/articles.js';
 import { renderArticle } from './views/article.js';
 import { renderWordPage } from './views/wordPage.js';
+import { renderTip } from './views/tips.js';
 import { renderChat } from './views/chat.js';
 import { renderProgress } from './views/progress.js';
 import { renderUserProfile } from './views/userProfile.js';
@@ -42,6 +43,7 @@ const routes = [
   { pattern: /^#\/lang\/([^/]+)\/progress$/, handler: (m) => renderProgress(dec(m[1])), auth: true },
   { pattern: /^#\/lang\/([^/]+)$/, handler: (m) => renderArticles(dec(m[1])) },
   { pattern: /^#\/article\/(\d+)$/, handler: (m) => renderArticle(Number(m[1])) },
+  { pattern: /^#\/tip\/(\d+)$/, handler: (m) => renderTip(Number(m[1])) },
   { pattern: /^#\/w\/([^/]+)\/(.+)$/, handler: (m) => renderWordPage(dec(m[1]), dec(m[2])) },
 ];
 

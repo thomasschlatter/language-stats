@@ -8,12 +8,12 @@ import { el, clear, openModal } from '../dom.js';
 import { tokenizeTree } from '../render.js';
 import { voteButton } from './voteButton.js';
 import { signInPrompt } from '../auth.js';
-import { appendTips } from './tips.js';
+import { openTipEditor } from './tips.js';
 import { navigate } from '../router.js';
 
-// The unified language page: the language's cards followed by its tips. (There
-// are no longer separate Cards / Tips / Progress tabs — progress lives on your
-// profile.)
+// The unified language page: cards and tips are the same kind of thing — one
+// combined, upvote-ranked list of entries. Each links to its own page (an
+// article page or a tip page). Progress lives on your profile now.
 export async function renderArticles(langCode) {
   const view = clear(document.getElementById('view'));
   const language = store.languages.find((l) => l.code === langCode);
@@ -22,13 +22,12 @@ export async function renderArticles(langCode) {
     return;
   }
 
-  view.append(el('h1', {}, language.name));
   view.append(
     el('div', { class: 'section-head' }, [
-      el('h2', {}, 'Cards'),
+      el('h1', {}, language.name),
       store.user
-        ? el('button', { class: 'btn small', onclick: () => openNewCard(language) }, '+ New card')
-        : signInPrompt('to create cards'),
+        ? el('button', { class: 'btn small', onclick: () => openTipEditor(language, () => renderArticles(langCode)) }, '+ Add')
+        : signInPrompt('to add cards & tips'),
     ])
   );
   const note = el('p', { class: 'muted', style: 'margin-top:-0.5rem' });
@@ -38,57 +37,78 @@ export async function renderArticles(langCode) {
   view.append(grid);
   grid.append(el('span', { class: 'muted' }, 'Loading…'));
 
-  // Cards are filtered to the learner's native language. If there are none,
-  // fall back to English (the common lingua franca) rather than every language —
-  // a German speaker shouldn't be shown the Spanish version of a card. Only if
-  // there's no English card either do we show all, as a last resort.
-  let { articles } = await api.articles(langCode, store.nativeLang);
+  // Cards are filtered to the native language (falling back native → English →
+  // all so a German speaker isn't shown the Spanish version of a card).
+  let articles = [];
   let mode = 'native';
-  if (!articles.length && store.nativeLang.split('-')[0] !== 'en') {
-    ({ articles } = await api.articles(langCode, 'en'));
-    if (articles.length) mode = 'english';
-  }
-  if (!articles.length) {
-    ({ articles } = await api.articles(langCode));
-    if (articles.length) mode = 'all';
-  }
+  try {
+    ({ articles } = await api.articles(langCode, store.nativeLang));
+    if (!articles.length && store.nativeLang.split('-')[0] !== 'en') {
+      ({ articles } = await api.articles(langCode, 'en'));
+      if (articles.length) mode = 'english';
+    }
+    if (!articles.length) {
+      ({ articles } = await api.articles(langCode));
+      if (articles.length) mode = 'all';
+    }
+  } catch { /* ignore */ }
+
+  let tips = [];
+  try { ({ tips } = await api.tips(langCode)); } catch { /* ignore */ }
+
+  const entries = [
+    ...articles.map((a) => ({
+      id: a.id, title: a.title, summary: a.summary, author: a.author,
+      is_official: a.is_official, votes: a.votes || 0, voted: a.voted,
+      body_lang: a.body_lang, href: `#/article/${a.id}`, voteFn: api.voteArticle,
+    })),
+    ...tips.map((t) => ({
+      id: t.id, title: t.title, summary: snippet(t.body), author: t.author,
+      is_official: 0, votes: t.votes || 0, voted: t.voted,
+      body_lang: t.body_lang, href: `#/tip/${t.id}`, voteFn: api.voteTip,
+    })),
+  ];
+  // Curated (official) first, then most-upvoted, then newest.
+  entries.sort((a, b) => (b.is_official - a.is_official) || (b.votes - a.votes) || (b.id - a.id));
 
   clear(grid);
-  note.textContent = {
-    native: `Showing cards written in your native language (${store.nativeLang}). Change it top-right.`,
-    english: `No cards in your native language (${store.nativeLang}) yet — showing English cards. Change your native language top-right.`,
-    all: `No cards in your native language (${store.nativeLang}) or English yet — showing all cards. Change your native language top-right.`,
-  }[mode];
-
-  if (!articles.length) {
-    grid.append(el('p', { class: 'muted' }, 'No cards yet. Create the first one!'));
+  note.textContent = mode === 'english'
+    ? `No cards in your native language (${store.nativeLang}) yet — showing English. Change it on your profile.`
+    : mode === 'all'
+      ? `No cards in your native language or English yet — showing all.`
+      : '';
+  if (!entries.length) {
+    grid.append(el('p', { class: 'muted' }, 'Nothing here yet. Add the first card or tip!'));
   }
-  for (const a of articles) {
-    // The whole card is one link to the article; the vote button inside stops
-    // propagation so it doesn't navigate.
+  for (const e of entries) {
     grid.append(
-      el('a', { class: 'card article-card', href: `#/article/${a.id}` }, [
+      el('a', { class: 'card article-card', href: e.href }, [
         el('div', { class: 'card-top' }, [
           el('div', { class: 'card-badges' }, [
-            a.is_official
+            e.is_official
               ? el('span', { class: 'badge official' }, 'Official')
-              : el('span', { class: 'badge user' }, `@${a.author || 'user'}`),
-            a.body_lang ? el('span', { class: 'badge lang' }, a.body_lang) : null,
+              : el('span', { class: 'badge user' }, `@${e.author || 'user'}`),
+            e.body_lang ? el('span', { class: 'badge lang' }, e.body_lang) : null,
           ]),
-          voteButton(a),
+          voteButton(e, e.voteFn),
         ]),
-        el('h3', {}, a.title),
-        a.summary ? el('p', { class: 'muted card-summary' }, a.summary) : null,
+        el('h3', {}, e.title),
+        e.summary ? el('p', { class: 'muted card-summary' }, e.summary) : null,
       ])
     );
   }
-
-  // Tokenize the surrounding chrome (heading, hints). Cards are <a> links, so
-  // their inner text is left intact as a single click target.
   tokenizeTree(view);
+}
 
-  // Then the tips for this language on the same page.
-  await appendTips(view, langCode, () => renderArticles(langCode));
+// A plain-text preview of a markdown body (strips markers + {{loc|text}} tokens).
+function snippet(body) {
+  return String(body)
+    .replace(/\{\{[^|}]*\|([^}]*)\}\}/g, '$1')
+    .replace(/^[#>\-*\s]+/gm, '')
+    .replace(/[`*_]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 140);
 }
 
 const MARKUP_HELP =
