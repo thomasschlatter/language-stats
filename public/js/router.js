@@ -13,7 +13,6 @@ import { signInPrompt } from './auth.js';
 import { renderArticles } from './views/articles.js';
 import { renderArticle } from './views/article.js';
 import { renderWordPage } from './views/wordPage.js';
-import { renderTips } from './views/tips.js';
 import { renderChat } from './views/chat.js';
 import { renderProgress } from './views/progress.js';
 import { renderUserProfile } from './views/userProfile.js';
@@ -38,7 +37,8 @@ const routes = [
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },
   { pattern: /^#\/chat$/, handler: () => renderChat(), auth: true },
   { pattern: /^#\/chat\/([^/]+)$/, handler: (m) => renderChat(dec(m[1])), auth: true },
-  { pattern: /^#\/lang\/([^/]+)\/tips$/, handler: (m) => renderTips(dec(m[1])) },
+  // Tips + cards are one unified page now; old /tips links still resolve there.
+  { pattern: /^#\/lang\/([^/]+)\/tips$/, handler: (m) => renderArticles(dec(m[1])) },
   { pattern: /^#\/lang\/([^/]+)\/progress$/, handler: (m) => renderProgress(dec(m[1])), auth: true },
   { pattern: /^#\/lang\/([^/]+)$/, handler: (m) => renderArticles(dec(m[1])) },
   { pattern: /^#\/article\/(\d+)$/, handler: (m) => renderArticle(Number(m[1])) },

@@ -8,47 +8,25 @@ import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { renderText, tokenizeTree } from '../render.js';
 import { parseArticle } from '../articleMarkup.js';
-import { languageTabs } from './tabs.js';
 import { signInPrompt } from '../auth.js';
 import { attachDeckButtons } from './listToDeck.js';
 import { voteButton } from './voteButton.js';
 import { navigate } from '../router.js';
 
-export async function renderTips(langCode) {
-  const view = clear(document.getElementById('view'));
+// Render the Tips section into `view` (part of the unified language page).
+// `onChange` re-renders the page after a tip is added/edited.
+export async function appendTips(view, langCode, onChange = () => {}) {
   const language = store.languages.find((l) => l.code === langCode);
-  if (!language) {
-    view.append(el('p', { class: 'muted' }, 'Unknown language.'));
-    return;
-  }
+  if (!language) return;
 
-  view.append(languageTabs(langCode, 'tips'));
   view.append(
-    el('div', { class: 'section-head' }, [
-      el('h1', {}, `${language.name} tips`),
+    el('div', { class: 'section-head', style: 'margin-top:2.25rem' }, [
+      el('h2', {}, 'Tips'),
       store.user
-        ? el('button', { class: 'btn small', onclick: () => openTipEditor(language, () => renderTips(langCode)) }, '+ Share a tip')
+        ? el('button', { class: 'btn small', onclick: () => openTipEditor(language, onChange) }, '+ Share a tip')
         : signInPrompt('to share tips'),
     ])
   );
-
-  // Compact progress strip above the tips (for signed-in learners).
-  if (store.user) {
-    const strip = el('a', { class: 'tips-progress', href: `#/lang/${langCode}/progress` },
-      el('span', { class: 'muted' }, 'Loading your progress…'));
-    view.append(strip);
-    api.progress(langCode)
-      .then(({ summary }) => {
-        clear(strip).append(
-          el('span', {}, [el('strong', {}, String(summary.known)), ' words known']),
-          summary.hasFrequency
-            ? el('span', {}, [el('strong', {}, `${summary.coveragePct || 0}%`), ' of conversation'])
-            : el('span', { class: 'muted' }, 'coverage n/a here'),
-          el('span', { class: 'tips-progress-link' }, 'Full progress →')
-        );
-      })
-      .catch(() => strip.remove());
-  }
 
   const list = el('div', { class: 'tips-list' });
   view.append(list);
@@ -58,7 +36,6 @@ export async function renderTips(langCode) {
   clear(list);
   if (!tips.length) {
     list.append(el('p', { class: 'muted' }, 'No tips yet. Be the first to share one!'));
-    tokenizeTree(view);
     return;
   }
 
@@ -75,7 +52,7 @@ export async function renderTips(langCode) {
           el('h3', {}, renderText(t.title, bodyLang)),
           el('div', { class: 'row', style: 'gap:0.5rem; align-items:center' }, [
             canEdit
-              ? el('button', { class: 'btn small secondary', onclick: () => openTipEditor(language, () => renderTips(langCode), t) }, 'Edit')
+              ? el('button', { class: 'btn small secondary', onclick: () => openTipEditor(language, onChange, t) }, 'Edit')
               : null,
             voteButton(t, api.voteTip),
           ]),
@@ -85,7 +62,7 @@ export async function renderTips(langCode) {
       ])
     );
   }
-  tokenizeTree(view);
+  tokenizeTree(list);
   // After tokenizing (so buttons aren't tokenized), offer a deck per list.
   for (const { bodyEl, name } of bodies) attachDeckButtons(bodyEl, langCode, name);
 }

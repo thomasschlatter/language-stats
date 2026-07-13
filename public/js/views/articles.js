@@ -6,11 +6,14 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { tokenizeTree } from '../render.js';
-import { languageTabs } from './tabs.js';
 import { voteButton } from './voteButton.js';
 import { signInPrompt } from '../auth.js';
+import { appendTips } from './tips.js';
 import { navigate } from '../router.js';
 
+// The unified language page: the language's cards followed by its tips. (There
+// are no longer separate Cards / Tips / Progress tabs — progress lives on your
+// profile.)
 export async function renderArticles(langCode) {
   const view = clear(document.getElementById('view'));
   const language = store.languages.find((l) => l.code === langCode);
@@ -19,10 +22,10 @@ export async function renderArticles(langCode) {
     return;
   }
 
-  view.append(languageTabs(langCode, 'cards'));
+  view.append(el('h1', {}, language.name));
   view.append(
     el('div', { class: 'section-head' }, [
-      el('h1', {}, `${language.name} cards`),
+      el('h2', {}, 'Cards'),
       store.user
         ? el('button', { class: 'btn small', onclick: () => openNewCard(language) }, '+ New card')
         : signInPrompt('to create cards'),
@@ -83,6 +86,9 @@ export async function renderArticles(langCode) {
   // Tokenize the surrounding chrome (heading, hints). Cards are <a> links, so
   // their inner text is left intact as a single click target.
   tokenizeTree(view);
+
+  // Then the tips for this language on the same page.
+  await appendTips(view, langCode, () => renderArticles(langCode));
 }
 
 const MARKUP_HELP =
