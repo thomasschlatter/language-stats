@@ -3,7 +3,8 @@
 
 import { api } from '../api.js';
 import { store } from '../store.js';
-import { el, clear } from '../dom.js';
+import { el, clear, openModal } from '../dom.js';
+import { navigate } from '../router.js';
 import { tokenizeTree } from '../render.js';
 import { parseArticle } from '../articleMarkup.js';
 import { coverageWidget } from './coverageWidget.js';
@@ -32,7 +33,10 @@ export async function renderArticle(id) {
     el('a', { href: `#/lang/${encodeURIComponent(article.language_code)}`, class: 'muted back' }, `← ${article.language_name} cards`),
     el('div', { class: 'article-head' }, [
       el('h1', {}, article.title),
-      voteButton(article),
+      el('div', { class: 'row', style: 'gap:0.5rem; align-items:center' }, [
+        store.user ? el('button', { class: 'btn small secondary', onclick: () => openTranslate(article) }, '🌐 Translate') : null,
+        voteButton(article),
+      ]),
     ]),
     el('div', { class: 'article-meta' }, `${author} · about ${article.language_name} · written in ${bodyLang}`),
     el('div', { class: 'article-body' }, parseArticle(article.body, bodyLang)),
@@ -55,4 +59,44 @@ export async function renderArticle(id) {
 
   // Let the reader turn any list in the article into a flashcard deck.
   attachDeckButtons(container, article.language_code, article.title);
+}
+
+// Translate this card into another language with the on-device AI model, saving
+// the result as a new card.
+function openTranslate(article) {
+  const err = el('div', { class: 'error' });
+  const status = el('div', { class: 'muted', style: 'font-size:0.82rem' });
+  const srcBase = (article.body_lang || 'en').split('-')[0];
+  const sel = el('select', {},
+    store.languages
+      .filter((l) => l.lang !== srcBase)
+      .map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name))
+  );
+  const submit = el('button', { class: 'btn', type: 'submit' }, 'Translate & save');
+  const form = el('form', {
+    onsubmit: async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      submit.disabled = true;
+      status.textContent = 'Translating on-device… the first use of a language pair downloads the model (~1 min), then it is quick.';
+      try {
+        const { article: created } = await api.translateArticle(article.id, { targetLanguageCode: sel.value });
+        close();
+        navigate(`#/article/${created.id}`);
+      } catch (ex) {
+        err.textContent = ex.message;
+        submit.disabled = false;
+        status.textContent = '';
+      }
+    },
+  }, [
+    el('label', {}, 'Translate into'),
+    sel,
+    el('div', { class: 'muted', style: 'font-size:0.78rem; margin-top:0.3rem' },
+      'Runs a local AI model — no data leaves the server. Keeps {{…}} examples and widgets; translates the prose and saves it as a new card.'),
+    err,
+    status,
+    el('div', { class: 'row', style: 'margin-top:1rem' }, [submit]),
+  ]);
+  const close = openModal(el('div', {}, [el('h2', {}, `Translate “${article.title}”`), form]));
 }

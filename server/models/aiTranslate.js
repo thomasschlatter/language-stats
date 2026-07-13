@@ -36,6 +36,17 @@ export async function aiTranslate({ fromBase, toBase, text }) {
   };
 }
 
+// Translate many strings in one pipeline call (much faster than one-by-one) —
+// used to translate a whole article's segments at once.
+export async function aiTranslateBatch({ fromBase, toBase, texts }) {
+  if (!texts.length) return [];
+  if (fromBase === toBase) return texts.slice();
+  const pipe = await getPipeline(fromBase, toBase);
+  const out = await pipe(texts, { max_new_tokens: 512 });
+  const arr = Array.isArray(out) ? out : [out];
+  return arr.map((o) => o.translation_text);
+}
+
 // Whether a pair is already loaded (so the frontend can warn about first-load).
 export function isPairReady(fromBase, toBase) {
   return pipes.has(`${fromBase}-${toBase}`);

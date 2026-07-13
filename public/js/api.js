@@ -63,6 +63,7 @@ export const api = {
     request('GET', `/articles?lang=${encodeURIComponent(lang)}${native ? `&native=${encodeURIComponent(native)}` : ''}`),
   article: (id) => request('GET', `/articles/${id}`),
   createArticle: (b) => request('POST', '/articles', b),
+  translateArticle: (id, b) => request('POST', `/articles/${id}/translate`, b),
   voteArticle: (id) => request('POST', `/articles/${id}/vote`),
 
   // --- frequency coverage (% of conversation) ---
