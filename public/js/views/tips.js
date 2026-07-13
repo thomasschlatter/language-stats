@@ -8,7 +8,6 @@ import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { renderText, tokenizeTree } from '../render.js';
 import { parseArticle } from '../articleMarkup.js';
-import { signInPrompt } from '../auth.js';
 import { attachDeckButtons } from './listToDeck.js';
 import { voteButton } from './voteButton.js';
 import { navigate } from '../router.js';

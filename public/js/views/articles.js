@@ -4,12 +4,11 @@
 
 import { api } from '../api.js';
 import { store } from '../store.js';
-import { el, clear, openModal } from '../dom.js';
+import { el, clear } from '../dom.js';
 import { tokenizeTree } from '../render.js';
 import { voteButton } from './voteButton.js';
 import { signInPrompt } from '../auth.js';
 import { openTipEditor } from './tips.js';
-import { navigate } from '../router.js';
 
 // The unified language page: cards and tips are the same kind of thing — one
 // combined, upvote-ranked list of entries. Each links to its own page (an
@@ -109,53 +108,4 @@ function snippet(body) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 140);
-}
-
-const MARKUP_HELP =
-  'Markup:  "# Heading"  ·  "- bullet"  ·  blank line = new paragraph  ·  ' +
-  '"[coverage]" inserts the % of conversation buttons  ·  "{{de-DE|der Tisch}}" tags text as a locale.';
-
-function openNewCard(language) {
-  const err = el('div', { class: 'error' });
-  const title = el('input', { type: 'text', placeholder: 'card title' });
-  const summary = el('input', { type: 'text', placeholder: 'one-line summary (optional)' });
-  const body = el('textarea', {
-    placeholder: '# My heading\n\nSome text about {{de-DE|die Sprache}}.\n\n[coverage]',
-    style: 'min-height:180px; font-family:ui-monospace, monospace;',
-  });
-  const writtenIn = el('select', {},
-    store.languages.map((l) =>
-      el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)
-    )
-  );
-
-  const form = el('form', {
-    onsubmit: async (e) => {
-      e.preventDefault();
-      err.textContent = '';
-      try {
-        const { article } = await api.createArticle({
-          languageCode: language.code,
-          bodyLanguageCode: writtenIn.value,
-          title: title.value,
-          summary: summary.value || undefined,
-          body: body.value,
-        });
-        close();
-        navigate(`#/article/${article.id}`);
-      } catch (ex) {
-        err.textContent = ex.message;
-      }
-    },
-  }, [
-    el('label', {}, 'Title'), title,
-    el('label', {}, 'Summary'), summary,
-    el('label', {}, 'Body'), body,
-    el('div', { class: 'muted', style: 'font-size:0.78rem; margin-top:0.35rem' }, MARKUP_HELP),
-    el('label', {}, 'Written in'), writtenIn,
-    err,
-    el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Create card')]),
-  ]);
-
-  const close = openModal(el('div', {}, [el('h2', {}, `New ${language.name} card`), form]));
 }
