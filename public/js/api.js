@@ -58,6 +58,7 @@ export const api = {
 
   // --- tips ---
   tips: (lang) => request('GET', `/tips?lang=${encodeURIComponent(lang)}`),
+  tip: (id) => request('GET', `/tips/${id}`),
   createTip: (b) => request('POST', '/tips', b),
   updateTip: (id, b) => request('PUT', `/tips/${id}`, b),
   voteTip: (id) => request('POST', `/tips/${id}/vote`),

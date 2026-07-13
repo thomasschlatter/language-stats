@@ -302,7 +302,10 @@ body:not(.authed) .auth-only { display: none !important; }
 .w {
   cursor: pointer;
   border-radius: 3px;
-  padding: 0.02em 0.16em;
+  /* Tight horizontal padding + a matching negative margin so the familiarity
+     box still hugs the word without widening the space between words. */
+  padding: 0.04em 0.12em;
+  margin: 0 -0.1em;
   background: var(--seen-bg, transparent); /* red→green familiarity (set by seen.js) */
   transition: background 0.08s, color 0.08s;
 }

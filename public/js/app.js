@@ -137,34 +137,9 @@ function openLanguagePicker() {
   ]));
 }
 
-function confirmRemoveLanguage(lang) {
-  const err = el('div', { class: 'error' });
-  const close = openModal(el('div', {}, [
-    el('h2', {}, `Remove ${lang.name}?`),
-    el('p', { class: 'muted' }, 'This permanently deletes all of its words, cards, tips and messages.'),
-    err,
-    el('div', { class: 'row', style: 'justify-content:flex-end; margin-top:1rem' }, [
-      el('button', { class: 'btn small secondary', type: 'button', onclick: () => close() }, 'Cancel'),
-      el('button', {
-        class: 'btn small danger', type: 'button',
-        onclick: async () => {
-          err.textContent = '';
-          try {
-            await api.deleteLanguage(lang.code);
-            await reloadLanguages();
-            renderSidebar();
-            if ((window.location.hash || '').startsWith(`#/lang/${lang.code}`)) {
-              window.location.hash = store.languages[0] ? `#/lang/${store.languages[0].code}` : '#/';
-            }
-            close();
-          } catch (ex) {
-            err.textContent = ex.message;
-          }
-        },
-      }, 'Remove'),
-    ]),
-  ]));
-}
+// (The old global "delete language" flow was removed: the carousel × now only
+// un-learns a language client-side, so a user's words/decks/progress for it are
+// never deleted — re-adding the language brings all their progress back.)
 
 function openAddLanguage() {
   const err = el('div', { class: 'error' });

@@ -7,9 +7,11 @@ import db from '../db/index.js';
 // client show an "edit" control to the author; votes powers upvote ranking.
 const TIP_COLS = `t.id, t.title, t.body, t.created_at, t.user_id,
                   u.username AS author, bl.code AS body_lang,
+                  al.code AS language_code, al.name AS language_name,
                   (SELECT COUNT(*) FROM tip_votes tv WHERE tv.tip_id = t.id) AS votes`;
 const TIP_FROM = `FROM tips t
                   JOIN users u ON u.id = t.user_id
+                  JOIN languages al ON al.id = t.language_id
                   LEFT JOIN languages bl ON bl.id = t.body_lang_id`;
 
 // Tips ranked by upvotes (then most recent).

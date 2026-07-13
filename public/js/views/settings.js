@@ -140,7 +140,21 @@ function profileForm(prof) {
   ]);
 }
 
-function confirmDeleteAccount() {
+// A light/dark theme toggle (reused on the profile page). `onChange` runs after
+// switching so the caller can re-render if it shows the current theme.
+export function themeControl(onChange = () => {}) {
+  const current = () => document.documentElement.getAttribute('data-theme') || 'dark';
+  const setTheme = (t) => {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('ls_theme', t);
+    onChange();
+  };
+  const btn = (label, value) =>
+    el('button', { class: `btn small${current() === value ? '' : ' secondary'}`, onclick: () => setTheme(value) }, label);
+  return el('div', { class: 'row' }, [btn('☀️ Light', 'light'), btn('🌙 Dark', 'dark')]);
+}
+
+export function confirmDeleteAccount() {
   const err = el('div', { class: 'error' });
   const close = openModal(el('div', {}, [
     el('h2', {}, 'Delete your account?'),
