@@ -45,7 +45,7 @@ export default class Practice extends Phaser.Scene {
 
   // Short synthesized tones (no audio assets to load). Rising blip = correct,
   // low buzz = wrong. Uses Phaser's WebAudio context so it respects mute/autoplay.
-  private beep(kind: 'correct' | 'wrong') {
+  private beep(kind: 'correct' | 'wrong' | 'shoot') {
     const mgr = this.sound as any
     const ctx: AudioContext | undefined = mgr?.context
     if (!ctx || ctx.state === 'suspended') return
@@ -54,20 +54,26 @@ export default class Practice extends Phaser.Scene {
     const gain = ctx.createGain()
     osc.connect(gain)
     gain.connect(ctx.destination)
+    const peak = kind === 'shoot' ? 0.08 : 0.18
+    const dur = kind === 'shoot' ? 0.1 : 0.22
     gain.gain.setValueAtTime(0.0001, now)
-    gain.gain.exponentialRampToValueAtTime(0.18, now + 0.02)
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22)
+    gain.gain.exponentialRampToValueAtTime(peak, now + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur)
     if (kind === 'correct') {
       osc.type = 'sine'
       osc.frequency.setValueAtTime(660, now)
       osc.frequency.setValueAtTime(990, now + 0.09)
+    } else if (kind === 'shoot') {
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(880, now)
+      osc.frequency.exponentialRampToValueAtTime(320, now + 0.1)
     } else {
       osc.type = 'square'
       osc.frequency.setValueAtTime(200, now)
       osc.frequency.exponentialRampToValueAtTime(110, now + 0.2)
     }
     osc.start(now)
-    osc.stop(now + 0.24)
+    osc.stop(now + dur + 0.02)
   }
 
   constructor() { super('practice') }
@@ -264,8 +270,21 @@ export default class Practice extends Phaser.Scene {
 
   private fire() {
     const dir = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[this.facing]
-    const obj = this.add.circle(this.player.x, this.player.y - 6, 7, 0xffd479)
-      .setStrokeStyle(2, 0xffffff).setDepth(6)
+    // Muzzle just in front of the player, in the facing direction.
+    const mx = this.player.x + dir[0] * 18
+    const my = this.player.y - 6 + dir[1] * 18
+
+    // Shooting "animation": face the shot, a recoil squash, and a muzzle flash.
+    // (The character sheets have no dedicated shoot frames, so this sells the
+    // action with a run-frame + scale punch + flash instead.)
+    this.player.anims.play(`adam_run_${this.facing}`, true)
+    this.player.setScale(1.18)
+    this.tweens.add({ targets: this.player, scaleX: 1, scaleY: 1, duration: 130, ease: 'Quad.out' })
+    const flash = this.add.circle(mx, my, 11, 0xffffff, 0.95).setDepth(7)
+    this.tweens.add({ targets: flash, scale: 2.2, alpha: 0, duration: 130, onComplete: () => flash.destroy() })
+    this.beep('shoot')
+
+    const obj = this.add.circle(mx, my, 7, 0xffd479).setStrokeStyle(2, 0xffffff).setDepth(6)
     this.shots.push({ obj, vx: dir[0] * 560, vy: dir[1] * 560 })
   }
 
