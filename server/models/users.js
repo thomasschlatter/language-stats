@@ -99,6 +99,13 @@ export function updateProfile(userId, { bio, interests, origin, location }) {
     .run(bio ?? null, interests ?? null, origin ?? null, location ?? null, userId);
 }
 
+// Self-rated CEFR proficiency. Stored as a1..c2; invalid values are ignored.
+export const CEFR_LEVELS = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
+export function setLevel(userId, level) {
+  if (!CEFR_LEVELS.includes(level)) return;
+  db.prepare('UPDATE users SET level = ? WHERE id = ?').run(level, userId);
+}
+
 // Replace a user's languages for a given role ('native' | 'learning').
 export function setUserLanguages(userId, role, languageIds) {
   const del = db.prepare('DELETE FROM user_languages WHERE user_id = ? AND role = ?');
@@ -166,6 +173,7 @@ export function profile(user) {
     location: user.location || null,
     avatar,
     avatar_image: user.avatar_image || null,
+    level: user.level || 'a1',
     native: langs.filter((l) => l.role === 'native').map(({ code, name }) => ({ code, name })),
     learning: langs.filter((l) => l.role === 'learning').map(({ code, name }) => ({ code, name })),
     created_at: user.created_at,

@@ -81,6 +81,7 @@ export async function renderUserProfile(username) {
   if (isMe) {
     view.append(el('div', { class: 'prof-setting' }, nativeSelector()));
     view.append(learningLanguagesSetting());
+    view.append(levelSetting(prof));
   }
 
   // Word-familiarity rundown (only on your own profile).
@@ -155,6 +156,31 @@ async function removeAvatarImage(prof) {
     if (store.user) store.set({ user: { ...store.user, avatar_image: null } });
     renderUserProfile(prof.username);
   } catch (ex) { console.error(ex.message); }
+}
+
+// CEFR proficiency picker (stored as a1..c2, shown as words). Drives difficulty
+// in the practice games.
+const CEFR_OPTIONS = [
+  ['a1', 'Beginner (A1)'],
+  ['a2', 'Elementary (A2)'],
+  ['b1', 'Intermediate (B1)'],
+  ['b2', 'Upper-intermediate (B2)'],
+  ['c1', 'Advanced (C1)'],
+  ['c2', 'Proficient (C2)'],
+];
+function levelSetting(prof) {
+  const current = prof.level || 'a1';
+  const sel = el('select', {
+    class: 'native-select',
+    onchange: (e) => {
+      api.updateProfile({ level: e.target.value }).catch(() => {});
+      if (store.user) store.set({ user: { ...store.user, level: e.target.value } });
+    },
+  }, CEFR_OPTIONS.map(([v, label]) => el('option', { value: v, selected: v === current ? '' : null }, label)));
+  return el('div', { class: 'prof-setting' }, [
+    el('span', { class: 'prof-langs-label' }, 'Proficiency'),
+    sel,
+  ]);
 }
 
 // Persist the current learning set (carousel) to the server so it survives

@@ -157,7 +157,7 @@ router.get('/me', requireAuth, (req, res) => {
   const user = getUserById(req.user.id);
   const avatar = user.avatar ? JSON.parse(user.avatar) : null;
   const learning = getUserLanguages(req.user.id).filter((l) => l.role === 'learning').map((l) => l.code);
-  res.json({ user: { ...publicUser(user), avatar, avatar_image: user.avatar_image || null, learning } });
+  res.json({ user: { ...publicUser(user), avatar, avatar_image: user.avatar_image || null, level: user.level || 'a1', learning } });
 });
 
 // POST /api/auth/change-password  { currentPassword, newPassword }
