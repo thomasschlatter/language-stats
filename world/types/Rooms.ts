@@ -53,10 +53,10 @@ export const WORLDS: WorldInfo[] = [
     emoji: '☕',
   },
   {
-    id: 'world_lounge',
-    name: 'Lounge',
-    description: 'A warm indoor lounge to hang out, relax and chat.',
-    map: 'lounge',
-    emoji: '🛋️',
+    id: 'world_town',
+    name: 'Town',
+    description: 'City streets, shops and a roundabout — meet up downtown.',
+    map: 'town',
+    emoji: '🏙️',
   },
 ]

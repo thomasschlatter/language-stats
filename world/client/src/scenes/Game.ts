@@ -111,7 +111,7 @@ export default class Game extends Phaser.Scene {
     // Dispatch to the right map builder based on the world the player picked.
     const worldMap = (this.network as any).worldMap || 'meadow'
     if (worldMap === 'cafe') this.buildInterior('tilemap')
-    else if (worldMap === 'lounge') this.buildInterior('lobbyMap')
+    else if (worldMap === 'town') this.buildInterior('lobbyMap')
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else this.buildProcedural(worldMap)
 
