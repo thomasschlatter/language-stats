@@ -7,6 +7,7 @@ import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { avatarFor } from '../avatar.js';
 import { nativeSelector, logout } from '../auth.js';
+import { byImportance } from '../langOrder.js';
 import { openCharacterCreator } from './characterCreator.js';
 
 export async function renderUserProfile(username) {
@@ -75,6 +76,7 @@ export async function renderUserProfile(username) {
   // Your reading/translation settings live here now (was the top bar).
   if (isMe) {
     view.append(el('div', { class: 'prof-setting' }, nativeSelector()));
+    view.append(learningLanguagesSetting());
   }
 
   // Word-familiarity rundown (only on your own profile).
@@ -100,6 +102,40 @@ export async function renderUserProfile(username) {
       }
     }).catch(() => { clear(box); });
   }
+}
+
+// Manage the languages you're learning (the top-bar carousel set) from your
+// profile. Add/remove here mirrors the carousel; native language is excluded.
+function learningLanguagesSetting() {
+  const learning = store.languages
+    .filter((l) => store.isLearning(l.code) && l.code !== store.nativeLang)
+    .sort(byImportance);
+  const available = store.languages
+    .filter((l) => !store.isLearning(l.code) && l.code !== store.nativeLang)
+    .sort(byImportance);
+
+  return el('div', { class: 'prof-setting' }, [
+    el('span', { class: 'prof-langs-label' }, 'Languages you’re learning'),
+    el('div', { class: 'learn-pills' },
+      learning.length
+        ? learning.map((l) =>
+            el('span', { class: 'lang-pill removable' }, [
+              l.name,
+              el('button', {
+                class: 'lang-pill-x', title: `Remove ${l.name}`,
+                onclick: () => store.removeLearning(l.code),
+              }, '×'),
+            ]))
+        : el('span', { class: 'muted' }, 'None yet — add one below.')
+    ),
+    el('select', {
+      class: 'native-select',
+      onchange: (e) => { if (e.target.value) store.addLearning(e.target.value); },
+    }, [
+      el('option', { value: '' }, '+ Add a language…'),
+      ...available.map((l) => el('option', { value: l.code }, l.name)),
+    ]),
+  ]);
 }
 
 function famStat(value, label) {

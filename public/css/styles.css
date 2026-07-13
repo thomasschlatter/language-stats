@@ -576,6 +576,14 @@ body.in-world .lang-bar { display: none; }
   background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; font-size: 0.85rem;
 }
 .prof-bio { margin: 1rem 0; line-height: 1.6; white-space: pre-wrap; }
+/* Learning-languages manager on the profile */
+.learn-pills { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.4rem 0 0.6rem; }
+.lang-pill.removable { display: inline-flex; align-items: center; gap: 0.25rem; margin: 0; }
+.lang-pill-x {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 1rem; line-height: 1; padding: 0;
+}
+.lang-pill-x:hover { color: var(--danger); }
 .lang-picker { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 0.5rem 0; }
 .lang-check { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.9rem; color: var(--text); margin: 0; }
 .lang-check input { width: auto; }
