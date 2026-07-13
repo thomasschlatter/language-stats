@@ -18,6 +18,7 @@ export async function renderDecks() {
     el('div', { class: 'section-head' }, [
       el('span', { class: 'muted' }, 'Your decks — studying them turns those words greener in “Studied” colour mode.'),
       el('div', { class: 'row' }, [
+        el('button', { class: 'btn small secondary', title: 'Practise your deck words as a quick arcade game', onclick: () => openWordGame() }, '🎯 Word game'),
         el('button', { class: 'btn small secondary', onclick: () => openGenerate(() => renderDecks()) }, '✨ Generate (AI)'),
         el('button', { class: 'btn small', onclick: () => openImport(() => renderDecks()) }, '+ Import deck'),
       ]),
@@ -82,6 +83,24 @@ export async function renderDecks() {
       ]),
     ]));
   }
+}
+
+// Open the solo Word game (runs in the World service, deep-linked to practice
+// mode). Practice reads the signed-in user's decks via the same-origin cookie.
+async function openWordGame() {
+  let base = null;
+  try { ({ url: base } = await api.world()); } catch { /* unavailable */ }
+  if (!base) {
+    const close = openModal(el('div', {}, [
+      el('h2', {}, 'Word game'),
+      el('p', { class: 'muted' }, 'The game runs in the World, which is currently unavailable. Try again shortly.'),
+      el('div', { class: 'row', style: 'justify-content:flex-end' }, [
+        el('button', { class: 'btn small', onclick: () => close() }, 'OK'),
+      ]),
+    ]));
+    return;
+  }
+  window.open(`${base}?mode=practice`, '_blank', 'noopener');
 }
 
 // Generate a starter deck from the most frequent words, auto-translated by the
