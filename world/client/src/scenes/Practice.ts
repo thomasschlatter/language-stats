@@ -236,7 +236,15 @@ export default class Practice extends Phaser.Scene {
     this.clearZones()
     this.wordText.setText(this.lives <= 0 ? 'Out of lives!' : 'Level complete! 🎉')
     this.hudText.setText('')
-    this.info.setText(`Score ${this.score}   ·   ${this.idx}/${this.items.length} answered`)
+
+    // Persistent per-language best score (localStorage), with a "new best" nod.
+    const bestKey = `practice-best-${this.lang}`
+    let best = 0
+    try { best = Number(localStorage.getItem(bestKey)) || 0 } catch { /* ignore */ }
+    const isBest = this.score > best
+    if (isBest) { try { localStorage.setItem(bestKey, String(this.score)) } catch { /* ignore */ } }
+    const bestTxt = isBest ? '🏆 New best!' : `Best ${Math.max(best, this.score)}`
+    this.info.setText(`Score ${this.score}   ·   ${this.idx}/${this.items.length} answered   ·   ${bestTxt}`)
     this.busy = true
 
     const W = this.scale.width
