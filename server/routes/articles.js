@@ -4,7 +4,17 @@ import { getLanguageByCode } from '../models/languages.js';
 import { listArticles, getArticle, findArticleBySlug, createArticle } from '../models/articles.js';
 import { toggleVote, userVoted, votedIds } from '../models/votes.js';
 import { aiTranslateBatch } from '../models/aiTranslate.js';
+import * as OpenCC from 'opencc-js';
 import { requireAuth } from '../middleware/auth.js';
+
+// OPUS-MT outputs Simplified Chinese; convert to Traditional for zh-TW/HK/MO.
+const s2tConverters = {};
+function toChineseVariant(texts, targetCode) {
+  const region = /-(HK|MO)$/i.test(targetCode) ? 'hk' : /-(TW)$/i.test(targetCode) ? 'tw' : null;
+  if (!region) return texts;
+  if (!s2tConverters[region]) s2tConverters[region] = OpenCC.Converter({ from: 'cn', to: region });
+  return texts.map((t) => s2tConverters[region](t));
+}
 
 const router = Router();
 
@@ -119,6 +129,8 @@ router.post('/:id(\\d+)/translate', requireAuth, async (req, res) => {
   } catch {
     return res.status(502).json({ error: `no on-device model for ${fromBase} → ${toBase}` });
   }
+  // Simplified → Traditional when the target is a Traditional Chinese locale.
+  if (toBase === 'zh') translations = toChineseVariant(translations, target.code);
 
   const done = (job) => restore(translations[job.idx], job.tokens);
   const title = done(titleJob);
