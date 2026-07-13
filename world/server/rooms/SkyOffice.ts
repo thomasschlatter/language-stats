@@ -91,6 +91,9 @@ export class SkyOffice extends Room<OfficeState> {
     this.name = name;
     this.description = description;
     this.autoDispose = autoDispose;
+    // Cap a room so it stays lively (and video stays manageable); when it fills,
+    // Colyseus' joinOrCreate spins up a fresh instance of the same world.
+    this.maxClients = 16;
 
     let hasPassword = false;
     if (password) {
