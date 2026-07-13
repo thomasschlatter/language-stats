@@ -154,7 +154,12 @@ router.get('/decks/:id(\\d+)/export', requireAuth, (req, res) => {
 
   let body, type, ext;
   if (req.query.format === 'csv') {
-    const esc = (s) => `"${String(s ?? '').replace(/"/g, '""')}"`;
+    const esc = (s) => {
+      let v = String(s ?? '');
+      // Neutralise spreadsheet formula injection (=, +, -, @, tab, CR triggers).
+      if (/^[=+\-@\t\r]/.test(v)) v = `'${v}`;
+      return `"${v.replace(/"/g, '""')}"`;
+    };
     body = '﻿' + cards.map((c) => `${esc(c.front)},${esc(c.back)}`).join('\r\n') + '\r\n';
     type = 'text/csv; charset=utf-8';
     ext = 'csv';

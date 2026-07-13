@@ -160,8 +160,11 @@ router.post('/:id(\\d+)/translate', requireAuth, async (req, res) => {
     title,
     summary,
     body,
-    authorId: src.is_official ? null : req.user.id,
-    isOfficial: !!src.is_official,
+    // A user-triggered translation is always a user card — never official,
+    // even when the source card is official (else anyone could mint official
+    // content by translating a seeded card).
+    authorId: req.user.id,
+    isOfficial: false,
   });
   res.status(201).json({ article });
 });
