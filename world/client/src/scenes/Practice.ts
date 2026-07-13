@@ -26,6 +26,19 @@ export default class Practice extends Phaser.Scene {
   private hudText!: Phaser.GameObjects.Text
   private info!: Phaser.GameObjects.Text
 
+  // Speak the current word in the target language (browser TTS, no assets).
+  private speak(text: string) {
+    try {
+      const synth = window.speechSynthesis
+      if (!synth || !text) return
+      synth.cancel()
+      const u = new SpeechSynthesisUtterance(text)
+      u.lang = this.lang
+      u.rate = 0.9
+      synth.speak(u)
+    } catch { /* TTS unavailable — silently skip */ }
+  }
+
   // Short synthesized tones (no audio assets to load). Rising blip = correct,
   // low buzz = wrong. Uses Phaser's WebAudio context so it respects mute/autoplay.
   private beep(kind: 'correct' | 'wrong') {
@@ -77,7 +90,9 @@ export default class Practice extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#1b2340')
 
     this.wordText = this.add.text(W / 2, 56, 'Loading…', { fontSize: '40px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5).setDepth(10)
-    this.add.text(W / 2, 104, 'Arrow keys to move · SPACE to shoot the correct answer', { fontSize: '15px', color: '#9fb0d8' }).setOrigin(0.5).setDepth(10)
+      .setInteractive({ useHandCursor: true })
+    this.wordText.on('pointerdown', () => this.speak(this.items[this.idx]?.front || ''))
+    this.add.text(W / 2, 104, 'Arrow keys to move · SPACE to shoot · 🔊 tap the word to hear it', { fontSize: '15px', color: '#9fb0d8' }).setOrigin(0.5).setDepth(10)
     this.hudText = this.add.text(16, 16, '', { fontSize: '18px', color: '#ffffff' }).setDepth(10)
     this.info = this.add.text(W / 2, H - 44, '', { fontSize: '20px', color: '#ffd479' }).setOrigin(0.5).setDepth(10)
 
@@ -155,6 +170,7 @@ export default class Practice extends Phaser.Scene {
     const W = this.scale.width
     const H = this.scale.height
     this.wordText.setText(item.front)
+    this.speak(item.front) // auto-play pronunciation each new question
     const streakTxt = this.streak >= 2 ? `   🔥 ${this.streak}` : ''
     this.hudText.setText(`Score ${this.score}    ${'♥'.repeat(this.lives)}    ${this.idx + 1}/${this.items.length}${streakTxt}`)
     this.info.setText('')
