@@ -41,7 +41,7 @@ export function renderAuthArea() {
     const link = el('a', {
       class: 'me-avatar', href: `#/u/${encodeURIComponent(store.user.username)}`,
       title: `${store.user.username} — your profile`,
-    }, avatarFor(store.user.avatar, store.user.username, 34));
+    }, avatarFor(store.user.avatar, store.user.username, 34, store.user.avatar_image));
     area.append(colorModeToggle(), link);
   } else {
     area.append(

@@ -32,6 +32,9 @@ const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name)
 if (!userCols.includes('line_user_id')) {
   db.exec('ALTER TABLE users ADD COLUMN line_user_id TEXT');
 }
+if (!userCols.includes('avatar_image')) {
+  db.exec('ALTER TABLE users ADD COLUMN avatar_image TEXT'); // URL/path to a personal photo avatar
+}
 // UNIQUE index tolerates many NULLs but keeps LINE ids one-per-account.
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_line_user_id ON users(line_user_id)');
 

@@ -149,7 +149,7 @@ router.post('/logout', (req, res) => {
 router.get('/me', requireAuth, (req, res) => {
   const user = getUserById(req.user.id);
   const avatar = user.avatar ? JSON.parse(user.avatar) : null;
-  res.json({ user: { ...publicUser(user), avatar } });
+  res.json({ user: { ...publicUser(user), avatar, avatar_image: user.avatar_image || null } });
 });
 
 // POST /api/auth/change-password  { currentPassword, newPassword }

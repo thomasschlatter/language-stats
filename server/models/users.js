@@ -33,8 +33,13 @@ export function createLineUser({ lineId, displayName, email }) {
 
 export function getUserById(id) {
   return db
-    .prepare('SELECT id, email, username, bio, interests, origin, location, avatar, created_at FROM users WHERE id = ?')
+    .prepare('SELECT id, email, username, bio, interests, origin, location, avatar, avatar_image, created_at FROM users WHERE id = ?')
     .get(id);
+}
+
+// Set (or clear, with null) the user's personal photo avatar path.
+export function setAvatarImage(userId, path) {
+  db.prepare('UPDATE users SET avatar_image = ? WHERE id = ?').run(path ?? null, userId);
 }
 
 // Save a user's character (avatar layer indices) as JSON.
@@ -151,6 +156,7 @@ export function profile(user) {
     origin: user.origin || null,
     location: user.location || null,
     avatar,
+    avatar_image: user.avatar_image || null,
     native: langs.filter((l) => l.role === 'native').map(({ code, name }) => ({ code, name })),
     learning: langs.filter((l) => l.role === 'learning').map(({ code, name }) => ({ code, name })),
     created_at: user.created_at,

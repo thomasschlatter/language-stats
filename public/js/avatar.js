@@ -53,7 +53,14 @@ export function characterCanvas(indices, size = 48) {
 }
 
 // Avatar for a user: their character if they made one, else letter initials.
-export function avatarFor(avatar, username, size = 48) {
+export function avatarFor(avatar, username, size = 48, imageUrl = null) {
+  // A personal photo takes precedence over the pixel-art character.
+  if (imageUrl) {
+    const img = el('img', { src: imageUrl, alt: username || '', class: 'avatar avatar-photo' });
+    img.style.width = `${size}px`;
+    img.style.height = `${size}px`;
+    return img;
+  }
   if (avatar && typeof avatar === 'object') return characterCanvas(avatar, size);
   const d = el('div', { class: 'avatar' }, (username || '?').slice(0, 2).toUpperCase());
   d.style.width = `${size}px`;

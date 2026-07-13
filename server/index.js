@@ -47,6 +47,7 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false 
 // .apkg uploads (base64) need a bigger limit than the default — apply it only
 // to that path, before the small global JSON parser.
 app.use('/api/flashcards/import-apkg', express.json({ limit: '30mb' }));
+app.use('/api/profile/avatar-image', express.json({ limit: '5mb' })); // base64 photo
 app.use(express.json({ limit: '256kb' }));
 app.use(cookieParser());
 app.use(attachUser); // makes req.user available to every route
@@ -78,6 +79,11 @@ app.get('/api/world', (_req, res) => {
 
 // Unknown API routes -> JSON 404 (so the SPA fallback below never masks them)
 app.use('/api', (_req, res) => res.status(404).json({ error: 'not found' }));
+
+// --- Uploads (user avatar photos) ------------------------------------------
+// Served from the persistent data dir so they survive redeploys.
+const uploadsDir = join(process.env.DATA_DIR || join(__dirname, '..', 'data'), 'uploads');
+app.use('/uploads', express.static(uploadsDir, { maxAge: '1h' }));
 
 // --- Frontend --------------------------------------------------------------
 const publicDir = join(__dirname, '..', 'public');

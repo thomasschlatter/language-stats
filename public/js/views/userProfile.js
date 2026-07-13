@@ -36,7 +36,7 @@ export async function renderUserProfile(username) {
   view.append(
     el('div', { class: 'profile' }, [
       el('div', { class: 'profile-head' }, [
-        avatarFor(prof.avatar, prof.username, 64),
+        avatarFor(prof.avatar, prof.username, 64, prof.avatar_image),
         el('div', {}, [
           el('h1', { style: 'margin:0' }, `@${prof.username}`),
           el('div', { class: 'muted' }, `member since ${(prof.created_at || '').slice(0, 10)}`),
@@ -45,6 +45,10 @@ export async function renderUserProfile(username) {
         isMe
           ? el('div', { class: 'row' }, [
               el('button', { class: 'btn small', onclick: () => openCharacterCreator(prof.avatar, () => renderUserProfile(prof.username)) }, prof.avatar ? 'Edit character' : 'Create character'),
+              el('button', { class: 'btn small secondary', onclick: () => pickAvatarImage(prof) }, prof.avatar_image ? 'Change photo' : 'Use a photo'),
+              prof.avatar_image
+                ? el('button', { class: 'btn small secondary', onclick: () => removeAvatarImage(prof) }, 'Remove photo')
+                : null,
               el('button', { class: 'btn small secondary', onclick: () => openEdit(prof) }, 'Edit profile'),
               el('button', { class: 'btn small secondary', onclick: () => logout() }, 'Sign out'),
             ])
@@ -102,6 +106,55 @@ export async function renderUserProfile(username) {
       }
     }).catch(() => { clear(box); });
   }
+}
+
+// Downscale a chosen image file to a small square-ish JPEG data URL (keeps
+// uploads tiny). Returns a data: URL string.
+function fileToResizedDataUrl(file, max = 256) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(img.src);
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => reject(new Error('could not read that image'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// Pick a photo from disk, resize it, and set it as the avatar.
+function pickAvatarImage(prof) {
+  const input = el('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', style: 'display:none' });
+  document.body.append(input);
+  input.addEventListener('change', async () => {
+    const file = input.files && input.files[0];
+    input.remove();
+    if (!file) return;
+    try {
+      const dataUrl = await fileToResizedDataUrl(file, 256);
+      const { avatar_image } = await api.uploadAvatarImage(dataUrl);
+      if (store.user) store.set({ user: { ...store.user, avatar_image } }); // refresh top bar
+      renderUserProfile(prof.username);
+    } catch (ex) {
+      console.error('avatar upload failed:', ex.message);
+    }
+  });
+  input.click();
+}
+
+async function removeAvatarImage(prof) {
+  try {
+    await api.removeAvatarImage();
+    if (store.user) store.set({ user: { ...store.user, avatar_image: null } });
+    renderUserProfile(prof.username);
+  } catch (ex) { console.error(ex.message); }
 }
 
 // Manage the languages you're learning (the top-bar carousel set) from your

@@ -65,7 +65,7 @@ export async function renderChat(langCode) {
   const renderMsg = (m) => {
     const bodyLang = m.body_lang || store.nativeLang;
     return el('div', { class: 'chat-msg' }, [
-      el('a', { class: 'chat-avatar-link', href: `#/u/${encodeURIComponent(m.author)}` }, avatarFor(m.author_avatar, m.author, 32)),
+      el('a', { class: 'chat-avatar-link', href: `#/u/${encodeURIComponent(m.author)}` }, avatarFor(m.author_avatar, m.author, 32, m.author_avatar_image)),
       el('div', { class: 'chat-msg-main' }, [
         el('div', { class: 'chat-meta' }, [
           el('span', { class: 'chat-author' }, `@${m.author}`),
