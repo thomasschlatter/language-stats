@@ -23,6 +23,7 @@ export function issueToken(res, user) {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production', // HTTPS-only in prod
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }

@@ -3,11 +3,13 @@ import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
 import { glossText } from '../models/translate.js';
 import { aiTranslate, isPairReady } from '../models/aiTranslate.js';
+import { requireAuth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rateLimit.js';
 
 const router = Router();
 
 // POST /api/translate  { text, from, to }  -> instant dictionary word-gloss
-router.post('/', (req, res) => {
+router.post('/', rateLimit({ max: 120 }), (req, res) => {
   const { text, from, to } = req.body ?? {};
   if (!text) return res.status(400).json({ error: 'text is required' });
   const fromLang = getLanguageByCode(from);
@@ -19,7 +21,9 @@ router.post('/', (req, res) => {
 // POST /api/translate/ai  { text, from, to }  -> local AI (OPUS-MT) sentence
 // translation. First call for a language pair downloads the model (~150MB),
 // then it's cached. Unavailable pairs return 503 so the client falls back.
-router.post('/ai', async (req, res) => {
+// Local AI inference is CPU-heavy and downloads models — members only, and
+// rate-limited so it can't be used to exhaust the server.
+router.post('/ai', requireAuth, rateLimit({ max: 30 }), async (req, res) => {
   const { text, from, to } = req.body ?? {};
   if (!text) return res.status(400).json({ error: 'text is required' });
   const fromLang = getLanguageByCode(from);

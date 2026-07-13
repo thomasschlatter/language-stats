@@ -9,6 +9,7 @@
 // could be replaced or hosted separately without touching the backend.
 
 import express from 'express';
+import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +37,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+
+// Security headers. CSP is disabled because the frontend uses inline scripts
+// (enabling it would need nonces); COEP is off so the same-origin World iframe
+// and its WebRTC keep working. Everything else (HSTS, nosniff, frameguard,
+// referrer-policy, …) applies.
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 
 // .apkg uploads (base64) need a bigger limit than the default — apply it only
 // to that path, before the small global JSON parser.
