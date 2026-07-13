@@ -41,7 +41,8 @@ export function genderNounsWidget(langCode) {
     }
     clear(result);
     if (!nouns.length) {
-      result.append(el('p', { class: 'muted' }, 'No gender data for this language yet.'));
+      result.append(el('p', { class: 'muted' },
+        'No unguessable-gender nouns at this coverage level — try a higher % (or this language has no gender data yet).'));
       return;
     }
 
