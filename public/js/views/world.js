@@ -39,11 +39,17 @@ export async function renderWorld() {
     ])
   );
 
-  view.append(el('iframe', {
+  const frame = el('iframe', {
     class: 'world-frame',
     src,
     allow: 'camera; microphone; fullscreen; display-capture',
-  }));
+  });
+  // Keep keyboard focus on the game so key releases reach it (a lost keyup makes
+  // the character walk forever). Focus it once it loads and whenever the pointer
+  // is over it.
+  frame.addEventListener('load', () => frame.focus());
+  frame.addEventListener('mouseenter', () => frame.focus());
+  view.append(frame);
 
   view.append(el('p', { class: 'muted', style: 'font-size:0.8rem; margin-top:0.5rem' },
     `If nothing loads, start the world (in the repo's world/ folder): "npm run world:install" once, then "npm run world:server" (:2567) and "npm run world:client" (:5173). Expected at ${base}.`));

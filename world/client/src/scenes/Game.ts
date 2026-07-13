@@ -55,6 +55,24 @@ export default class Game extends Phaser.Scene {
     this.keyR = this.input.keyboard.addKey('R')
     this.keySpace = this.input.keyboard.addKey('SPACE')
     this.input.keyboard.disableGlobalCapture()
+    // Capture the movement keys so the browser doesn't scroll the (iframe) page
+    // on arrow/WASD presses. Without this, an arrow keypress inside the embedded
+    // World iframe scrolls/steals focus and the matching keyup is delivered to the
+    // parent window instead of the game — leaving the key stuck "down" so the
+    // character keeps walking after release. Other keys stay uncaptured so chat
+    // typing still works.
+    this.input.keyboard.addCapture('UP,DOWN,LEFT,RIGHT,W,A,S,D,SPACE')
+
+    // Safety net: if the game ever loses focus (tab switch, click outside the
+    // iframe, alt-tab) a keyup can be missed. Clear all key state on blur so a
+    // key can never remain stuck "down".
+    const resetKeys = () => this.input.keyboard?.resetKeys()
+    this.game.events.on(Phaser.Core.Events.BLUR, resetKeys)
+    window.addEventListener('blur', resetKeys)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) resetKeys()
+    })
+
     this.input.keyboard.on('keydown-ENTER', (event) => {
       store.dispatch(setShowChat(true))
       store.dispatch(setFocused(true))
@@ -103,37 +121,170 @@ export default class Game extends Phaser.Scene {
 
     const W = 48
     const H = 36
-    const GRASS = 1167 // base ground tile (Tiled gid 1168 → data index gid-1)
-    const WALL = 480 //   collidable obstacle tile (gid 481 → gid-1)
+    const GRASS = 476 // textured grass (Tiled gid 477 → data index gid-1)
+
+    // Water shoreline autotile — a water hole in grass (dirt bank on top/bottom,
+    // grassy edge on the sides) + interior water with ripple/lily-pad variants.
+    // This tileset only ships the EAST-facing shore tiles, so the WEST edges
+    // reuse the same tiles flipped horizontally (see flipCells below).
+    const W_N = 481, W_NE = 482
+    const W_C = 654, W_E = 655
+    const W_S = 827, W_SE = 828
+    const W_RIPPLE = [997, 998, 999, 1000]
+    const W_LILY = [1001, 1002, 1003]
+    const WATER_TILES = [
+      W_N, W_NE, W_C, W_E, W_S, W_SE,
+      ...W_RIPPLE, ...W_LILY,
+    ]
+
+    // Decoration tiles — all have transparent backgrounds, so they're painted on
+    // an overlay layer that sits above the grass (indices verified against the
+    // tileset image; each value is a Tiled gid-1 frame index).
+    // A big palette of scatter objects (indices verified against the tileset).
+    // OBJ_WALK = flat ground detail you walk over; OBJ_SOLID = chunky objects
+    // that block movement. Every one of these appears at least once in the world.
+    const OBJ_WALK = [
+      // flowers & plants
+      188, 361, 422, 497, 498, 534, 671, 707, 880, 1175, 1435, 1608, 2152, 2153,
+      2094, 2095, 2096, 2269, 2270, 2271, 2475, 2476,
+      // mushrooms
+      3060, 3061, 3062, 3233, 3234, 3235,
+      // grass tufts
+      1095, 3424, 3579, 3580,
+      // pebbles & gems
+      3057, 3129, 3230, 3302, 3176, 3003,
+      // sticks & twigs
+      3788, 3789, 3796, 3797, 4306, 4314, 4316, 4650, 4656, 4657, 4658,
+      // bottles & cans
+      1509, 1510, 1511, 1682, 1683, 1684,
+      // food
+      1633, 1634, 1806, 1807, 4463, 7114, 10665,
+      // misc
+      1150, 670, 1958, 1979,
+    ]
+    const OBJ_SOLID = [
+      // bushes
+      495, 669, 879, 1094, 1262, 1353, 1526, 1781, 2302, 2303, 3406, 3407,
+      // small trees / stumps
+      1089, 1093, 3070, 4802,
+      // rocks
+      3058, 3059, 3231, 3232, 3403, 3405, 1788, 4629, 6770,
+      // flower planters & boxes
+      1954, 1955, 2127, 2128, 2300, 2301, 9225, 9398, 9571, 9917, 10090, 10263,
+      // potted plants
+      10833, 10838, 11006, 11007,
+      // baskets, barrels, crates
+      324, 325, 1144, 1501, 1502, 1503, 2019, 2203, 2477, 1846, 4805, 6936,
+      // lanterns
+      1674, 1675, 1676,
+      // benches & tables
+      2196, 2197, 2325, 5321, 5322,
+      // posts, lamps, signs
+      2435, 2724, 2788, 3081, 3170, 3288, 4098, 4099, 4167, 8320,
+      // bins, wood piles, cone
+      2844, 2845, 1574, 3927, 6255,
+    ]
+    // Full 4×4 apple tree (canopy + trunk + shadow base). The trunk tile blocks
+    // movement; the rest of the footprint is walkable canopy overhang.
+    const TREE = [
+      [838, 839, 840, 841],
+      [1011, 1012, 1013, 1014],
+      [1184, 1185, 1186, 1187],
+      [1357, 1358, 1359, 1360],
+    ]
+    const TREE_TRUNK = 1358
+
+    const spawnTX = Math.floor(W / 2)
+    const spawnTY = Math.floor(H / 2)
+
+    // --- water mask: a sea border + a few ponds. Ponds are axis-aligned
+    // rectangles (which keep the shoreline free of inner corners so the autotile
+    // stays clean), but their proportions vary a lot — wide, tall, big, small —
+    // so they read as different shapes. ---
+    const water: boolean[][] = Array.from({ length: H }, (_, y) =>
+      Array.from({ length: W }, (_, x) => x === 0 || y === 0 || x === W - 1 || y === H - 1)
+    )
+    const rectFree = (x0: number, y0: number, w: number, h: number) => {
+      const cx = x0 + (w >> 1)
+      const cy = y0 + (h >> 1)
+      if (Math.abs(cx - spawnTX) <= 6 && Math.abs(cy - spawnTY) <= 6) return false
+      for (let y = y0 - 1; y <= y0 + h; y++)
+        for (let x = x0 - 1; x <= x0 + w; x++) {
+          if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) return false
+          if (water[y][x]) return false // keep a 1-cell grass gap between ponds
+        }
+      return true
+    }
+    // varied proportions: 0 wide, 1 tall, 2 big square, 3 small
+    const pondKinds = [() => [6 + Math.floor(rng() * 6), 3 + Math.floor(rng() * 2)],
+                       () => [3 + Math.floor(rng() * 2), 6 + Math.floor(rng() * 5)],
+                       () => [6 + Math.floor(rng() * 4), 5 + Math.floor(rng() * 3)],
+                       () => [3 + Math.floor(rng() * 2), 3 + Math.floor(rng() * 2)]]
+    let pondCount = 0
+    let pondTries = 300
+    while (pondCount < 6 && pondTries-- > 0) {
+      const [w, h] = pondKinds[Math.floor(rng() * pondKinds.length)]()
+      const x0 = 2 + Math.floor(rng() * Math.max(1, W - 4 - w))
+      const y0 = 2 + Math.floor(rng() * Math.max(1, H - 4 - h))
+      if (!rectFree(x0, y0, w, h)) continue
+      for (let y = y0; y < y0 + h; y++)
+        for (let x = x0; x < x0 + w; x++) water[y][x] = true
+      pondCount++
+    }
+    // keep the spawn clearing on dry land
+    for (let dy = -4; dy <= 4; dy++)
+      for (let dx = -4; dx <= 4; dx++) {
+        const x = spawnTX + dx
+        const y = spawnTY + dy
+        if (x > 0 && y > 0 && x < W - 1 && y < H - 1) water[y][x] = false
+      }
+
+    // --- autotile: grass everywhere, shore/water tiles on water cells (off-map
+    // neighbours count as water, so the true map edge has no shore). ---
+    const landAt = (x: number, y: number) =>
+      x >= 0 && y >= 0 && x < W && y < H && !water[y][x]
+    const flipCells: Array<[number, number]> = []
     const grid: number[][] = []
     for (let y = 0; y < H; y++) {
       const row: number[] = []
       for (let x = 0; x < W; x++) {
-        const border = x === 0 || y === 0 || x === W - 1 || y === H - 1
-        row.push(border ? WALL : GRASS)
+        if (!water[y][x]) { row.push(GRASS); continue }
+        const n = landAt(x, y - 1), s = landAt(x, y + 1)
+        const wl = landAt(x - 1, y), e = landAt(x + 1, y)
+        let t: number
+        let flip = false
+        if (n && wl) { t = W_NE; flip = true } // NW = NE mirrored
+        else if (n && e) t = W_NE
+        else if (s && wl) { t = W_SE; flip = true } // SW = SE mirrored
+        else if (s && e) t = W_SE
+        else if (n) t = W_N
+        else if (s) t = W_S
+        else if (wl) { t = W_E; flip = true } // W = E mirrored
+        else if (e) t = W_E
+        else {
+          const rr = rng()
+          t = rr < 0.06 ? W_LILY[Math.floor(rng() * W_LILY.length)]
+            : rr < 0.35 ? W_RIPPLE[Math.floor(rng() * W_RIPPLE.length)]
+            : W_C
+        }
+        row.push(t)
+        if (flip) flipCells.push([x, y])
       }
       grid.push(row)
     }
-    const clusters = 20 + Math.floor(rng() * 16)
-    for (let i = 0; i < clusters; i++) {
-      const cx = 2 + Math.floor(rng() * (W - 4))
-      const cy = 2 + Math.floor(rng() * (H - 4))
-      const size = 1 + Math.floor(rng() * 3)
-      for (let dy = 0; dy < size; dy++)
-        for (let dx = 0; dx < size; dx++) {
-          const x = cx + dx
-          const y = cy + dy
-          if (x > 0 && y > 0 && x < W - 1 && y < H - 1) grid[y][x] = WALL
-        }
-    }
-    const spawnTX = Math.floor(W / 2)
-    const spawnTY = Math.floor(H / 2)
-    for (let dy = -3; dy <= 3; dy++)
-      for (let dx = -3; dx <= 3; dx++) {
-        const x = spawnTX + dx
-        const y = spawnTY + dy
-        if (x > 0 && y > 0 && x < W - 1 && y < H - 1) grid[y][x] = GRASS
+
+    // The pond's top shore is two tiles tall: a grassy tuft overhang sits on the
+    // land cell directly ABOVE each top-edge water cell (matching the tufts the
+    // bottom/side edges already have). Overhang tiles are walkable land.
+    const OVERHANG_N = 308, OVERHANG_NE = 309
+    for (let y = 0; y < H - 1; y++) {
+      for (let x = 0; x < W; x++) {
+        if (water[y][x] || !water[y + 1][x]) continue // land cell above water
+        if (landAt(x + 1, y + 1)) grid[y][x] = OVERHANG_NE // above a NE corner
+        else if (landAt(x - 1, y + 1)) { grid[y][x] = OVERHANG_NE; flipCells.push([x, y]) } // NW
+        else grid[y][x] = OVERHANG_N
       }
+    }
 
     this.map = this.make.tilemap({ data: grid, tileWidth: 32, tileHeight: 32 })
     const tileset = this.map.addTilesetImage(
@@ -143,18 +294,231 @@ export default class Game extends Phaser.Scene {
       32
     )!
     const groundLayer = this.map.createLayer(0, tileset, 0, 0)!
-    groundLayer.setCollision([WALL])
+    groundLayer.setCollision(WATER_TILES)
+    // west-facing shores reuse the east tiles, mirrored horizontally
+    for (const [fx, fy] of flipCells) {
+      const gt = groundLayer.getTileAt(fx, fy)
+      if (gt) gt.flipX = true
+    }
+
+    // --- decoration overlay: trees, shrubs, rocks, flowers on top of the grass ---
+    const deco = this.map.createBlankLayer('decoration', tileset)!
+    const used: boolean[][] = Array.from({ length: H }, () => new Array(W).fill(false))
+    const isGrass = (x: number, y: number) =>
+      x > 0 && y > 0 && x < W - 1 && y < H - 1 && grid[y][x] === GRASS
+    const nearSpawn = (x: number, y: number) =>
+      Math.abs(x - spawnTX) <= 5 && Math.abs(y - spawnTY) <= 5
+    const pick = (arr: number[]) => arr[Math.floor(rng() * arr.length)]
+
+    // Build the tree as a single 128×128 texture from the 4×4 tileset region so
+    // each tree is one image we can depth-sort. We bake THREE recoloured
+    // variants of the same clean tree (green apple, autumn orange, dark
+    // evergreen) — reliable variety with no messy multi-tree extraction.
+    type Recolor = (r: number, g: number, b: number, a: number) => [number, number, number, number]
+    // Bake a w×h tileset region into one texture. `mask` keeps only the pixels
+    // connected to the bottom-centre (drops touching neighbours in the sheet);
+    // `recolor` re-tints each pixel.
+    const buildObjTex = (
+      key: string, c0: number, r0: number, w: number, h: number,
+      opts: { mask?: boolean; recolor?: Recolor } = {}
+    ) => {
+      if (this.textures.exists(key)) return
+      const srcImg = this.textures.get('complete_exterior_tileset').getSourceImage() as HTMLImageElement
+      const cw = w * 32, ch = h * 32
+      const canvasTex = this.textures.createCanvas(key, cw, ch)!
+      const ctx = canvasTex.getContext()
+      ctx.drawImage(srcImg, c0 * 32, r0 * 32, cw, ch, 0, 0, cw, ch)
+      const img = ctx.getImageData(0, 0, cw, ch)
+      const d = img.data
+      if (opts.mask) {
+        // label connected components, keep the largest (the object itself)
+        const comp = new Int32Array(cw * ch).fill(-1)
+        const nb = [-1, 1, -cw, cw, -cw - 1, -cw + 1, cw - 1, cw + 1]
+        let best = -1, bestSize = 0, cid = 0
+        for (let start = 0; start < cw * ch; start++) {
+          if (d[start * 4 + 3] <= 30 || comp[start] >= 0) continue
+          const stack = [start]; comp[start] = cid; let size = 0
+          while (stack.length) {
+            const p = stack.pop()!; size++
+            const x = p % cw
+            for (const off of nb) {
+              const q = p + off
+              if (q < 0 || q >= cw * ch) continue
+              if (Math.abs((q % cw) - x) > 1) continue
+              if (comp[q] < 0 && d[q * 4 + 3] > 30) { comp[q] = cid; stack.push(q) }
+            }
+          }
+          if (size > bestSize) { bestSize = size; best = cid }
+          cid++
+        }
+        for (let p = 0; p < cw * ch; p++) if (comp[p] !== best) d[p * 4 + 3] = 0
+      }
+      if (opts.recolor) {
+        for (let i = 0; i < d.length; i += 4) {
+          const [nr, ng, nb2, na] = opts.recolor(d[i], d[i + 1], d[i + 2], d[i + 3])
+          d[i] = nr; d[i + 1] = ng; d[i + 2] = nb2; d[i + 3] = na
+        }
+      }
+      ctx.putImageData(img, 0, 0)
+      canvasTex.refresh()
+    }
+    const cl = (v: number) => Math.max(0, Math.min(255, Math.round(v)))
+    // robust: red channel clearly dominant → an apple pixel (spares the brown trunk)
+    const isRed = (r: number, g: number, b: number) => r - g > 40 && r - b > 40
+    // Three GREEN tree tones (no red/orange). Apples are recoloured to foliage
+    // green first, then the whole canopy is toned.
+    const green: Recolor = (r, g, b, a) =>
+      a !== 0 && isRed(r, g, b) ? [60, 120, 60, a] : [r, g, b, a]
+    const light: Recolor = (r, g, b, a) => {
+      if (a === 0) return [r, g, b, a]
+      if (isRed(r, g, b)) { r = 60; g = 120; b = 60 }
+      return g >= r && g > b + 8 ? [cl(r * 0.9 + 40), cl(g * 1.12 + 15), cl(b * 0.8 + 10), a] : [r, g, b, a]
+    }
+    const dark: Recolor = (r, g, b, a) => {
+      if (a === 0) return [r, g, b, a]
+      if (isRed(r, g, b)) { r = 60; g = 120; b = 60 }
+      return g >= r && g > b + 8 ? [cl(r * 0.55), cl(g * 0.72), cl(b * 0.72 + 18), a] : [r, g, b, a]
+    }
+    // Two tree SHAPES (spread canopy + round), each in three green tones → six
+    // distinct trees. The round shape is masked to drop its neighbours.
+    const TONES: Array<[string, Recolor]> = [['green', green], ['light', light], ['dark', dark]]
+    const TREE_KEYS: string[] = []
+    for (const [tone, rc] of TONES) {
+      buildObjTex(`tree_spread_${tone}`, 146, 4, 4, 4, { recolor: rc })
+      buildObjTex(`tree_round_${tone}`, 154, 6, 4, 4, { mask: true, recolor: rc })
+      TREE_KEYS.push(`tree_spread_${tone}`, `tree_round_${tone}`)
+    }
+    // Cottage — a big depth-sorted landmark building (2-storey, full height).
+    // Masked (largest component) so the neighbouring house in the sheet is
+    // dropped and the whole cottage incl. its base/porch is kept.
+    const HOUSE_W = 14, HOUSE_H = 14
+    buildObjTex('house_brown', 95, 45, HOUSE_W, HOUSE_H, { mask: true })
+    const HOUSE_KEYS = ['house_brown']
+
+    const solidTile = (x: number, y: number) => {
+      const t = deco.putTileAt(TREE_TRUNK, x, y) // invisible collider (a collidable index)
+      if (t) t.setVisible(false)
+    }
+
+    // Houses first (they need the most room) — a couple of cottage landmarks.
+    let houseCount = 0
+    let houseTries = 100
+    while (houseCount < 2 && houseTries-- > 0) {
+      const hx = 2 + Math.floor(rng() * Math.max(1, W - HOUSE_W - 3))
+      const hy = 2 + Math.floor(rng() * Math.max(1, H - HOUSE_H - 3))
+      let ok = true
+      for (let dy = 0; dy < HOUSE_H && ok; dy++)
+        for (let dx = 0; dx < HOUSE_W && ok; dx++) {
+          const x = hx + dx, y = hy + dy
+          if (water[y][x] || used[y][x] || nearSpawn(x, y)) ok = false
+        }
+      if (!ok) continue
+      const key = HOUSE_KEYS[Math.floor(rng() * HOUSE_KEYS.length)]
+      this.add.image(hx * 32, hy * 32, key).setOrigin(0, 0).setDepth((hy + HOUSE_H) * 32 - 24)
+      for (let dy = 0; dy < HOUSE_H; dy++)
+        for (let dx = 0; dx < HOUSE_W; dx++) used[hy + dy][hx + dx] = true
+      // collide the solid cottage base (ground floor + porch). The house sits in
+      // the LEFT part of the box — cols 0-7, ground floor at rows 9-13. Col 8 is
+      // the drop shadow (walkable), so it's excluded from the collision box.
+      for (let dy = 9; dy <= 13; dy++)
+        for (let dx = 0; dx <= 7; dx++) solidTile(hx + dx, hy + dy)
+      houseCount++
+    }
+
+    // Trees. Placed in GROVES (clustered around a few centres) so the map reads
+    // as clumps of forest rather than an even sprinkle. Each is a depth-sorted
+    // image sorted by its trunk foot (player-centre y sits ~24px above its feet,
+    // so drop the sort line: standing in front of the stem renders on top, while
+    // walking up behind the tree stays hidden by the canopy).
+    const placeTree = (tx: number, ty: number) => {
+      if (tx < 1 || ty < 1 || tx > W - 5 || ty > H - 5) return false
+      for (let dy = 0; dy < 4; dy++)
+        for (let dx = 0; dx < 4; dx++)
+          if (!isGrass(tx + dx, ty + dy) || used[ty + dy][tx + dx] || nearSpawn(tx + dx, ty + dy)) return false
+      for (let dy = 0; dy < 4; dy++)
+        for (let dx = 0; dx < 4; dx++) used[ty + dy][tx + dx] = true
+      const treeKey = TREE_KEYS[Math.floor(rng() * TREE_KEYS.length)]
+      this.add.image(tx * 32, ty * 32, treeKey).setOrigin(0, 0).setDepth((ty + 4) * 32 - 24)
+      solidTile(tx + 1, ty + 3)
+      solidTile(tx + 2, ty + 3)
+      return true
+    }
+    let treeTotal = 0
+    let groveTries = 60
+    while (treeTotal < 34 && groveTries-- > 0) {
+      const gcx = 3 + Math.floor(rng() * (W - 8))
+      const gcy = 3 + Math.floor(rng() * (H - 8))
+      const target = 4 + Math.floor(rng() * 5)
+      let placed = 0, attempts = 0
+      while (placed < target && attempts++ < 30) {
+        const tx = gcx + Math.floor((rng() - 0.5) * 8)
+        const ty = gcy + Math.floor((rng() - 0.5) * 6)
+        if (placeTree(tx, ty)) { placed++; treeTotal++ }
+      }
+    }
+
+    // place a single object on the first free grass cell we can find
+    const placeOne = (idx: number) => {
+      for (let tries = 0; tries < 60; tries++) {
+        const x = 1 + Math.floor(rng() * (W - 2))
+        const y = 1 + Math.floor(rng() * (H - 2))
+        if (!isGrass(x, y) || used[y][x] || nearSpawn(x, y)) continue
+        deco.putTileAt(idx, x, y)
+        used[y][x] = true
+        return
+      }
+    }
+    // guarantee every object type (100+) appears at least once
+    for (const idx of OBJ_SOLID) placeOne(idx)
+    for (const idx of OBJ_WALK) placeOne(idx)
+
+    // Scatter extra copies in CLUSTERS (patches of a few related objects around
+    // a centre) rather than an even sprinkle, so the ground reads as little
+    // gardens/piles with open meadow between them.
+    const allObjs = [...OBJ_WALK, ...OBJ_SOLID]
+    for (let c = 0; c < 34; c++) {
+      const ccx = 2 + Math.floor(rng() * (W - 4))
+      const ccy = 2 + Math.floor(rng() * (H - 4))
+      const palette: number[] = []
+      const kinds = 1 + Math.floor(rng() * 3)
+      for (let k = 0; k < kinds; k++) palette.push(allObjs[Math.floor(rng() * allObjs.length)])
+      const n = 3 + Math.floor(rng() * 8)
+      for (let i = 0; i < n; i++) {
+        const x = ccx + Math.floor((rng() - 0.5) * 6)
+        const y = ccy + Math.floor((rng() - 0.5) * 6)
+        if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) continue
+        if (!isGrass(x, y) || used[y][x] || nearSpawn(x, y)) continue
+        deco.putTileAt(palette[Math.floor(rng() * palette.length)], x, y)
+        used[y][x] = true
+      }
+    }
+
+    // tree trunks + chunky objects stop the player; ground detail is walkable
+    deco.setCollision([TREE_TRUNK, ...OBJ_SOLID])
 
     this.myPlayer = this.add.myPlayer(spawnTX * 32, spawnTY * 32, 'adam', this.network.mySessionId)
+    this.myPlayer.setDepth(this.myPlayer.y) // sort with trees before the first move
     this.playerSelector = new PlayerSelector(this, 0, 0, 16, 16)
   
     this.otherPlayers = this.physics.add.group({ classType: OtherPlayer })
 
 
-    // Bot
+    // Bot — place Foxy on the nearest clear grass tile to its usual spot so it
+    // never ends up standing in a pond (or inside a tree/prop).
+    const foxTargetX = 10, foxTargetY = 9
+    let foxX = spawnTX, foxY = spawnTY
+    ringSearch: for (let r = 0; r < Math.max(W, H); r++) {
+      for (let dy = -r; dy <= r; dy++)
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue // ring edge only
+          const x = foxTargetX + dx, y = foxTargetY + dy
+          if (x <= 0 || y <= 0 || x >= W - 1 || y >= H - 1) continue
+          if (grid[y][x] === GRASS && !used[y][x]) { foxX = x; foxY = y; break ringSearch }
+        }
+    }
     this.botPlayer = this.add.otherPlayer(
-      330,
-      300,
+      foxX * 32,
+      foxY * 32,
       "fox",
       "bot",
       "Foxy",
@@ -167,6 +531,7 @@ export default class Game extends Phaser.Scene {
 
     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
     this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], groundLayer)
+    this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], deco)
 
     this.physics.add.overlap(
       this.myPlayer,
