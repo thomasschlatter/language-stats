@@ -29,11 +29,15 @@ function App() {
   );
   const videoConnected = useAppSelector((state) => state.user.videoConnected);
   const roomJoined = useAppSelector((state) => state.room.roomJoined);
+  const practiceMode = useAppSelector((state) => state.room.practiceMode);
 
   const isMobile = window.innerWidth <= 768;
 
   let ui: JSX.Element;
-  if (loggedIn) {
+  if (practiceMode) {
+    // Single-player practice: just the Phaser canvas, no room/chat UI.
+    ui = <></>;
+  } else if (loggedIn) {
     if (computerDialogOpen) {
       /* Render ComputerDialog if user is using a computer. */
       ui = <ComputerDialog />;
@@ -68,7 +72,7 @@ function App() {
       <Backdrop>
         {ui}
         {/* Render HelperButtonGroup if no dialogs are opened. */}
-        {!computerDialogOpen && !whiteboardDialogOpen && <HelperButtonGroup />}
+        {!computerDialogOpen && !whiteboardDialogOpen && !practiceMode && <HelperButtonGroup />}
       </Backdrop>
     </>
   );

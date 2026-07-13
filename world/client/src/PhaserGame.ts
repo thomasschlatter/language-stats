@@ -5,6 +5,7 @@ import Background from './scenes/Background'
 import Bootstrap from './scenes/Bootstrap'
 import Lobby from './scenes/Lobby'
 import Island from './scenes/Island'
+import Practice from './scenes/Practice'
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -24,7 +25,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   autoFocus: true,
-  scene: [Bootstrap, Background, Game, LobbyScene, Lobby, Island],
+  scene: [Bootstrap, Background, Game, LobbyScene, Lobby, Island, Practice],
 }
 
 const phaserGame = new Phaser.Game(config)

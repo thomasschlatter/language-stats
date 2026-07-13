@@ -154,6 +154,12 @@ export default function RoomSelectionDialog() {
       .catch((error) => console.error(error));
   };
 
+  // Single-player mini-game — no room/Colyseus needed.
+  const handlePractice = () => {
+    const bootstrap = phaserGame.scene.keys.bootstrap as Bootstrap;
+    bootstrap.launchPractice();
+  };
+
   return (
     <>
       <CookiePopup />
@@ -236,6 +242,13 @@ export default function RoomSelectionDialog() {
                   </WorldCard>
                 ))}
               </WorldGrid>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handlePractice}
+              >
+                🎯 Solo word practice (beta)
+              </Button>
               <Button
                 variant="text"
                 color="secondary"

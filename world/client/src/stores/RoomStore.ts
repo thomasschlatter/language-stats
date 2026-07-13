@@ -18,6 +18,7 @@ export const roomSlice = createSlice({
   initialState: {
     lobbyJoined: false,
     roomJoined: false,
+    practiceMode: false,
     roomId: "",
     roomName: "",
     roomDescription: "",
@@ -29,6 +30,9 @@ export const roomSlice = createSlice({
     },
     setRoomJoined: (state, action: PayloadAction<boolean>) => {
       state.roomJoined = action.payload;
+    },
+    setPracticeMode: (state, action: PayloadAction<boolean>) => {
+      state.practiceMode = action.payload;
     },
     setJoinedRoomData: (
       state,
@@ -68,6 +72,7 @@ export const roomSlice = createSlice({
 export const {
   setLobbyJoined,
   setRoomJoined,
+  setPracticeMode,
   setJoinedRoomData,
   setAvailableRooms,
   addAvailableRooms,

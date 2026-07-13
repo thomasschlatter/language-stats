@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import Network from '../services/Network'
 import { BackgroundMode } from '../../../types/BackgroundMode'
 import store from '../stores'
-import { setRoomJoined } from '../stores/RoomStore'
+import { setRoomJoined, setPracticeMode } from '../stores/RoomStore'
 
 
 
@@ -143,6 +143,14 @@ export default class Bootstrap extends Phaser.Scene {
     })
     // update Redux state
     store.dispatch(setRoomJoined(true))
+  }
+
+  // Single-player practice mini-game — no network/Colyseus needed.
+  launchPractice() {
+    if (!this.preloadComplete) return
+    this.scene.stop('background')
+    this.scene.launch('practice', {})
+    store.dispatch(setPracticeMode(true))
   }
 
   launchLobby() {
