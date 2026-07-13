@@ -17,6 +17,7 @@ export default class Practice extends Phaser.Scene {
   private lives = 3
   private streak = 0
   private busy = true
+  private listening = false // current question hides the word — answer by ear
   private lang = 'de-DE'
   private facing: 'up' | 'down' | 'left' | 'right' = 'down'
   private shots: { obj: Phaser.GameObjects.Arc; vx: number; vy: number }[] = []
@@ -169,7 +170,10 @@ export default class Practice extends Phaser.Scene {
     const item = this.items[this.idx]
     const W = this.scale.width
     const H = this.scale.height
-    this.wordText.setText(item.front)
+    // ~1 in 3 questions are listening-only (word hidden) when TTS is available —
+    // train the ear, then reveal the spelling on answer.
+    this.listening = !!window.speechSynthesis && this.idx > 0 && Math.random() < 0.34
+    this.wordText.setText(this.listening ? '🔊  Listen…' : item.front)
     this.speak(item.front) // auto-play pronunciation each new question
     const streakTxt = this.streak >= 2 ? `   🔥 ${this.streak}` : ''
     this.hudText.setText(`Score ${this.score}    ${'♥'.repeat(this.lives)}    ${this.idx + 1}/${this.items.length}${streakTxt}`)
@@ -196,6 +200,7 @@ export default class Practice extends Phaser.Scene {
     this.busy = true
     const item = this.items[this.idx]
     const correct = zone.choice === item.answer
+    if (this.listening) this.wordText.setText(item.front) // reveal the spelling
     // Feed the result into the real SRS schedule (correct = "good", wrong = "again").
     if (item.id != null) {
       fetch('/api/flashcards/review', {
