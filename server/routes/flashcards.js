@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
 import {
   createDeck, getDeck, listDecks, deleteDeck,
-  addCards, dueCards, reviewCard, familiarityMap, listCards, deckHasCard,
+  addCards, dueCards, reviewCard, familiarityMap, listCards, deckHasCard, quizCards,
 } from '../models/flashcards.js';
 import { topWords, totalCount } from '../models/frequency.js';
 import { unpredictableGenderNouns } from '../models/analysis.js';
@@ -143,6 +143,26 @@ router.post('/gender-deck', requireAuth, (req, res) => {
   });
   const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows });
   res.status(201).json({ deck, added });
+});
+
+// GET /api/flashcards/quiz?lang=de-DE&n=10  — multiple-choice questions from
+// the player's decks for a language (used by the practice mini-game).
+router.get('/quiz', requireAuth, (req, res) => {
+  const language = getLanguageByCode(req.query.lang);
+  if (!language) return res.status(404).json({ error: 'unknown language' });
+  const n = Math.min(Math.max(Number(req.query.n) || 10, 1), 30);
+
+  const pool = quizCards(req.user.id, language.id, Math.max(40, n * 4));
+  if (pool.length < 4) {
+    return res.status(400).json({ error: 'add at least 4 cards to a deck for this language to play' });
+  }
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const backs = [...new Set(pool.map((c) => c.back))];
+  const items = pool.slice(0, n).map((c) => {
+    const distractors = shuffle(backs.filter((b) => b !== c.back)).slice(0, 3);
+    return { front: c.front, answer: c.back, choices: shuffle([c.back, ...distractors]) };
+  });
+  res.json({ items, languageCode: language.code });
 });
 
 // GET /api/flashcards/decks/:id/export?format=csv|anki  — download a deck.

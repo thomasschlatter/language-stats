@@ -33,6 +33,17 @@ export function deleteDeck(id, userId) {
 }
 
 // Bulk-add cards. rows: [{ front, back }]. New cards are due immediately.
+// Random cards (front + non-empty back) across a user's decks for a language —
+// the source for the practice mini-game's questions and its distractor pool.
+export function quizCards(userId, languageId, limit = 40) {
+  return db.prepare(
+    `SELECT c.front, c.back
+       FROM cards c JOIN decks d ON d.id = c.deck_id
+      WHERE c.user_id = ? AND d.language_id = ? AND c.back IS NOT NULL AND TRIM(c.back) <> ''
+      ORDER BY RANDOM() LIMIT ?`
+  ).all(userId, languageId, limit);
+}
+
 // Whether a deck already contains a card with this (lowercased) front word.
 export function deckHasCard(deckId, wordLc) {
   return !!db.prepare('SELECT 1 FROM cards WHERE deck_id = ? AND word_lc = ? LIMIT 1').get(deckId, wordLc);
