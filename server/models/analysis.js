@@ -74,13 +74,23 @@ export function unpredictableGenderNouns(languageId, threshold = 1, limit = 500)
   for (const [ending, counts] of buckets) predictedFor.set(ending, majority(counts).key);
 
   const ARTICLE = { m: 'der', f: 'die', n: 'das' };
-  const seen = new Set();
+  // Inflectional suffixes; a form is treated as a duplicate of an already-listed
+  // noun only when stripping one of these yields a stem we've already added — so
+  // "Hause"→"Haus", "Kinder"→"Kind", "Jahren"→"Jahr" collapse to the singular,
+  // without ever merging two genuinely different nouns.
+  const SUFFIXES = ['nen', 'ern', 'en', 'er', 'e', 'n', 's'];
+  const seen = new Set();      // lowercased keys already emitted
   const out = [];
   for (const { lc, gender, form, meaning } of rows) {
     const ending = ENDINGS.find((e) => lc.length > e.length && lc.endsWith(e));
     if (ending && predictedFor.get(ending) === gender) continue; // rule already right
-    if (seen.has(lc)) continue;
-    seen.add(lc);
+    const fl = form.toLowerCase();
+    if (seen.has(fl)) continue;
+    const inflectionOfSeen = SUFFIXES.some(
+      (suf) => fl.length - suf.length >= 3 && fl.endsWith(suf) && seen.has(fl.slice(0, -suf.length))
+    );
+    if (inflectionOfSeen) continue;
+    seen.add(fl);
     out.push({ word: form, gender, article: ARTICLE[gender] || '', meaning: meaning || '' });
     if (out.length >= limit) break;
   }
