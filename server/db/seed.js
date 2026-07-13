@@ -230,7 +230,33 @@ Not every frequent word is a noun. The breakdown below splits the same coverage 
 
 Some endings strongly predict gender. Nouns ending in -ung, -heit, -keit or -schaft are almost always {{de-DE|die}} (feminine). Nouns ending in -chen or -lein are {{de-DE|das}} (neuter) — which is why {{de-DE|das Mädchen}} (the girl) is grammatically neuter. Many -er nouns for people and tools are {{de-DE|der}} (masculine).
 
-These are tendencies, not laws — but they cover a lot of ground while the exceptions catch up.`;
+These are tendencies, not laws — but they cover a lot of ground while the exceptions catch up.
+
+# Nouns to memorise
+
+Where the ending gives no hint, there's nothing for it but to learn the gender together with the word. Here are common everyday nouns whose gender you simply have to remember. Use the “Make a flashcard deck” button under the list to drill them until the article comes automatically:
+
+- {{de-DE|Mädchen}} — das (the girl)
+- {{de-DE|Tisch}} — der (the table)
+- {{de-DE|Zeit}} — die (the time)
+- {{de-DE|Haus}} — das (the house)
+- {{de-DE|Mann}} — der (the man)
+- {{de-DE|Frau}} — die (the woman)
+- {{de-DE|Kind}} — das (the child)
+- {{de-DE|Tag}} — der (the day)
+- {{de-DE|Nacht}} — die (the night)
+- {{de-DE|Wasser}} — das (the water)
+- {{de-DE|Weg}} — der (the way)
+- {{de-DE|Hand}} — die (the hand)
+- {{de-DE|Buch}} — das (the book)
+- {{de-DE|Kopf}} — der (the head)
+- {{de-DE|Tür}} — die (the door)
+- {{de-DE|Auge}} — das (the eye)
+- {{de-DE|Stuhl}} — der (the chair)
+- {{de-DE|Welt}} — die (the world)
+- {{de-DE|Geld}} — das (the money)
+- {{de-DE|Baum}} — der (the tree)
+- {{de-DE|Stadt}} — die (the city)`;
 
 if (!findArticleBySlug(german.id, 'gender-in-german')) {
   createArticle({
