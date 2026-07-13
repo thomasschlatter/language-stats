@@ -63,6 +63,9 @@ a:hover { text-decoration: underline; }
 .brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
 .brand:hover { text-decoration: none; color: var(--accent); }
 .topnav { display: flex; gap: 1rem; margin-left: 1.5rem; flex: 1; }
+/* Sections that require an account are hidden until signed in (body.authed is
+   toggled by renderAuthArea). Hidden by default so they never flash pre-auth. */
+body:not(.authed) .auth-only { display: none !important; }
 .topnav a { color: var(--muted); font-size: 0.9rem; }
 .topnav a:hover { color: var(--text); text-decoration: none; }
 .topnav a.active { color: var(--text); font-weight: 600; }

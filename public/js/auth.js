@@ -30,6 +30,8 @@ function nativeSelector() {
 
 // Render the top-right controls (native picker + auth) based on store.user.
 export function renderAuthArea() {
+  // Gate account-only sections (nav links marked .auth-only) on login state.
+  document.body.classList.toggle('authed', !!store.user);
   const area = clear(document.getElementById('auth-area'));
   area.append(nativeSelector());
   if (store.user) {

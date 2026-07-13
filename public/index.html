@@ -12,10 +12,17 @@
     <link rel="stylesheet" href="/css/intro.css" />
   </head>
   <body>
-    <!-- Butterfly logo intro (Groupifier). Covers the app on first load, then
+    <!-- Groupifier logo intro. Covers the app on first load, then
          fades away. Controlled by /js/intro.js. -->
     <div id="intro-splash" aria-hidden="true">
-      <div class="bf-logo"><img src="/img/intro/butterfly.png" alt="Groupifier" /></div>
+      <div class="bf-logo">
+        <div class="bf-mark" aria-label="Groupifier logo" role="img">
+          <img class="bf-piece bf-piece-1" src="/img/intro/1.png" alt="" />
+          <img class="bf-piece bf-piece-2" src="/img/intro/2.png" alt="" />
+          <img class="bf-piece bf-piece-3" src="/img/intro/3.png" alt="" />
+          <img class="bf-piece bf-piece-4" src="/img/intro/4.png" alt="" />
+        </div>
+      </div>
       <div class="bf-wordmark">Group<b>ifier</b></div>
       <div class="bf-skip">click to skip</div>
     </div>
@@ -25,11 +32,11 @@
       <a class="brand" href="#/">Language&nbsp;Stats</a>
       <nav class="topnav">
         <a href="#/community">Community</a>
-        <a href="#/chat">Chat</a>
-        <a href="#/world">World</a>
-        <a href="#/decks">Flashcards</a>
-        <a href="#/messages">Messages</a>
-        <a href="#/settings">Settings</a>
+        <a class="auth-only" href="#/chat">Chat</a>
+        <a class="auth-only" href="#/world">World</a>
+        <a class="auth-only" href="#/decks">Flashcards</a>
+        <a class="auth-only" href="#/messages">Messages</a>
+        <a class="auth-only" href="#/settings">Settings</a>
       </nav>
       <form id="search-form" class="search-form">
         <input id="search-input" type="search" placeholder="Search words…" autocomplete="off" />
