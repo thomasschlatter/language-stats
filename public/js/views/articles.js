@@ -36,18 +36,26 @@ export async function renderArticles(langCode) {
   grid.append(el('span', { class: 'muted' }, 'Loading…'));
 
   // Cards are filtered to the learner's native language. If there are none,
-  // fall back to showing all cards (so the page is never just empty).
+  // fall back to English (the common lingua franca) rather than every language —
+  // a German speaker shouldn't be shown the Spanish version of a card. Only if
+  // there's no English card either do we show all, as a last resort.
   let { articles } = await api.articles(langCode, store.nativeLang);
-  let fallback = false;
+  let mode = 'native';
+  if (!articles.length && store.nativeLang.split('-')[0] !== 'en') {
+    ({ articles } = await api.articles(langCode, 'en'));
+    if (articles.length) mode = 'english';
+  }
   if (!articles.length) {
     ({ articles } = await api.articles(langCode));
-    fallback = articles.length > 0;
+    if (articles.length) mode = 'all';
   }
 
   clear(grid);
-  note.textContent = fallback
-    ? `No cards written in your native language (${store.nativeLang}) yet — showing all cards. Change your native language top-right.`
-    : `Showing cards written in your native language (${store.nativeLang}). Change it top-right.`;
+  note.textContent = {
+    native: `Showing cards written in your native language (${store.nativeLang}). Change it top-right.`,
+    english: `No cards in your native language (${store.nativeLang}) yet — showing English cards. Change your native language top-right.`,
+    all: `No cards in your native language (${store.nativeLang}) or English yet — showing all cards. Change your native language top-right.`,
+  }[mode];
 
   if (!articles.length) {
     grid.append(el('p', { class: 'muted' }, 'No cards yet. Create the first one!'));
