@@ -149,8 +149,9 @@ export default class Game extends Phaser.Scene {
       2094, 2095, 2096, 2269, 2270, 2271, 2475, 2476,
       // mushrooms
       3060, 3061, 3062, 3233, 3234, 3235,
-      // grass tufts
+      // grass tufts, bushes & clover (low ground vegetation — walk over it)
       1095, 3424, 3579, 3580,
+      495, 669, 879, 1094, 1262, 1353, 1526, 1781, 2302, 2303, 3406, 3407,
       // pebbles & gems
       3057, 3129, 3230, 3302, 3176, 3003,
       // sticks & twigs
@@ -163,8 +164,6 @@ export default class Game extends Phaser.Scene {
       1150, 670, 1958, 1979,
     ]
     const OBJ_SOLID = [
-      // bushes
-      495, 669, 879, 1094, 1262, 1353, 1526, 1781, 2302, 2303, 3406, 3407,
       // small trees / stumps
       1089, 1093, 3070, 4802,
       // rocks
