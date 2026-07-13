@@ -20,6 +20,9 @@ export class Player extends Schema implements IPlayer {
   @type("string") anim = "adam_idle_down";
   @type("boolean") readyToConnect = false;
   @type("boolean") videoConnected = false;
+  // JSON {key, index} describing a custom avatar so peers can composite it
+  // locally (empty for the default character).
+  @type("string") avatar = "";
 }
 
 export class Computer extends Schema implements IComputer {

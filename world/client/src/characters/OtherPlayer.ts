@@ -5,6 +5,7 @@ import { sittingShiftData } from './Player'
 import WebRTC from '../web/WebRTC'
 import { Event, phaserEvents } from '../events/EventCenter'
 import { FRAMES } from '../anims/frames'
+import { loadRemoteAvatar } from '../anims/remoteAvatar'
 
 export default class OtherPlayer extends Player {
   private targetPosition: [number, number]
@@ -73,13 +74,32 @@ export default class OtherPlayer extends Player {
           if (this.anims.exists(value)) {
             this.anims.play(value, true)
           } else {
-            // Custom characters used to stream from an external asset bucket
-            // that no longer exists (loading it 404s and crashes the renderer).
-            // Fall back to the default character's matching animation instead.
+            // Their custom sheet may not be composited yet (or unavailable):
+            // fall back to the default character's matching animation until it is.
             const suffix = value.split('_').slice(1).join('_') || 'idle_down'
             const fallback = `adam_${suffix}`
             if (this.anims.exists(fallback)) this.anims.play(fallback, true)
           }
+        }
+        break
+
+      case 'avatar':
+        // Composite this peer's custom character locally from the broadcast
+        // recipe, then switch to it. Guarded end-to-end; stays on the default
+        // character if anything fails.
+        if (typeof value === 'string' && value) {
+          try {
+            const { key, index } = JSON.parse(value)
+            if (key && index && !this.scene.textures.exists(key)) {
+              loadRemoteAvatar(this.scene, key, index).then((ok) => {
+                if (ok && this.active && this.anims.exists(`${key}_idle_down`)) {
+                  this.anims.play(`${key}_idle_down`, true)
+                }
+              })
+            } else if (key && this.scene.textures.exists(key) && this.anims.exists(`${key}_idle_down`)) {
+              this.anims.play(`${key}_idle_down`, true)
+            }
+          } catch { /* malformed recipe — keep default character */ }
         }
         break
 

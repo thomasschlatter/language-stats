@@ -701,6 +701,8 @@ export default class Game extends Phaser.Scene {
     const otherPlayer = this.add.otherPlayer(newPlayer.x, newPlayer.y, 'adam', id, newPlayer.name)
     this.otherPlayers.add(otherPlayer)
     this.otherPlayerMap.set(id, otherPlayer)
+    // If they already have a custom avatar (joined before us), composite it now.
+    if (newPlayer.avatar) otherPlayer.updateOtherPlayer('avatar', newPlayer.avatar)
   }
 
   // function to remove the player who left from the otherPlayer group

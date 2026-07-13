@@ -752,6 +752,11 @@ export default function CharacterCreation() {
           game.myPlayer.setPlayerName(name);
           game.myPlayer.setPlayerTexture(uuid);
           game.anims.play(`${uuid}_idle_down`, game.myPlayer);
+          // Share the avatar recipe so peers render this exact character (they
+          // composite it locally under the same `uuid` key -> anim names match).
+          game.network.updatePlayerAvatar(
+            JSON.stringify({ key: uuid, index: avatarStyleIndex })
+          );
           game.network.readyToConnect();
           dispatch(setLoggedIn(true));
         };

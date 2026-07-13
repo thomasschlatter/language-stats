@@ -198,6 +198,16 @@ export class SkyOffice extends Room<OfficeState> {
       }
     );
 
+    // when a player finalises their custom avatar, store the descriptor so
+    // everyone (including players who join later) can composite it locally.
+    this.onMessage(
+      Message.UPDATE_PLAYER_AVATAR,
+      (client, message: { avatar: string }) => {
+        const player = this.state.players.get(client.sessionId);
+        if (player) player.avatar = message?.avatar || "";
+      }
+    );
+
     // when a player is ready to connect, call the PlayerReadyToConnectCommand
     this.onMessage(Message.READY_TO_CONNECT, (client) => {
       const player = this.state.players.get(client.sessionId);

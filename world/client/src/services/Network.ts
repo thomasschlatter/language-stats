@@ -307,6 +307,12 @@ export default class Network {
     this.room?.send(Message.UPDATE_PLAYER_NAME, { name: currentName });
   }
 
+  // broadcast this player's custom-avatar descriptor (JSON {key, index}) so
+  // peers can composite the same character locally.
+  updatePlayerAvatar(avatar: string) {
+    this.room?.send(Message.UPDATE_PLAYER_AVATAR, { avatar });
+  }
+
   // method to send ready-to-connect signal to Colyseus server
   readyToConnect() {
     this.room?.send(Message.READY_TO_CONNECT);
