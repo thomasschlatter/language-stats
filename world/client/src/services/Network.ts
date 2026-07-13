@@ -40,10 +40,9 @@ export default class Network {
 
   constructor() {
     const protocol = window.location.protocol.replace("http", "ws");
-    const endpoint =
-      process.env.NODE_ENV === "production"
-        ? import.meta.env.VITE_SERVER_URL
-        : `${protocol}//${window.location.hostname}:2567`;
+    // A deployed World can point at its dedicated secure Colyseus endpoint.
+    // Locally (and as a resilient fallback), use the host serving the client.
+    const endpoint = import.meta.env.VITE_SERVER_URL || `${protocol}//${window.location.hostname}:2567`;
     this.client = new Client(endpoint);
     this.joinLobbyRoom().then(() => {
       store.dispatch(setLobbyJoined(true));

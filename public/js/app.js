@@ -11,7 +11,7 @@ import { guardSingleInstance } from './singleInstance.js';
 
 // Make the persistent chrome (language bar, top-bar labels) clickable too.
 function tokenizeChrome() {
-  tokenizeTree(document.querySelector('.lang-bar'));
+  tokenizeTree(document.querySelector('.lang-viewport'));
   tokenizeTree(document.getElementById('auth-area'));
 }
 
@@ -45,23 +45,31 @@ function setupSearch() {
   });
 }
 
-// Collapsible languages section (persisted).
-function setupSidebarCollapse() {
-  const toggle = document.getElementById('lang-toggle');
-  const list = document.getElementById('language-list');
-  if (!toggle || !list) return;
-  const apply = (collapsed) => {
-    list.style.display = collapsed ? 'none' : '';
-    toggle.classList.toggle('collapsed', collapsed);
-    toggle.setAttribute('aria-expanded', String(!collapsed));
+// Language carousel: prev/next arrows scroll the horizontal viewport. Arrows
+// hide when there's nothing to scroll and disable at each end.
+let refreshLangArrows = () => {};
+function setupLangCarousel() {
+  const view = document.querySelector('.lang-viewport');
+  const prev = document.getElementById('lang-prev');
+  const next = document.getElementById('lang-next');
+  if (!view || !prev || !next) return;
+
+  const update = () => {
+    const overflow = view.scrollWidth - view.clientWidth;
+    const scrollable = overflow > 4;
+    prev.hidden = next.hidden = !scrollable;
+    if (!scrollable) return;
+    prev.disabled = view.scrollLeft <= 2;
+    next.disabled = view.scrollLeft >= overflow - 2;
   };
-  let collapsed = localStorage.getItem('ls_lang_collapsed') === '1';
-  apply(collapsed);
-  toggle.addEventListener('click', () => {
-    collapsed = !collapsed;
-    localStorage.setItem('ls_lang_collapsed', collapsed ? '1' : '0');
-    apply(collapsed);
-  });
+  refreshLangArrows = update;
+
+  const page = (dir) => view.scrollBy({ left: dir * view.clientWidth * 0.8, behavior: 'smooth' });
+  prev.addEventListener('click', () => page(-1));
+  next.addEventListener('click', () => page(1));
+  view.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
 }
 
 function renderSidebar() {
@@ -87,6 +95,7 @@ function renderSidebar() {
   if (store.user) {
     nav.append(el('button', { class: 'lang-add', onclick: openAddLanguage }, '+ Add language'));
   }
+  refreshLangArrows();
 }
 
 function confirmRemoveLanguage(lang) {
@@ -161,7 +170,7 @@ async function init() {
   renderSidebar();
   renderAuthArea();
   tokenizeChrome();
-  setupSidebarCollapse();
+  setupLangCarousel();
   setupSearch();
   startRouter();
   updateDueBadge();

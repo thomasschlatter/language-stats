@@ -15,7 +15,7 @@ let tmp;
 before(async () => {
   tmp = mkdtempSync(join(tmpdir(), 'ls-test-'));
   server = spawn(process.execPath, ['server/index.js'], {
-    env: { ...process.env, PORT: String(PORT), DATA_DIR: tmp, NODE_ENV: 'test', JWT_SECRET: 'test-secret' },
+    env: { ...process.env, PORT: String(PORT), DATA_DIR: tmp, NODE_ENV: 'test', JWT_SECRET: 'test-secret', WORLD_URL: 'https://world.example.test' },
     stdio: 'ignore',
   });
   // The empty DB auto-seeds on boot before it listens, so wait generously.
@@ -48,6 +48,12 @@ test('seed produced languages and frequency data', async () => {
 
   const cov = await api('/api/frequency/coverage?lang=de-DE&t=0.5');
   assert.ok(cov.data.wordsNeeded > 0);
+});
+
+test('world uses the configured public host', async () => {
+  const { status, data } = await api('/api/world');
+  assert.equal(status, 200);
+  assert.equal(data.url, 'https://world.example.test');
 });
 
 test('signup + me, and duplicate email is rejected', async () => {
@@ -86,6 +92,29 @@ test('flashcard import → study → review grows the interval', async () => {
 });
 
 test('auth required for protected routes', async () => {
-  const r = await api('/api/flashcards/decks');
-  assert.equal(r.status, 401);
+  const protectedPaths = [
+    '/api/flashcards/decks',
+    '/api/messages?lang=de-DE',
+    '/api/progress?lang=de-DE',
+    '/api/dm',
+    '/api/profile',
+  ];
+  for (const path of protectedPaths) {
+    const r = await api(path);
+    assert.equal(r.status, 401, `${path} should require authentication`);
+  }
+});
+
+test('language and community browsing remain public', async () => {
+  const publicPaths = [
+    '/api/languages',
+    '/api/articles?lang=de-DE',
+    '/api/tips?lang=de-DE',
+    '/api/community',
+    '/api/words?lang=de-DE',
+  ];
+  for (const path of publicPaths) {
+    const r = await api(path);
+    assert.equal(r.status, 200, `${path} should remain public`);
+  }
 });

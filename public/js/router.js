@@ -27,7 +27,7 @@ import { renderStudy } from './views/study.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
-  { pattern: /^#\/world$/, handler: () => renderWorld() },
+  { pattern: /^#\/world$/, handler: () => renderWorld(), auth: true },
   { pattern: /^#\/search\/(.+)$/, handler: (m) => renderSearch(dec(m[1])) },
   { pattern: /^#\/settings$/, handler: () => renderSettings(), auth: true },
   { pattern: /^#\/decks$/, handler: () => renderDecks(), auth: true },
@@ -35,10 +35,10 @@ const routes = [
   { pattern: /^#\/messages$/, handler: () => renderMessages(), auth: true },
   { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])), auth: true },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },
-  { pattern: /^#\/chat$/, handler: () => renderChat() },
-  { pattern: /^#\/chat\/([^/]+)$/, handler: (m) => renderChat(dec(m[1])) },
+  { pattern: /^#\/chat$/, handler: () => renderChat(), auth: true },
+  { pattern: /^#\/chat\/([^/]+)$/, handler: (m) => renderChat(dec(m[1])), auth: true },
   { pattern: /^#\/lang\/([^/]+)\/tips$/, handler: (m) => renderTips(dec(m[1])) },
-  { pattern: /^#\/lang\/([^/]+)\/progress$/, handler: (m) => renderProgress(dec(m[1])) },
+  { pattern: /^#\/lang\/([^/]+)\/progress$/, handler: (m) => renderProgress(dec(m[1])), auth: true },
   { pattern: /^#\/lang\/([^/]+)$/, handler: (m) => renderArticles(dec(m[1])) },
   { pattern: /^#\/article\/(\d+)$/, handler: (m) => renderArticle(Number(m[1])) },
   { pattern: /^#\/w\/([^/]+)\/(.+)$/, handler: (m) => renderWordPage(dec(m[1]), dec(m[2])) },

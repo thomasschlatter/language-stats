@@ -20,6 +20,7 @@ import { createTip } from '../models/tips.js';
 import { toggleFollow } from '../models/follows.js';
 import { toggleVote } from '../models/votes.js';
 import { createDeck, addCards, reviewCard } from '../models/flashcards.js';
+import { EXTRA_LANGUAGES } from './extra-languages.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -46,6 +47,9 @@ const spanish = ensureLanguage('es-ES', 'es', 'ES', 'Spanish (Spain)');
 const french = ensureLanguage('fr-FR', 'fr', 'FR', 'French (France)');
 const italian = ensureLanguage('it-IT', 'it', 'IT', 'Italian (Italy)');
 const portuguese = ensureLanguage('pt-PT', 'pt', 'PT', 'Portuguese (Portugal)');
+
+// A broad catalogue of world languages, available from a fresh install.
+for (const [code, lang, country, name] of EXTRA_LANGUAGES) ensureLanguage(code, lang, country, name);
 
 // Starter words. Each entry has a word + a monolingual gloss in its OWN
 // language, so the words inside a definition are themselves clickable and

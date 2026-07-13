@@ -61,10 +61,14 @@
       <div id="auth-area" class="auth-area"><!-- filled by auth.js --></div>
     </header>
 
-    <!-- Languages: a horizontal bar under the header (was a left sidebar) -->
+    <!-- Languages: a horizontal carousel under the header (was a left sidebar) -->
     <div class="lang-bar" aria-label="Languages">
       <span class="lang-bar-label">Languages</span>
-      <nav id="language-list" class="language-list"></nav>
+      <button id="lang-prev" class="lang-nav" type="button" aria-label="Scroll languages left" hidden>‹</button>
+      <div class="lang-viewport">
+        <nav id="language-list" class="language-list"></nav>
+      </div>
+      <button id="lang-next" class="lang-nav" type="button" aria-label="Scroll languages right" hidden>›</button>
     </div>
 
     <div class="layout">

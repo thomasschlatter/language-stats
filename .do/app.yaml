@@ -27,3 +27,5 @@ services:
         value: CHANGE_ME_TO_A_LONG_RANDOM_STRING
       - key: NODE_ENV
         value: production
+      - key: WORLD_URL
+        value: https://strndd.com

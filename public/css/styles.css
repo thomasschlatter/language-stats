@@ -115,11 +115,10 @@ body:not(.authed) .auth-only { display: none !important; }
 .lang-bar {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   padding: 0.45rem 2rem;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  overflow-x: auto;
 }
 .lang-bar-label {
   flex-shrink: 0;
@@ -128,6 +127,39 @@ body:not(.authed) .auth-only { display: none !important; }
   letter-spacing: 0.08em;
   color: var(--muted);
 }
+/* Carousel viewport: scrolls horizontally, scrollbar hidden (arrows drive it). */
+.lang-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+.lang-viewport::-webkit-scrollbar { display: none; }
+/* Prev / next arrow buttons. */
+.lang-nav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0 2px;
+  transition: background 0.12s, border-color 0.12s, opacity 0.12s;
+}
+.lang-nav:hover { border-color: var(--accent); color: var(--accent); }
+.lang-nav[hidden] { display: none; }
+.lang-nav:disabled { opacity: 0.3; cursor: default; border-color: var(--border); color: var(--muted); }
 .sidebar {
   background: var(--surface);
   border-right: 1px solid var(--border);
@@ -175,9 +207,9 @@ body:not(.authed) .auth-only { display: none !important; }
 .lang-row:hover .lang-remove { opacity: 1; }
 .lang-remove:hover { color: var(--danger); }
 .lang-add {
-  margin-top: 0.5rem; width: 100%; text-align: left; background: none;
-  border: 1px dashed var(--border); color: var(--muted); border-radius: var(--radius);
-  padding: 0.4rem 0.65rem; cursor: pointer; font: inherit; font-size: 0.85rem;
+  flex-shrink: 0; white-space: nowrap; background: none;
+  border: 1px dashed var(--border); color: var(--muted); border-radius: 999px;
+  padding: 0.28rem 0.7rem; cursor: pointer; font: inherit; font-size: 0.82rem;
 }
 .lang-add:hover { border-color: var(--accent); color: var(--text); }
 .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }

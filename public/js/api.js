@@ -94,6 +94,9 @@ export const api = {
   translate: (text, from, to) => request('POST', '/translate', { text, from, to }),
   aiTranslate: (text, from, to) => request('POST', '/translate/ai', { text, from, to }),
 
+  // --- multiplayer world ---
+  world: () => request('GET', '/world'),
+
   // --- progress / stats ---
   progress: (lang) => request('GET', `/progress?lang=${encodeURIComponent(lang)}`),
   rundown: () => request('GET', '/progress/rundown'),

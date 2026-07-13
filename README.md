@@ -135,6 +135,13 @@ npm run world:server      # Colyseus game server on :2567
 npm run world:client      # Vite client on :5173  (the World tab embeds this)
 ```
 
+For a production deployment, host the World client and its Colyseus service
+separately, configure the client with its public secure WebSocket endpoint, and
+set `WORLD_URL` on the main app to the clientâ€™s public HTTPS URL. The World tab
+then embeds that URL; it never exposes local setup instructions to visitors.
+For the included World deployment, `world/client/.env.production` should set
+`VITE_SERVER_URL=wss://strndd.com:2567` before its production build.
+
 Secrets (real API keys / TLS certs) from the original were stripped out; `.env`
 files are git-ignored. If you want the optional AI-NPC, add your own key to
 `world/server/.env`.
