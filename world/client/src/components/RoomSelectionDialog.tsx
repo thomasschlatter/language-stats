@@ -122,6 +122,30 @@ const WorldCard = styled.button`
   }
 `;
 
+// Full-width, same padding/look as the world cards.
+const PracticeButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: #2c3050;
+  border: 1px solid #3a3f66;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  color: #eee;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.08s ease, border-color 0.12s ease, background 0.12s ease;
+
+  &:hover {
+    background: #333858;
+    border-color: #33ac96;
+    transform: translateY(-2px);
+  }
+`;
+
 const ProgressBarWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -242,13 +266,9 @@ export default function RoomSelectionDialog() {
                   </WorldCard>
                 ))}
               </WorldGrid>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handlePractice}
-              >
+              <PracticeButton onClick={handlePractice}>
                 🎯 Solo word practice (beta)
-              </Button>
+              </PracticeButton>
               <Button
                 variant="text"
                 color="secondary"
