@@ -190,13 +190,15 @@ async function init() {
   startRouter();
   updateDueBadge();
 
-  // Highlight the active top-nav item.
+  // Highlight the active top-nav item, and hide the language carousel inside the
+  // immersive World (clicking a language there would yank you out of the world).
   const syncNav = () => {
     const h = window.location.hash || '';
     document.querySelectorAll('.topnav a').forEach((a) => {
       const target = a.getAttribute('href');
       a.classList.toggle('active', h === target || (target !== '#/' && h.startsWith(target)));
     });
+    document.body.classList.toggle('in-world', h.startsWith('#/world'));
   };
   syncNav();
 

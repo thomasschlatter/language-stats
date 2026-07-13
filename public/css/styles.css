@@ -127,6 +127,9 @@ body:not(.authed) .auth-only { display: none !important; }
   letter-spacing: 0.08em;
   color: var(--muted);
 }
+/* Hide the language carousel inside the immersive World so you can't
+   accidentally navigate out of it by clicking a language. */
+body.in-world .lang-bar { display: none; }
 /* Carousel viewport: scrolls horizontally, scrollbar hidden (arrows drive it). */
 .lang-viewport {
   flex: 1;
