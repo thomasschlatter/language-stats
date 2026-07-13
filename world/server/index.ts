@@ -20,8 +20,8 @@ var options = {};
 
 if (process.env.NODE_ENV === "production") {
   options = {
-    key: fs.readFileSync("/app/certbot/config/privkey3.pem"),
-    cert: fs.readFileSync("/app/certbot/config/fullchain3.pem"),
+    key: fs.readFileSync(process.env.TLS_KEY_PATH || "/app/certbot/config/privkey3.pem"),
+    cert: fs.readFileSync(process.env.TLS_CERT_PATH || "/app/certbot/config/fullchain3.pem"),
   };
 }
 

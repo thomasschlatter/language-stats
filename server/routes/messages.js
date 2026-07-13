@@ -8,15 +8,14 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 
 // GET /api/messages?lang=de-DE&since=42  (hides messages from users you blocked)
-router.get('/', (req, res) => {
+// Chat history is private to members, just like posting to the room.
+router.get('/', requireAuth, (req, res) => {
   const language = getLanguageByCode(req.query.lang);
   if (!language) return res.status(404).json({ error: 'unknown language' });
   const since = Number(req.query.since) || 0;
   let messages = listMessages(language.id, since);
-  if (req.user) {
-    const blocked = blockedIds(req.user.id);
-    if (blocked.size) messages = messages.filter((m) => !blocked.has(m.author_id));
-  }
+  const blocked = blockedIds(req.user.id);
+  if (blocked.size) messages = messages.filter((m) => !blocked.has(m.author_id));
   res.json({ messages });
 });
 

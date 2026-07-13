@@ -62,6 +62,12 @@ app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/reports', reportRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
+// The multiplayer World is deployed separately from this app. Local development
+// uses its conventional Vite port; production must explicitly provide its URL.
+app.get('/api/world', (_req, res) => {
+  const url = process.env.WORLD_URL || (process.env.NODE_ENV === 'production' ? null : 'http://localhost:5173');
+  res.json({ url });
+});
 
 // Unknown API routes -> JSON 404 (so the SPA fallback below never masks them)
 app.use('/api', (_req, res) => res.status(404).json({ error: 'not found' }));
