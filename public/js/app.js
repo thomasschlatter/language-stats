@@ -93,39 +93,64 @@ function renderSidebar() {
   const nav = clear(document.getElementById('language-list'));
   const currentCode = decodeURIComponent((window.location.hash.match(/#\/lang\/([^/]+)/) || [])[1] || '');
 
-  const learning = store.languages.filter((l) => store.isLearning(l.code)).sort(byImportance);
-  const rest = store.languages.filter((l) => !store.isLearning(l.code)).sort(byImportance);
+  // The carousel shows only the languages you're LEARNING (never your native
+  // language — you don't learn that). The rest live behind "+ Add languages".
+  const learning = store.languages
+    .filter((l) => store.isLearning(l.code) && l.code !== store.nativeLang)
+    .sort(byImportance);
 
-  const makePill = (lang, isLearning) => {
-    const row = el('div', { class: `lang-row${isLearning ? '' : ' not-learning'}` }, [
-      el('a', {
-        href: `#/lang/${lang.code}`,
-        class: lang.code === currentCode ? 'active' : '',
-        title: isLearning ? lang.name : `Add ${lang.name} to your languages`,
-        // Clicking a not-yet-learned language adds it (then navigation proceeds).
-        onclick: isLearning ? null : () => store.addLearning(lang.code),
-      }, lang.name),
-    ]);
-    if (lang.code === store.nativeLang) {
-      row.append(el('span', { class: 'lang-native-tag', title: 'Your native language' }, 'native'));
-    }
-    if (isLearning) {
-      row.append(el('button', {
+  for (const lang of learning) {
+    nav.append(el('div', { class: 'lang-row' }, [
+      el('a', { href: `#/lang/${lang.code}`, class: lang.code === currentCode ? 'active' : '' }, lang.name),
+      el('button', {
         class: 'lang-remove', title: `Remove ${lang.name} from your languages`,
         onclick: (e) => { e.preventDefault(); store.removeLearning(lang.code); },
-      }, '×'));
-    }
-    return row;
-  };
-
-  if (!store.languages.length) nav.append(el('span', { class: 'muted' }, 'No languages yet.'));
-  for (const lang of learning) nav.append(makePill(lang, true));
-  if (learning.length && rest.length) nav.append(el('span', { class: 'lang-divider', 'aria-hidden': 'true' }));
-  for (const lang of rest) nav.append(makePill(lang, false));
-  if (store.user) {
-    nav.append(el('button', { class: 'lang-add', onclick: openAddLanguage }, '+ Add language'));
+      }, '×'),
+    ]));
   }
+  if (!learning.length) {
+    nav.append(el('span', { class: 'muted', style: 'font-size:0.85rem' }, 'Pick languages to learn →'));
+  }
+  nav.append(el('button', { class: 'lang-add', onclick: openLanguagePicker }, '+ Add languages'));
   refreshLangArrows();
+}
+
+// Modal to browse the catalogue and add languages to learn. Excludes your
+// native language and anything you're already learning; sorted by importance.
+function openLanguagePicker() {
+  const listWrap = el('div', { class: 'lang-picker-list' });
+  const renderList = () => {
+    clear(listWrap);
+    const available = store.languages
+      .filter((l) => !store.isLearning(l.code) && l.code !== store.nativeLang)
+      .sort(byImportance);
+    if (!available.length) {
+      listWrap.append(el('p', { class: 'muted' }, 'You’re already learning every language in the catalogue!'));
+      return;
+    }
+    for (const lang of available) {
+      listWrap.append(el('button', {
+        class: 'lang-picker-item', type: 'button',
+        onclick: () => { store.addLearning(lang.code); renderList(); },
+      }, [
+        el('span', {}, lang.name),
+        el('span', { class: 'muted', style: 'font-size:0.72rem' }, '+ add'),
+      ]));
+    }
+  };
+  renderList();
+
+  const close = openModal(el('div', { class: 'lang-picker' }, [
+    el('h2', {}, 'Add languages to learn'),
+    el('p', { class: 'muted', style: 'font-size:0.82rem' }, 'Click a language to add it to your carousel. Ordered by number of speakers.'),
+    listWrap,
+    store.user
+      ? el('button', { class: 'lang-picker-custom', type: 'button', onclick: () => { close(); openAddLanguage(); } }, "+ Can't find it? Add a custom language")
+      : null,
+    el('div', { class: 'row', style: 'justify-content:flex-end; margin-top:1rem' }, [
+      el('button', { class: 'btn small', type: 'button', onclick: () => close() }, 'Done'),
+    ]),
+  ]));
 }
 
 function confirmRemoveLanguage(lang) {

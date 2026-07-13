@@ -30,7 +30,7 @@ export async function renderTips(langCode) {
     ])
   );
 
-  const list = el('div', {});
+  const list = el('div', { class: 'tips-list' });
   view.append(list);
   list.append(el('p', { class: 'muted' }, 'Loading…'));
 
