@@ -25,6 +25,7 @@ export async function renderDmThread(username) {
     return;
   }
 
+  const langLine = el('div', { class: 'muted', style: 'font-size:0.82rem' });
   view.append(
     el('div', { class: 'dm-head' }, [
       el('a', { href: '#/messages', class: 'muted' }, '← Messages'),
@@ -32,6 +33,7 @@ export async function renderDmThread(username) {
         'Chat with ',
         el('a', { href: `#/u/${encodeURIComponent(username)}` }, `@${username}`),
       ]),
+      langLine,
     ])
   );
 
@@ -52,6 +54,10 @@ export async function renderDmThread(username) {
   try {
     const res = await api.dmThread(username);
     blocked = res.blocked;
+    const parts = [];
+    if (res.partner_native?.length) parts.push(`Speaks ${res.partner_native.join(', ')}`);
+    if (res.partner_learning?.length) parts.push(`learning ${res.partner_learning.join(', ')}`);
+    langLine.textContent = parts.join(' · ');
     clear(list);
     if (!res.messages.length) { empty = el('p', { class: 'muted' }, 'No messages yet. Say hi!'); list.append(empty); }
     res.messages.forEach(add);

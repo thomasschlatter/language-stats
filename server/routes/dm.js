@@ -1,6 +1,6 @@
 // /api/dm — 1-on-1 direct messages and corrections.
 import { Router } from 'express';
-import { getUserByUsername } from '../models/users.js';
+import { getUserByUsername, getUserLanguages } from '../models/users.js';
 import { getLanguageByCode } from '../models/languages.js';
 import { sendDM, thread, conversations, getMessage, addCorrection, unreadDmCount, markDmsRead } from '../models/dm.js';
 import { blockedBetween } from '../models/moderation.js';
@@ -46,8 +46,11 @@ router.get('/:username', requireAuth, (req, res) => {
   const other = getUserByUsername(req.params.username);
   if (!other) return res.status(404).json({ error: 'user not found' });
   const since = Number(req.query.since) || 0;
+  const langs = getUserLanguages(other.id);
   res.json({
     partner: other.username,
+    partner_native: langs.filter((l) => l.role === 'native').map((l) => l.name),
+    partner_learning: langs.filter((l) => l.role === 'learning').map((l) => l.name),
     blocked: blockedBetween(req.user.id, other.id),
     messages: thread(req.user.id, other.id, since),
   });
