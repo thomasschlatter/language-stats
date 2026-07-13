@@ -54,10 +54,17 @@ export function parseArticle(src, defaultLang) {
       blocks.push(el('h2', { class: 'article-h' }, inline(line.slice(2))));
       continue;
     }
-    if (line.startsWith('- ')) {
+    const ordered = line.match(/^\d+[.)]\s+(.*)$/);
+    if (line.startsWith('- ') || line.startsWith('* ') || ordered) {
       flushPara();
-      if (!list) list = el('ul', { class: 'article-ul' });
-      list.append(el('li', {}, inline(line.slice(2))));
+      const tag = ordered ? 'ol' : 'ul';
+      // start a fresh list if none open or the bullet type changed
+      if (!list || list.tagName.toLowerCase() !== tag) {
+        flushList();
+        list = el(tag, { class: ordered ? 'article-ol' : 'article-ul' });
+      }
+      const itemText = ordered ? ordered[1] : line.slice(2);
+      list.append(el('li', {}, inline(itemText)));
       continue;
     }
     flushList();

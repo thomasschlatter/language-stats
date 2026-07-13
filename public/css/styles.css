@@ -242,7 +242,8 @@ body:not(.authed) .auth-only { display: none !important; }
 }
 
 .reader-prose { font-size: 1.15rem; line-height: 2; }
-.tip-body { white-space: pre-wrap; }
+.tip-body { margin-top: 0.25rem; }
+.tip-body .article-p:last-child, .tip-body .article-ul:last-child { margin-bottom: 0; }
 
 .word-detail .lang-tag { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .word-detail .headword { margin: 0.15rem 0 0.5rem; font-size: 2rem; }
@@ -315,6 +316,22 @@ body:not(.authed) .auth-only { display: none !important; }
 .article-p { margin: 0 0 1rem; }
 .article-ul { margin: 0 0 1rem; padding-left: 1.25rem; }
 .article-ul li { margin: 0.2rem 0; }
+.article-ol { margin: 0 0 1rem; padding-left: 1.4rem; }
+.article-ol li { margin: 0.2rem 0; }
+
+/* "Make a flashcard deck" control shown under each list. */
+.list-deck-bar {
+  margin: -0.4rem 0 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.list-deck-btn { white-space: nowrap; }
+.list-deck-status { font-size: 0.85rem; color: var(--muted); }
+.list-deck-status.ok { color: var(--accent-2); }
+.list-deck-status.err { color: var(--danger); }
+.list-deck-link { font-weight: 600; white-space: nowrap; }
 
 /* ---- Coverage widget ---- */
 .coverage {

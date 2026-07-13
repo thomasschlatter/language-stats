@@ -1,7 +1,7 @@
 // /api/tips — community language-learning tips.
 import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
-import { listTips, createTip } from '../models/tips.js';
+import { listTips, createTip, updateTip } from '../models/tips.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -30,6 +30,22 @@ router.post('/', requireAuth, (req, res) => {
     body,
   });
   res.status(201).json({ tip });
+});
+
+// PUT /api/tips/:id  { title, body, bodyLanguageCode? } — author-only edit.
+router.put('/:id(\\d+)', requireAuth, (req, res) => {
+  const { title, body, bodyLanguageCode } = req.body ?? {};
+  if (!title || !body) return res.status(400).json({ error: 'title and body are required' });
+  const bodyLang = bodyLanguageCode ? getLanguageByCode(bodyLanguageCode) : null;
+  const tip = updateTip({
+    id: Number(req.params.id),
+    userId: req.user.id,
+    title,
+    body,
+    bodyLangId: bodyLang?.id,
+  });
+  if (!tip) return res.status(404).json({ error: 'tip not found or not yours' });
+  res.json({ tip });
 });
 
 export default router;

@@ -56,6 +56,7 @@ export const api = {
   // --- tips ---
   tips: (lang) => request('GET', `/tips?lang=${encodeURIComponent(lang)}`),
   createTip: (b) => request('POST', '/tips', b),
+  updateTip: (id, b) => request('PUT', `/tips/${id}`, b),
 
   // --- articles (cards) ---  native filters cards to the learner's language
   articles: (lang, native) =>

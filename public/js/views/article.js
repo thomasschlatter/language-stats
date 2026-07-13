@@ -9,6 +9,7 @@ import { parseArticle } from '../articleMarkup.js';
 import { coverageWidget } from './coverageWidget.js';
 import { genderStatsWidget } from './genderStatsWidget.js';
 import { voteButton } from './voteButton.js';
+import { attachDeckButtons } from './listToDeck.js';
 
 export async function renderArticle(id) {
   const view = clear(document.getElementById('view'));
@@ -47,4 +48,7 @@ export async function renderArticle(id) {
   for (const mount of container.querySelectorAll('.gender-mount')) {
     mount.append(genderStatsWidget(article.language_code));
   }
+
+  // Let the reader turn any list in the article into a flashcard deck.
+  attachDeckButtons(container, article.language_code, article.title);
 }

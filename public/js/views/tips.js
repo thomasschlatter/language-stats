@@ -1,13 +1,16 @@
-// Tips view: community language-learning advice. Tip bodies are prose, so —
-// like everything else on the site — every word is clickable and rendered in
-// the locale the tip was written in.
+// Tips view: community language-learning advice. Tip bodies are markdown-based
+// (the same small markup as articles: # headings, - lists, {{locale|word}}),
+// so every word is clickable and any list can be turned into a flashcard deck.
+// Authors can edit their own tips.
 
 import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { renderText, tokenizeTree } from '../render.js';
+import { parseArticle } from '../articleMarkup.js';
 import { languageTabs } from './tabs.js';
 import { signInPrompt } from '../auth.js';
+import { attachDeckButtons } from './listToDeck.js';
 
 export async function renderTips(langCode) {
   const view = clear(document.getElementById('view'));
@@ -22,7 +25,7 @@ export async function renderTips(langCode) {
     el('div', { class: 'section-head' }, [
       el('h1', {}, `${language.name} tips`),
       store.user
-        ? el('button', { class: 'btn small', onclick: () => openAddTip(language, () => renderTips(langCode)) }, '+ Share a tip')
+        ? el('button', { class: 'btn small', onclick: () => openTipEditor(language, () => renderTips(langCode)) }, '+ Share a tip')
         : signInPrompt('to share tips'),
     ])
   );
@@ -38,27 +41,47 @@ export async function renderTips(langCode) {
     tokenizeTree(view);
     return;
   }
+
+  const bodies = []; // { bodyEl, name } — deck buttons attached after tokenizing
   for (const t of tips) {
     const bodyLang = t.body_lang || store.nativeLang;
+    const canEdit = store.user && store.user.id === t.user_id;
+    const bodyEl = el('div', { class: 'tip-body article-body', lang: bodyLang }, parseArticle(t.body, bodyLang));
+    bodies.push({ bodyEl, name: t.title });
+
     list.append(
       el('div', { class: 'card' }, [
-        el('h3', {}, renderText(t.title, bodyLang)),
-        el('div', { class: 'tip-body', lang: bodyLang }, renderText(t.body, bodyLang)),
+        el('div', { class: 'section-head', style: 'align-items:flex-start' }, [
+          el('h3', {}, renderText(t.title, bodyLang)),
+          canEdit
+            ? el('button', { class: 'btn small secondary', onclick: () => openTipEditor(language, () => renderTips(langCode), t) }, 'Edit')
+            : null,
+        ]),
+        bodyEl,
         el('div', { class: 'meta', style: 'margin-top:0.5rem' }, `by @${t.author} · written in ${bodyLang} · ${t.created_at}`),
       ])
     );
   }
   tokenizeTree(view);
+  // After tokenizing (so buttons aren't tokenized), offer a deck per list.
+  for (const { bodyEl, name } of bodies) attachDeckButtons(bodyEl, langCode, name);
 }
 
-function openAddTip(language, onDone) {
+// Create (tip omitted) or edit (tip given) a tip. Markdown-aware.
+function openTipEditor(language, onDone, tip = null) {
+  const editing = !!tip;
   const err = el('div', { class: 'error' });
-  const title = el('input', { type: 'text', placeholder: 'short title' });
-  const body = el('textarea', { placeholder: 'Share your trick for learning…' });
+  const title = el('input', { type: 'text', placeholder: 'short title', value: tip?.title || '' });
+  const body = el('textarea', {
+    rows: '10',
+    placeholder: 'Share your trick for learning…\n\nMarkdown: # heading, "- " for bullet lists, blank line = new paragraph.\nTip: any list can be turned into a flashcard deck.',
+  });
+  body.value = tip?.body || '';
   const writtenIn = el('select', {},
-    store.languages.map((l) =>
-      el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)
-    )
+    store.languages.map((l) => {
+      const selected = l.code === (tip?.body_lang || store.nativeLang);
+      return el('option', { value: l.code, selected: selected ? '' : null }, l.name);
+    })
   );
 
   const form = el('form', {
@@ -66,12 +89,20 @@ function openAddTip(language, onDone) {
       e.preventDefault();
       err.textContent = '';
       try {
-        await api.createTip({
-          languageCode: language.code,
-          bodyLanguageCode: writtenIn.value,
-          title: title.value,
-          body: body.value,
-        });
+        if (editing) {
+          await api.updateTip(tip.id, {
+            title: title.value,
+            body: body.value,
+            bodyLanguageCode: writtenIn.value,
+          });
+        } else {
+          await api.createTip({
+            languageCode: language.code,
+            bodyLanguageCode: writtenIn.value,
+            title: title.value,
+            body: body.value,
+          });
+        }
         close();
         onDone();
       } catch (ex) {
@@ -81,15 +112,18 @@ function openAddTip(language, onDone) {
   }, [
     el('label', {}, 'Title'),
     title,
-    el('label', {}, 'Your tip'),
+    el('label', {}, 'Your tip (markdown)'),
     body,
+    el('div', { class: 'muted', style: 'font-size:0.78rem; margin-top:0.3rem' },
+      'Use "- " for bullet lists and "# " for headings. Readers can turn any list into a flashcard deck.'),
     el('label', {}, 'Written in'),
     writtenIn,
     err,
     el('div', { class: 'row', style: 'margin-top:1rem' }, [
-      el('button', { class: 'btn', type: 'submit' }, 'Post tip'),
+      el('button', { class: 'btn', type: 'submit' }, editing ? 'Save changes' : 'Post tip'),
     ]),
   ]);
 
-  const close = openModal(el('div', {}, [el('h2', {}, `Share a ${language.name} tip`), form]));
+  const heading = editing ? 'Edit tip' : `Share a ${language.name} tip`;
+  const close = openModal(el('div', {}, [el('h2', {}, heading), form]));
 }
