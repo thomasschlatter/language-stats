@@ -43,7 +43,7 @@ export function unpredictableGenderNouns(languageId, threshold = 1, limit = 500)
   if (!total) return [];
   const target = threshold * total;
 
-  const rows = db
+  const raw = db
     .prepare(
       `SELECT f.word AS lc, l.gender AS gender, COALESCE(l.form, f.word) AS form,
               (SELECT w.meaning FROM words w
@@ -56,6 +56,11 @@ export function unpredictableGenderNouns(languageId, threshold = 1, limit = 500)
         ORDER BY f.count DESC`
     )
     .all(languageId, target);
+
+  // The lexicon is noisy (numbers, units, lowercase adverbs, single letters).
+  // Keep only clean noun-shaped forms: capitalised, letters-only, ≥3 chars.
+  const CLEAN = /^[A-ZÄÖÜ][A-Za-zÄÖÜäöüß-]{2,}$/;
+  const rows = raw.filter((r) => CLEAN.test(r.form));
 
   // Majority gender per ending, over every gendered noun in the set.
   const buckets = new Map();
