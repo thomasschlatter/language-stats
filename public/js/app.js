@@ -42,6 +42,20 @@ async function updateDueBadge() {
 }
 window.addEventListener('ls:decks-changed', updateDueBadge);
 
+// Show a badge with unread DM count on the Messages nav item.
+async function updateDmBadge() {
+  const link = document.querySelector('.topnav a[href="#/messages"]');
+  if (!link) return;
+  const clearBadges = () => link.querySelectorAll('.due-badge').forEach((b) => b.remove());
+  if (!store.user) { clearBadges(); return; }
+  try {
+    const { count } = await api.dmUnread();
+    clearBadges();
+    if (count > 0) link.append(el('span', { class: 'due-badge' }, String(count)));
+  } catch { /* ignore */ }
+}
+window.addEventListener('ls:dm-changed', updateDmBadge);
+
 // Top-bar word search.
 function setupSearch() {
   const form = document.getElementById('search-form');
@@ -196,6 +210,8 @@ async function init() {
   setupSearch();
   startRouter();
   updateDueBadge();
+  updateDmBadge();
+  setInterval(updateDmBadge, 60000); // poll for incoming DMs
 
   // First-run language setup for brand-new accounts (e.g. after LINE signup,
   // which redirects here with ?welcome=1).
@@ -226,6 +242,7 @@ async function init() {
     renderSidebar();
     tokenizeChrome();
     updateDueBadge();
+    updateDmBadge();
     // Refresh the current view so add/edit buttons appear/disappear.
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });

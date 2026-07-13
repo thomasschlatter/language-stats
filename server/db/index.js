@@ -35,6 +35,9 @@ if (!userCols.includes('line_user_id')) {
 if (!userCols.includes('avatar_image')) {
   db.exec('ALTER TABLE users ADD COLUMN avatar_image TEXT'); // URL/path to a personal photo avatar
 }
+if (!userCols.includes('dm_last_read_id')) {
+  db.exec('ALTER TABLE users ADD COLUMN dm_last_read_id INTEGER NOT NULL DEFAULT 0'); // for the unread-DM badge
+}
 // UNIQUE index tolerates many NULLs but keeps LINE ids one-per-account.
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_line_user_id ON users(line_user_id)');
 

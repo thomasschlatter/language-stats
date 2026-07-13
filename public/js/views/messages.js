@@ -22,6 +22,8 @@ export async function renderMessages() {
   let conversations;
   try {
     ({ conversations } = await api.conversations());
+    // Opening the inbox marked DMs read server-side — refresh the nav badge.
+    window.dispatchEvent(new Event('ls:dm-changed'));
   } catch (ex) {
     clear(list).append(el('p', { class: 'error' }, ex.message));
     return;

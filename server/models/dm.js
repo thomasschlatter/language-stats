@@ -65,6 +65,20 @@ export function conversations(userId) {
 }
 
 // --- corrections ---
+// Count DMs sent TO this user that they haven't seen (id past their read mark).
+export function unreadDmCount(userId) {
+  return db.prepare(
+    `SELECT COUNT(*) AS n FROM dm_messages
+     WHERE recipient_id = ? AND id > (SELECT dm_last_read_id FROM users WHERE id = ?)`
+  ).get(userId, userId).n;
+}
+
+// Mark all received DMs as read (moves the read mark to the latest one).
+export function markDmsRead(userId) {
+  const row = db.prepare('SELECT MAX(id) AS m FROM dm_messages WHERE recipient_id = ?').get(userId);
+  db.prepare('UPDATE users SET dm_last_read_id = ? WHERE id = ?').run(row.m || 0, userId);
+}
+
 export function getMessage(id) {
   return db.prepare(`SELECT ${MSG_COLS}, m.sender_id, m.recipient_id ${MSG_FROM} WHERE m.id = ?`).get(id);
 }

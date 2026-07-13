@@ -2,15 +2,22 @@
 import { Router } from 'express';
 import { getUserByUsername } from '../models/users.js';
 import { getLanguageByCode } from '../models/languages.js';
-import { sendDM, thread, conversations, getMessage, addCorrection } from '../models/dm.js';
+import { sendDM, thread, conversations, getMessage, addCorrection, unreadDmCount, markDmsRead } from '../models/dm.js';
 import { blockedBetween } from '../models/moderation.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-// GET /api/dm  -> conversation list
+// GET /api/dm  -> conversation list. Opening the inbox marks DMs as read.
 router.get('/', requireAuth, (req, res) => {
-  res.json({ conversations: conversations(req.user.id) });
+  const list = conversations(req.user.id);
+  markDmsRead(req.user.id);
+  res.json({ conversations: list });
+});
+
+// GET /api/dm/unread  -> number of unseen DMs (for the nav badge).
+router.get('/unread', requireAuth, (req, res) => {
+  res.json({ count: unreadDmCount(req.user.id) });
 });
 
 // POST /api/dm/messages/:id/correct  { correctedText, note? }

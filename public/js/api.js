@@ -97,6 +97,7 @@ export const api = {
 
   // --- direct messages ---
   conversations: () => request('GET', '/dm'),
+  dmUnread: () => request('GET', '/dm/unread'),
   dmThread: (username, since = 0) =>
     request('GET', `/dm/${encodeURIComponent(username)}${since ? `?since=${since}` : ''}`),
   sendDM: (username, b) => request('POST', `/dm/${encodeURIComponent(username)}`, b),
