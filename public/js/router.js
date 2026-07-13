@@ -32,6 +32,7 @@ const routes = [
   { pattern: /^#\/search\/(.+)$/, handler: (m) => renderSearch(dec(m[1])) },
   { pattern: /^#\/settings$/, handler: () => renderSettings(), auth: true },
   { pattern: /^#\/decks$/, handler: () => renderDecks(), auth: true },
+  { pattern: /^#\/study$/, handler: () => renderStudy(), auth: true }, // all decks
   { pattern: /^#\/study\/(\d+)$/, handler: (m) => renderStudy(Number(m[1])), auth: true },
   { pattern: /^#\/messages$/, handler: () => renderMessages(), auth: true },
   { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])), auth: true },

@@ -35,6 +35,18 @@ export async function renderDecks() {
     list.append(el('p', { class: 'muted' }, 'No decks yet. Import a CSV, or an Anki “Notes in Plain Text” (TSV) export.'));
     return;
   }
+
+  // Study everything due across all decks in one session.
+  const totalDue = decks.reduce((s, d) => s + (d.due || 0), 0);
+  if (totalDue > 0) {
+    list.append(
+      el('div', { class: 'study-all-bar' }, [
+        el('span', {}, `${totalDue} card${totalDue === 1 ? '' : 's'} due across your decks.`),
+        el('a', { class: 'btn small', href: '#/study' }, `Study all (${totalDue})`),
+      ])
+    );
+  }
+
   for (const d of decks) {
     list.append(
       el('div', { class: 'card deck-card' }, [
