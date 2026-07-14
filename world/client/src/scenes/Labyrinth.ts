@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { createCharacterAnims } from '../anims/CharacterAnims'
 import { recordResult } from '../game/progress'
+import { celebrate } from '../game/celebrate'
 
 // Labyrinth: a word appears; walk through a maze to the tile with its correct
 // meaning. Reach a wrong tile and you lose a life. The maze is a fully-connected
@@ -225,6 +226,7 @@ export default class Labyrinth extends Phaser.Scene {
     const W = this.scale.width
     const H = this.scale.height
     const prog = recordResult({ game: 'labyrinth', score: this.score, bestStreak: 0, won: this.lives > 0 })
+    if (prog.advanced) celebrate(this)
     this.wordText.setText(prog.advanced ? `Level ${prog.level!.id} complete! 🎉` : (this.lives <= 0 ? 'Out of lives!' : 'Round complete! 🎉'))
     this.hudText.setText('')
     this.info.setText(`Reached ${this.score} of ${this.items.length}`)

@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { recordResult } from '../game/progress'
+import { celebrate } from '../game/celebrate'
 
 // Memory Match: a grid of face-down tiles, half words and half meanings. Flip
 // two; if a word meets its meaning they stay up. Clear the board to win. Reuses
@@ -158,6 +159,7 @@ export default class Memory extends Phaser.Scene {
     const W = this.scale.width
     const H = this.scale.height
     const res = recordResult({ game: 'memory', score: this.pairs, bestStreak: 0, pairs: this.pairs, won: true })
+    if (res.advanced) celebrate(this)
     const banner = res.advanced ? `Level ${res.level!.id} complete! 🎉` : 'Board cleared! 🎉'
     this.add.text(W / 2, H * 0.4, banner, { fontSize: '30px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5).setDepth(20)
     this.info.setText(`${this.pairs} pairs in ${this.moves} moves`)

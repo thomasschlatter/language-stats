@@ -17,7 +17,19 @@ export default class GameMenu extends Phaser.Scene {
     const cur = currentLevel()
     const progTxt = allDone() ? `All ${LEVELS.length} levels complete! 🏆` : `Level ${done + 1} of ${LEVELS.length}`
     this.add.text(W / 2, H * 0.22, progTxt, { fontSize: '20px', color: '#9fb0d8' }).setOrigin(0.5)
-    if (cur) this.add.text(W / 2, H * 0.27, `🎯 Task: ${cur.goal}`, { fontSize: '18px', color: '#ffd479' }).setOrigin(0.5)
+    if (cur) this.add.text(W / 2, H * 0.26, `🎯 Task: ${cur.goal}`, { fontSize: '18px', color: '#ffd479' }).setOrigin(0.5)
+
+    // Level ladder: a dot per level — cleared (teal), current (gold), locked (grey).
+    const total = LEVELS.length
+    const dotGap = Math.min(34, (W * 0.72) / Math.max(1, total - 1))
+    const rowStart = W / 2 - ((total - 1) * dotGap) / 2
+    LEVELS.forEach((lv, i) => {
+      const x = rowStart + i * dotGap
+      const isDone = lv.id <= done
+      const isCurrent = lv.id === done + 1
+      const dot = this.add.circle(x, H * 0.31, isCurrent ? 9 : 7, isDone ? 0x33ac96 : isCurrent ? 0xffd479 : 0x39456e)
+      if (isCurrent) dot.setStrokeStyle(2, 0xffffff)
+    })
 
     const games: { scene: string; emoji: string; name: string; desc: string }[] = [
       { scene: 'practice', emoji: '🎯', name: 'Shooter', desc: 'Shoot the correct word' },

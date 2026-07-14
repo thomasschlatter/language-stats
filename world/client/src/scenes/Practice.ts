@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { createCharacterAnims } from '../anims/CharacterAnims'
 import { recordResult } from '../game/progress'
+import { celebrate } from '../game/celebrate'
 
 // A self-contained, single-player language mini-game (independent of the
 // multiplayer worlds and Colyseus). A word from the player's decks appears; walk
@@ -298,6 +299,7 @@ export default class Practice extends Phaser.Scene {
 
     // Report to the level ladder (may advance the current level).
     const prog = recordResult({ game: 'shooter', score: this.score, bestStreak: this.maxStreak, won: this.lives > 0 })
+    if (prog.advanced) celebrate(this)
     this.wordText.setText(prog.advanced ? `Level ${prog.level!.id} complete! 🎉` : (this.lives <= 0 ? 'Out of lives!' : 'Round complete! 🎉'))
     this.hudText.setText('')
 

@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { createCharacterAnims } from '../anims/CharacterAnims'
 import { recordResult } from '../game/progress'
+import { celebrate } from '../game/celebrate'
 
 // Word Fall: a word appears up top and its possible meanings drift down the
 // screen. Move along the bottom and catch the correct one. Catch a wrong one
@@ -145,6 +146,7 @@ export default class WordFall extends Phaser.Scene {
     const W = this.scale.width
     const H = this.scale.height
     const prog = recordResult({ game: 'wordfall', score: this.score, bestStreak: 0, won: this.lives > 0 })
+    if (prog.advanced) celebrate(this)
     this.wordText.setText(prog.advanced ? `Level ${prog.level!.id} complete! 🎉` : (this.lives <= 0 ? 'Out of lives!' : 'Round complete! 🎉'))
     this.hudText.setText('')
     this.info.setText(`Caught ${this.score} of ${this.items.length}`)
