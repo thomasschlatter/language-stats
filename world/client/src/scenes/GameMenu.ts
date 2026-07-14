@@ -23,16 +23,17 @@ export default class GameMenu extends Phaser.Scene {
       { scene: 'practice', emoji: '🎯', name: 'Shooter', desc: 'Shoot the correct word' },
       { scene: 'memory', emoji: '🧠', name: 'Memory Match', desc: 'Match words to their meanings' },
       { scene: 'wordfall', emoji: '🌧️', name: 'Word Fall', desc: 'Catch the correct meaning as it falls' },
+      { scene: 'labyrinth', emoji: '🧩', name: 'Labyrinth', desc: 'Navigate a maze to the right word' },
     ]
     const cardW = Math.min(460, W * 0.86)
     games.forEach((g, i) => {
-      const y = H * 0.40 + i * 92
-      const card = this.add.rectangle(W / 2, y, cardW, 82, 0x232a49, 0.96)
+      const y = H * 0.36 + i * 78
+      const card = this.add.rectangle(W / 2, y, cardW, 68, 0x232a49, 0.96)
         .setStrokeStyle(2, 0x3a4470).setInteractive({ useHandCursor: true })
       const left = W / 2 - cardW / 2
-      this.add.text(left + 28, y, g.emoji, { fontSize: '36px' }).setOrigin(0, 0.5)
-      this.add.text(left + 80, y - 13, g.name, { fontSize: '22px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0, 0.5)
-      this.add.text(left + 80, y + 15, g.desc, { fontSize: '14px', color: '#9fb0d8' }).setOrigin(0, 0.5)
+      this.add.text(left + 26, y, g.emoji, { fontSize: '32px' }).setOrigin(0, 0.5)
+      this.add.text(left + 74, y - 11, g.name, { fontSize: '21px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0, 0.5)
+      this.add.text(left + 74, y + 14, g.desc, { fontSize: '13px', color: '#9fb0d8' }).setOrigin(0, 0.5)
       card.on('pointerover', () => card.setStrokeStyle(2, 0x33ac96))
       card.on('pointerout', () => card.setStrokeStyle(2, 0x3a4470))
       card.on('pointerdown', () => this.scene.start(g.scene))
