@@ -113,6 +113,10 @@ export default class Bootstrap extends Phaser.Scene {
     // slices the irregular rows into frames itself.
     this.load.image('bodytest', 'assets/character/Bodies/32x32/Body_32x32_08.png')
 
+    // Osaka (Japanese city) world — a pre-rendered GuttyKreum street scene used
+    // as an image world; collision comes from osakaCollision.ts.
+    this.load.image('osaka_map', 'assets/guttykreum/osaka/OsakaWorld.png')
+
     this.load.on('complete', () => {
       this.preloadComplete = true
       // Deep-link: /game?mode=practice jumps straight into the solo word game

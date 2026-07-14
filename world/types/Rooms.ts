@@ -59,4 +59,11 @@ export const WORLDS: WorldInfo[] = [
     map: 'town',
     emoji: '🏙️',
   },
+  {
+    id: 'world_osaka',
+    name: 'Osaka',
+    description: 'A Japanese city crossroads — cherry trees, shops and neon, right off the street.',
+    map: 'osaka',
+    emoji: '🏮',
+  },
 ]

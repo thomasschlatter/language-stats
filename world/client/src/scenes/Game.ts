@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import { debugDraw } from '../utils/debug'
 import { createCharacterAnims } from '../anims/CharacterAnims'
 import { buildTestAnims } from '../anims/testAnims'
+import { OSAKA_WALKABLE, OSAKA_SPAWN, OSAKA_BOT } from './osakaCollision'
 
 import Item from '../items/Item'
 import Chair from '../items/Chair'
@@ -118,6 +119,8 @@ export default class Game extends Phaser.Scene {
     if (worldMap === 'cafe') this.buildInterior('tilemap')
     else if (worldMap === 'town') this.buildInterior('lobbyMap')
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
+    else if (worldMap === 'osaka')
+      this.buildImageWorld('osaka_map', OSAKA_WALKABLE, OSAKA_SPAWN, OSAKA_BOT)
     else this.buildProcedural(worldMap)
 
     this.setupPlayerAndNetwork()
@@ -246,6 +249,53 @@ export default class Game extends Phaser.Scene {
     this.spawnY = 500
     this.botX = 330
     this.botY = 300
+  }
+
+  // An image world: a single pre-rendered scene (e.g. the GuttyKreum Osaka
+  // street) drawn as a flat background, with collision from a walkability grid
+  // ('1' walkable, '0' solid). Solid tiles are merged into horizontal strips to
+  // keep the static-body count low.
+  private buildImageWorld(
+    imageKey: string,
+    walkable: string[],
+    spawn: [number, number],
+    bot: [number, number]
+  ) {
+    this.worldColliders = []
+    const img = this.add.image(0, 0, imageKey).setOrigin(0, 0).setDepth(0)
+    const W = img.width
+    const H = img.height
+    // Blank tilemap purely so this.map (camera + physics bounds) is populated.
+    this.map = this.make.tilemap({
+      tileWidth: 32,
+      tileHeight: 32,
+      width: Math.ceil(W / 32),
+      height: Math.ceil(H / 32),
+    })
+    this.spawnX = spawn[0]
+    this.spawnY = spawn[1]
+    this.botX = bot[0]
+    this.botY = bot[1]
+
+    const solids = this.physics.add.staticGroup()
+    for (let ty = 0; ty < walkable.length; ty++) {
+      const row = walkable[ty]
+      let x = 0
+      while (x < row.length) {
+        if (row[x] === '0') {
+          let x2 = x
+          while (x2 < row.length && row[x2] === '0') x2++
+          const w = (x2 - x) * 32
+          const rect = this.add
+            .rectangle(x * 32 + w / 2, ty * 32 + 16, w, 32)
+            .setVisible(false)
+          this.physics.add.existing(rect, true)
+          solids.add(rect)
+          x = x2
+        } else x++
+      }
+    }
+    this.worldColliders.push(solids)
   }
 
   // A designed indoor Tiled map (café = the office map, lounge = the lobby map).

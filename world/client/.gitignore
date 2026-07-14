@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# GuttyKreum raw asset packs (paid) — keep local; commit only wired-in world images
+public/assets/guttykreum/
