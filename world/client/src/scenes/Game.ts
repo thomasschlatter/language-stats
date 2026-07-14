@@ -53,6 +53,10 @@ export default class Game extends Phaser.Scene {
   // Tile grid for click-to-walk pathfinding (built from the world's colliders).
   private navGrid?: NavGrid
 
+  // Drag-to-walk (character-as-joystick) state.
+  private dragActive = false
+  private dragClient = { x: 0, y: 0 }
+
   // Set by the per-world builders, consumed by setupPlayerAndNetwork().
   private spawnX = 0
   private spawnY = 0
@@ -250,7 +254,7 @@ export default class Game extends Phaser.Scene {
     // real UI controls so buttons/inputs still work. Toggle in helper buttons.
     const onTapToWalk = (e: PointerEvent) => {
       if (!this.myPlayer || !this.scene.isActive()) return
-      if (!store.getState().user.tapToWalk) return
+      if (store.getState().user.moveMode !== 'tap') return
       const t = e.target as HTMLElement | null
       if (
         t &&
@@ -275,6 +279,41 @@ export default class Game extends Phaser.Scene {
     window.addEventListener('pointerdown', onTapToWalk)
     this.events.once('shutdown', () => window.removeEventListener('pointerdown', onTapToWalk))
     this.events.once('destroy', () => window.removeEventListener('pointerdown', onTapToWalk))
+
+    // Drag-to-walk (the character is the joystick): hold anywhere and the offset
+    // of the finger from the character sets the walk direction. Kept in code but
+    // not offered in the movement rotation yet.
+    const isUi = (t: EventTarget | null) =>
+      t instanceof HTMLElement &&
+      !!t.closest('button, a, input, textarea, select, label, [role="button"], [role="dialog"], .MuiPaper-root, .MuiButtonBase-root')
+    const onDragDown = (e: PointerEvent) => {
+      if (store.getState().user.moveMode !== 'drag' || isUi(e.target)) return
+      this.dragActive = true
+      this.dragClient = { x: e.clientX, y: e.clientY }
+    }
+    const onDragMove = (e: PointerEvent) => {
+      if (this.dragActive) this.dragClient = { x: e.clientX, y: e.clientY }
+    }
+    const onDragUp = () => {
+      if (!this.dragActive) return
+      this.dragActive = false
+      this.myPlayer?.handleJoystickMovement({
+        isMoving: false,
+        direction: { left: false, right: false, up: false, down: false },
+      })
+    }
+    window.addEventListener('pointerdown', onDragDown)
+    window.addEventListener('pointermove', onDragMove)
+    window.addEventListener('pointerup', onDragUp)
+    window.addEventListener('pointercancel', onDragUp)
+    const cleanupDrag = () => {
+      window.removeEventListener('pointerdown', onDragDown)
+      window.removeEventListener('pointermove', onDragMove)
+      window.removeEventListener('pointerup', onDragUp)
+      window.removeEventListener('pointercancel', onDragUp)
+    }
+    this.events.once('shutdown', cleanupDrag)
+    this.events.once('destroy', cleanupDrag)
 
     this.network.onPlayerJoined(this.handlePlayerJoined, this)
     this.network.onPlayerLeft(this.handlePlayerLeft, this)
@@ -985,6 +1024,21 @@ export default class Game extends Phaser.Scene {
 
   update(t: number, dt: number) {
     if (this.myPlayer && this.network) {
+      // Drag-to-walk: steer by the finger's offset from the character.
+      if (this.dragActive && store.getState().user.moveMode === 'drag') {
+        const rect = this.game.canvas.getBoundingClientRect()
+        const wp = this.cameras.main.getWorldPoint(
+          this.dragClient.x - rect.left,
+          this.dragClient.y - rect.top
+        )
+        const dx = wp.x - this.myPlayer.x
+        const dy = wp.y - this.myPlayer.y
+        const dead = 12
+        this.myPlayer.handleJoystickMovement({
+          isMoving: Math.hypot(dx, dy) > dead,
+          direction: { left: dx < -dead, right: dx > dead, up: dy < -dead, down: dy > dead },
+        })
+      }
       this.playerSelector.update(this.myPlayer, this.cursors)
       this.myPlayer.update(this.playerSelector, this.cursors, this.keyE, this.keyR, this.keySpace, this.network)
       // Keep the animation-tester sprite hovering above the player.

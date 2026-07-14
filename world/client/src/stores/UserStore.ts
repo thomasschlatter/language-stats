@@ -18,11 +18,11 @@ export const userSlice = createSlice({
     videoConnected: false,
     loggedIn: false,
     playerNameMap: new Map<string, string>(),
-    showJoystick: window.innerWidth < 650,
-    tapToWalk:
-      typeof localStorage !== 'undefined' && localStorage.getItem('gf_tap_to_walk') === 'off'
-        ? false
-        : true,
+    // How the player moves: 'tap' (click/tap to walk — the default), 'joystick'
+    // (on-screen stick), or 'drag' (the character itself is the stick — hold +
+    // drag). Rotate between them from the helper buttons.
+    moveMode: ((typeof localStorage !== 'undefined' && localStorage.getItem('gf_move_mode')) ||
+      'tap') as 'tap' | 'joystick' | 'drag',
   },
   reducers: {
     toggleBackgroundMode: (state) => {
@@ -48,13 +48,21 @@ export const userSlice = createSlice({
     removePlayerNameMap: (state, action: PayloadAction<string>) => {
       state.playerNameMap.delete(sanitizeId(action.payload))
     },
-    setShowJoystick: (state, action: PayloadAction<boolean>) => {
-      state.showJoystick = action.payload
-    },
-    setTapToWalk: (state, action: PayloadAction<boolean>) => {
-      state.tapToWalk = action.payload
+    setMoveMode: (state, action: PayloadAction<'tap' | 'joystick' | 'drag'>) => {
+      state.moveMode = action.payload
       try {
-        localStorage.setItem('gf_tap_to_walk', action.payload ? 'on' : 'off')
+        localStorage.setItem('gf_move_mode', action.payload)
+      } catch {
+        /* ignore */
+      }
+    },
+    cycleMoveMode: (state) => {
+      // 'drag' is kept in code but not offered in the rotation yet.
+      const order: Array<'tap' | 'joystick'> = ['tap', 'joystick']
+      const i = order.indexOf(state.moveMode as 'tap' | 'joystick')
+      state.moveMode = order[(i + 1) % order.length] || 'tap'
+      try {
+        localStorage.setItem('gf_move_mode', state.moveMode)
       } catch {
         /* ignore */
       }
@@ -69,8 +77,8 @@ export const {
   setLoggedIn,
   setPlayerNameMap,
   removePlayerNameMap,
-  setShowJoystick,
-  setTapToWalk,
+  setMoveMode,
+  cycleMoveMode,
 } = userSlice.actions
 
 export default userSlice.reducer

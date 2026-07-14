@@ -19,7 +19,7 @@ import VideogameAssetOffIcon from '@mui/icons-material/VideogameAssetOff'
 
 import { BackgroundMode } from '../../../types/BackgroundMode'
 import TouchAppIcon from '@mui/icons-material/TouchApp'
-import { setShowJoystick, setTapToWalk, toggleBackgroundMode } from '../stores/UserStore'
+import { cycleMoveMode, toggleBackgroundMode } from '../stores/UserStore'
 import { useAppSelector, useAppDispatch } from '../hooks'
 import { getAvatarString, getColorByString } from '../util'
 import { Link } from '@mui/material'
@@ -112,8 +112,7 @@ export default function HelperButtonGroup() {
   const [showControlGuide, setShowControlGuide] = useState(false)
   const [showLegal, setShowLegal] = useState(false)
   const [showRoomInfo, setShowRoomInfo] = useState(false)
-  const showJoystick = useAppSelector((state) => state.user.showJoystick)
-  const tapToWalk = useAppSelector((state) => state.user.tapToWalk)
+  const moveMode = useAppSelector((state) => state.user.moveMode)
   const backgroundMode = useAppSelector((state) => state.user.backgroundMode)
   const roomJoined = useAppSelector((state) => state.room.roomJoined)
   const roomId = useAppSelector((state) => state.room.roomId)
@@ -125,16 +124,15 @@ export default function HelperButtonGroup() {
     <Backdrop>
       <div className="wrapper-group">
         {roomJoined && (
-          <Tooltip title={showJoystick ? 'Disable virtual joystick' : 'Enable virtual joystick'}>
-            <StyledFab size="small" onClick={() => dispatch(setShowJoystick(!showJoystick))}>
-              {showJoystick ? <VideogameAssetOffIcon /> : <VideogameAssetIcon />}
-            </StyledFab>
-          </Tooltip>
-        )}
-        {roomJoined && (
-          <Tooltip title={tapToWalk ? 'Disable tap-to-walk' : 'Enable tap-to-walk'}>
-            <StyledFab size="small" onClick={() => dispatch(setTapToWalk(!tapToWalk))}>
-              <TouchAppIcon style={tapToWalk ? undefined : { opacity: 0.4 }} />
+          <Tooltip
+            title={
+              moveMode === 'joystick'
+                ? 'Movement: on-screen joystick (tap to switch to tap-to-walk)'
+                : 'Movement: tap-to-walk (tap to switch to joystick)'
+            }
+          >
+            <StyledFab size="small" onClick={() => dispatch(cycleMoveMode())}>
+              {moveMode === 'joystick' ? <VideogameAssetIcon /> : <TouchAppIcon />}
             </StyledFab>
           </Tooltip>
         )}
