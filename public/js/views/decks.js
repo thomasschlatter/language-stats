@@ -3,6 +3,7 @@
 import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
+import { iconEl } from '../icons.js';
 import { signInPrompt } from '../auth.js';
 
 export async function renderDecks() {
@@ -19,8 +20,8 @@ export async function renderDecks() {
       el('span', { class: 'muted' }, 'Your decks — studying them turns those words greener in “Studied” colour mode.'),
       el('div', { class: 'row' }, [
         // Word game button removed for now (TODO: put it back — openWordGame still exists).
-        el('a', { class: 'btn small secondary', href: '#/decks/browse' }, '🔍 Browse shared'),
-        el('button', { class: 'btn small secondary', onclick: () => openGenerate(() => renderDecks()) }, '✨ Generate (AI)'),
+        el('a', { class: 'btn small secondary', href: '#/decks/browse' }, [iconEl('search'), ' Browse shared']),
+        el('button', { class: 'btn small secondary', onclick: () => openGenerate(() => renderDecks()) }, [iconEl('sparkle'), ' Generate (AI)']),
         el('button', { class: 'btn small', onclick: () => openImport(() => renderDecks()) }, '+ Import deck'),
       ]),
     ])

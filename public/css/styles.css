@@ -111,6 +111,7 @@ body:not(.authed) .auth-only { display: none !important; }
 /* Compact icon action buttons (follow, message, block…) — line icons, centered. */
 .icon-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; padding: 0.35rem 0.5rem; }
 .btn-ico, .icon-btn svg { display: inline-flex; }
+.btn-ico { vertical-align: middle; position: relative; top: -1px; }
 .icon-btn svg, .btn-ico svg { width: 17px; height: 17px; display: block; }
 .prof-counts { font-size: 0.85rem; margin-bottom: 1rem; }
 .auth-area .who { color: var(--muted); font-size: 0.9rem; }
