@@ -34,8 +34,30 @@ export async function renderUserProfile(username) {
         : el('span', { class: 'muted' }, '—'),
     ]);
 
-  view.append(
-    el('div', { class: 'profile' }, [
+  // Each section is its own card for clear visual separation.
+  const card = (children, cls = '') => el('div', { class: ('profile-card ' + cls).trim() }, children.filter(Boolean));
+
+  const headButtons = isMe
+    ? el('div', { class: 'row' }, [
+        el('button', { class: 'btn small', onclick: () => openCharacterCreator(prof.avatar, () => renderUserProfile(prof.username)) }, prof.avatar ? 'Edit character' : 'Create character'),
+        el('button', { class: 'btn small secondary', onclick: () => pickAvatarImage(prof) }, prof.avatar_image ? 'Change photo' : 'Use a photo'),
+        prof.avatar_image
+          ? el('button', { class: 'btn small secondary', onclick: () => removeAvatarImage(prof) }, 'Remove photo')
+          : null,
+        el('button', { class: 'btn small secondary', onclick: () => openEdit(prof) }, 'Edit profile'),
+        el('button', { class: 'btn small secondary', onclick: () => logout() }, 'Sign out'),
+      ])
+    : (store.user
+        ? el('div', { class: 'row' }, [
+            prof.blocked ? null : followBtn(prof),
+            prof.blocked ? null : el('a', { class: 'btn small secondary', href: `#/dm/${encodeURIComponent(prof.username)}` }, 'Message'),
+            blockBtn(prof),
+          ])
+        : null);
+
+  const profile = el('div', { class: 'profile' }, [
+    // Identity
+    card([
       el('div', { class: 'profile-head' }, [
         avatarFor(prof.avatar, prof.username, 64, prof.avatar_image),
         el('div', {}, [
@@ -43,25 +65,13 @@ export async function renderUserProfile(username) {
           el('div', { class: 'muted' }, `member since ${(prof.created_at || '').slice(0, 10)}`),
         ]),
         el('div', { class: 'spacer' }),
-        isMe
-          ? el('div', { class: 'row' }, [
-              el('button', { class: 'btn small', onclick: () => openCharacterCreator(prof.avatar, () => renderUserProfile(prof.username)) }, prof.avatar ? 'Edit character' : 'Create character'),
-              el('button', { class: 'btn small secondary', onclick: () => pickAvatarImage(prof) }, prof.avatar_image ? 'Change photo' : 'Use a photo'),
-              prof.avatar_image
-                ? el('button', { class: 'btn small secondary', onclick: () => removeAvatarImage(prof) }, 'Remove photo')
-                : null,
-              el('button', { class: 'btn small secondary', onclick: () => openEdit(prof) }, 'Edit profile'),
-              el('button', { class: 'btn small secondary', onclick: () => logout() }, 'Sign out'),
-            ])
-          : (store.user
-              ? el('div', { class: 'row' }, [
-                  prof.blocked ? null : followBtn(prof),
-                  prof.blocked ? null : el('a', { class: 'btn small secondary', href: `#/dm/${encodeURIComponent(prof.username)}` }, 'Message'),
-                  blockBtn(prof),
-                ])
-              : null),
+        headButtons,
       ]),
       el('div', { class: 'prof-counts muted' }, `${prof.followers ?? 0} followers · ${prof.following_count ?? 0} following`),
+    ]),
+    // About
+    card([
+      el('div', { class: 'card-title' }, 'About'),
       langRow('Speaks', prof.native),
       langRow('Learning', prof.learning),
       (prof.origin || prof.location)
@@ -75,25 +85,27 @@ export async function renderUserProfile(username) {
       prof.interests.length
         ? el('div', { class: 'prof-interests' }, prof.interests.map((t) => el('span', { class: 'tag-chip' }, titleCase(t))))
         : null,
-    ])
-  );
+    ]),
+  ]);
+  view.append(profile);
 
-  // Your reading/translation settings live here now (was the top bar).
+  // Your own account: language/level settings + word-familiarity, each in a card.
   if (isMe) {
-    view.append(el('div', { class: 'prof-setting' }, nativeSelector()));
-    view.append(learningLanguagesSetting());
-    view.append(levelSetting(prof));
-  }
+    profile.append(card([
+      el('div', { class: 'card-title' }, 'Languages & level'),
+      el('div', { class: 'prof-setting' }, nativeSelector()),
+      learningLanguagesSetting(),
+      levelSetting(prof),
+    ]));
 
-  // Word-familiarity rundown (only on your own profile).
-  if (isMe) {
-    const box = el('div', { class: 'familiarity-rundown' }, [el('div', { class: 'links-title' }, 'Word familiarity'), el('p', { class: 'muted' }, 'Loading…')]);
-    view.append(box);
+    const famBody = el('div', {});
+    profile.append(card([el('div', { class: 'card-title' }, 'Word familiarity'), famBody]));
+    famBody.append(el('p', { class: 'muted' }, 'Loading…'));
     api.rundown().then(({ rundown }) => {
-      clear(box).append(el('div', { class: 'links-title' }, 'Word familiarity'));
-      if (!rundown.length) { box.append(el('p', { class: 'muted' }, 'Start reading and studying to build familiarity.')); return; }
+      clear(famBody);
+      if (!rundown.length) { famBody.append(el('p', { class: 'muted' }, 'Start reading and studying to build familiarity.')); return; }
       for (const r of rundown) {
-        box.append(
+        famBody.append(
           el('div', { class: 'fam-row' }, [
             el('div', { class: 'fam-lang' }, r.name),
             el('div', { class: 'fam-stats' }, [
@@ -102,11 +114,11 @@ export async function renderUserProfile(username) {
               famStat(r.mature, 'mastered'),
               famStat(r.known, 'marked known'),
               r.coveragePct != null ? famStat(`${r.coveragePct}%`, 'conversation') : null,
-            ]),
+            ].filter(Boolean)),
           ])
         );
       }
-    }).catch(() => { clear(box); });
+    }).catch(() => { clear(famBody).append(el('p', { class: 'muted' }, 'Could not load familiarity.')); });
   }
 }
 
