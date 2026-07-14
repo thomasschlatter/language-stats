@@ -43,12 +43,69 @@ export async function drawCharacter(canvas, indices) {
   }
 }
 
-// A canvas element showing the character.
+// --- Animated avatars: cycle the 6-frame idle-down animation so thumbnails
+// feel alive. A single shared ticker drives every on-screen avatar; each keeps a
+// pre-composited horizontal strip so per-frame work is just one drawImage. ---
+const IDLE_FRAMES = 6;
+
+async function buildIdleStrip(indices) {
+  const strip = document.createElement('canvas');
+  strip.width = FRAME.w * IDLE_FRAMES;
+  strip.height = FRAME.h;
+  const ctx = strip.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  for (const layer of DRAW_ORDER) {
+    const idx = indices?.[layer] ?? 0;
+    const src = AVATAR_STYLES[layer]?.[idx];
+    if (!src) continue;
+    let img;
+    try { img = await loadImg(src); } catch { continue; }
+    for (let f = 0; f < IDLE_FRAMES; f++) {
+      ctx.drawImage(img, FRAME.x + f * FRAME.w, FRAME.y, FRAME.w, FRAME.h, f * FRAME.w, 0, FRAME.w, FRAME.h);
+    }
+  }
+  return strip;
+}
+
+const animatedAvatars = new Set();
+let tickerRunning = false;
+function startTicker() {
+  if (tickerRunning) return;
+  tickerRunning = true;
+  const step = () => {
+    if (!animatedAvatars.size) { tickerRunning = false; return; }
+    const frame = Math.floor(performance.now() / 150) % IDLE_FRAMES;
+    for (const a of animatedAvatars) {
+      if (!a.canvas.isConnected) { animatedAvatars.delete(a); continue; }
+      if (a.frame === frame) continue;
+      a.frame = frame;
+      const ctx = a.canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, a.canvas.width, a.canvas.height);
+      const scale = a.canvas.height / FRAME.h;
+      const dw = FRAME.w * scale;
+      const dh = FRAME.h * scale;
+      const dx = (a.canvas.width - dw) / 2;
+      const dy = (a.canvas.height - dh) / 2;
+      ctx.drawImage(a.strip, frame * FRAME.w, 0, FRAME.w, FRAME.h, dx, dy, dw, dh);
+    }
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// A canvas element showing the character, gently animated (idle bob).
 export function characterCanvas(indices, size = 48) {
   const c = el('canvas', { class: 'char-avatar', width: size, height: size });
   c.style.width = `${size}px`;
   c.style.height = `${size}px`;
-  drawCharacter(c, indices || {});
+  drawCharacter(c, indices || {}); // static first paint
+  buildIdleStrip(indices || {})
+    .then((strip) => {
+      animatedAvatars.add({ canvas: c, strip, frame: -1 });
+      startTicker();
+    })
+    .catch(() => { /* keep the static frame */ });
   return c;
 }
 
