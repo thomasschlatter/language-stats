@@ -102,13 +102,16 @@ body:not(.authed) .auth-only { display: none !important; }
 @media (max-width: 680px) { .search-form { flex-basis: 140px; margin: 0 0.4rem; } }
 .auth-area { display: flex; align-items: center; gap: 0.6rem; }
 .avatar.sm { width: 28px; height: 28px; font-size: 0.72rem; }
-.person-card .card-top { align-items: center; gap: 0.5rem; }
-.person-name { display: flex; align-items: center; gap: 0.5rem; color: var(--text); min-width: 0; flex: 1 1 auto; }
+.person-card { display: flex; flex-direction: column; }
+.person-name { display: flex; align-items: center; gap: 0.5rem; color: var(--text); min-width: 0; }
 .person-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .person-name:hover { text-decoration: none; color: var(--accent); }
-.person-card .card-top .icon-btn { flex-shrink: 0; }
-/* Compact emoji/icon action buttons (follow, message, etc.). */
-.icon-btn { min-width: 34px; padding: 0.3rem 0.55rem; text-align: center; font-size: 1rem; line-height: 1; }
+/* Actions pinned to the bottom so they align across cards of different heights. */
+.person-actions { display: flex; gap: 0.4rem; margin-top: auto; padding-top: 0.7rem; }
+/* Compact icon action buttons (follow, message, block…) — line icons, centered. */
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; padding: 0.35rem 0.5rem; }
+.btn-ico, .icon-btn svg { display: inline-flex; }
+.icon-btn svg, .btn-ico svg { width: 17px; height: 17px; display: block; }
 .prof-counts { font-size: 0.85rem; margin-bottom: 1rem; }
 .auth-area .who { color: var(--muted); font-size: 0.9rem; }
 .welcome-steps { margin: 0.5rem 0 0; padding-left: 1.25rem; }

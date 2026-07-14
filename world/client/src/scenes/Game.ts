@@ -387,7 +387,9 @@ export default class Game extends Phaser.Scene {
       ground2.setCollisionByProperty({ collides: true })
       this.worldColliders.push(ground2)
     }
-    this.addTiled('Objects', false, 1000)
+    // Objects depth-sort by their base (per-sprite), NOT forced to foreground —
+    // otherwise flat ground decoration (grass) renders on top of the player/bot.
+    this.addTiled('Objects', false)
     this.addTiled('ObjectsOnCollide', true)
     this.addTiled('ObjectsOnCollide 2', true)
     this.spawnX = 1000

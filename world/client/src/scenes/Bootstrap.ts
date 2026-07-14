@@ -3,6 +3,7 @@ import Network from '../services/Network'
 import { BackgroundMode } from '../../../types/BackgroundMode'
 import store from '../stores'
 import { setRoomJoined, setPracticeMode } from '../stores/RoomStore'
+import { claimWorld } from '../singleInstance'
 
 
 
@@ -177,6 +178,27 @@ export default class Bootstrap extends Phaser.Scene {
     })
     // update Redux state
     store.dispatch(setRoomJoined(true))
+    // Claim the world for this window; a newer window entering evicts this one.
+    this.worldGuardCleanup?.()
+    this.worldGuardCleanup = claimWorld(() => this.evictFromWorld())
+  }
+
+  private worldGuardCleanup?: () => void
+
+  // Kicked out because a newer window entered the world: leave the room and drop
+  // back to world selection (no reload — the user can re-join, taking it back).
+  private evictFromWorld() {
+    this.worldGuardCleanup?.()
+    this.worldGuardCleanup = undefined
+    try {
+      this.network.room?.leave()
+    } catch {
+      /* already gone */
+    }
+    this.scene.stop('game')
+    store.dispatch(setRoomJoined(false))
+    this.launchBackground(store.getState().user.backgroundMode)
+    window.dispatchEvent(new Event('world-evicted'))
   }
 
   // Single-player word games hub — no network/Colyseus needed.

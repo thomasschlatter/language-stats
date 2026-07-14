@@ -11,6 +11,7 @@ import { byImportance } from '../langOrder.js';
 import { languageMultiPicker, nativeLanguagesSetting } from '../langPicker.js';
 import { openCharacterCreator } from './characterCreator.js';
 import { themeControl, changePasswordForm, confirmDeleteAccount } from './settings.js';
+import { ICONS } from '../icons.js';
 
 export async function renderUserProfile(username) {
   const view = clear(document.getElementById('view'));
@@ -50,7 +51,7 @@ export async function renderUserProfile(username) {
     : (store.user
         ? el('div', { class: 'row' }, [
             prof.blocked ? null : followBtn(prof),
-            prof.blocked ? null : el('a', { class: 'btn small secondary icon-btn', href: `#/dm/${encodeURIComponent(prof.username)}`, title: 'Message' }, '💬'),
+            prof.blocked ? null : el('a', { class: 'btn small secondary icon-btn', href: `#/dm/${encodeURIComponent(prof.username)}`, title: 'Message', html: ICONS.message }),
             blockBtn(prof),
           ])
         : null);
@@ -332,13 +333,18 @@ function titleCase(s) {
 }
 
 function followBtn(prof) {
-  const btn = el('button', { class: `btn small${prof.following ? ' secondary' : ''}` }, prof.following ? 'Following' : 'Follow');
+  const btn = el('button', {
+    class: `btn small icon-btn${prof.following ? ' secondary' : ''}`,
+    title: prof.following ? 'Following — click to unfollow' : 'Follow',
+    html: prof.following ? ICONS.following : ICONS.follow,
+  });
   btn.addEventListener('click', async () => {
     btn.disabled = true;
     try {
       const { following } = await api.followUser(prof.username);
       prof.following = following;
-      btn.textContent = following ? 'Following' : 'Follow';
+      btn.innerHTML = following ? ICONS.following : ICONS.follow;
+      btn.title = following ? 'Following — click to unfollow' : 'Follow';
       btn.classList.toggle('secondary', following);
     } catch { /* ignore */ } finally { btn.disabled = false; }
   });
@@ -346,7 +352,7 @@ function followBtn(prof) {
 }
 
 function blockBtn(prof) {
-  const btn = el('button', { class: 'btn small secondary icon-btn', title: prof.blocked ? 'Unblock' : 'Block' }, prof.blocked ? '↩️' : '🚫');
+  const btn = el('button', { class: 'btn small secondary icon-btn', title: prof.blocked ? 'Unblock' : 'Block', html: prof.blocked ? ICONS.unblock : ICONS.block });
   btn.addEventListener('click', async () => {
     btn.disabled = true;
     try {

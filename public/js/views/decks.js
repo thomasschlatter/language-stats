@@ -18,7 +18,7 @@ export async function renderDecks() {
     el('div', { class: 'section-head' }, [
       el('span', { class: 'muted' }, 'Your decks — studying them turns those words greener in “Studied” colour mode.'),
       el('div', { class: 'row' }, [
-        el('button', { class: 'btn small secondary', title: 'Practise your deck words as a quick arcade game', onclick: () => openWordGame() }, '🎯 Word game'),
+        // Word game button removed for now (TODO: put it back — openWordGame still exists).
         el('button', { class: 'btn small secondary', onclick: () => openGenerate(() => renderDecks()) }, '✨ Generate (AI)'),
         el('button', { class: 'btn small', onclick: () => openImport(() => renderDecks()) }, '+ Import deck'),
       ]),

@@ -6,6 +6,7 @@ import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { avatarFor } from '../avatar.js';
 import { navigate } from '../router.js';
+import { ICONS } from '../icons.js';
 
 export async function renderCommunity() {
   const view = clear(document.getElementById('view'));
@@ -99,17 +100,20 @@ function personCard(p) {
     arr.length ? el('div', { class: 'muted', style: 'font-size:0.82rem' }, `${label}: ${arr.map((l) => l.name).join(', ')}`) : null;
 
   const card = el('div', { class: 'card person-card' }, [
-    el('div', { class: 'card-top' }, [
-      el('a', { class: 'person-name', href: `#/u/${encodeURIComponent(p.username)}` }, [
-        avatarFor(p.avatar, p.username, 56, p.avatar_image),
-        el('strong', {}, `@${p.username}`),
-      ]),
-      store.user ? followBtn(p) : null,
+    el('a', { class: 'person-name', href: `#/u/${encodeURIComponent(p.username)}` }, [
+      avatarFor(p.avatar, p.username, 56, p.avatar_image),
+      el('strong', {}, `@${p.username}`),
     ]),
     langs('Speaks', p.native),
     langs('Learning', p.learning),
     p.bio ? el('p', { class: 'muted card-summary', style: 'margin-top:0.4rem' }, p.bio) : null,
-    store.user ? el('a', { class: 'btn small secondary icon-btn', href: `#/dm/${encodeURIComponent(p.username)}`, title: `Message @${p.username}`, style: 'margin-top:0.5rem' }, '💬') : null,
+    // Actions pinned to the bottom of the card so they line up across cards.
+    store.user
+      ? el('div', { class: 'person-actions' }, [
+          followBtn(p),
+          el('a', { class: 'btn small secondary icon-btn', href: `#/dm/${encodeURIComponent(p.username)}`, title: `Message @${p.username}`, html: ICONS.message }),
+        ])
+      : null,
   ]);
   return card;
 }
@@ -118,14 +122,15 @@ function followBtn(p) {
   const btn = el('button', {
     class: `btn small icon-btn${p.following ? ' secondary' : ''}`,
     title: p.following ? 'Following — click to unfollow' : 'Follow',
-  }, p.following ? '✓' : '+');
+    html: p.following ? ICONS.following : ICONS.follow,
+  });
   btn.addEventListener('click', async (e) => {
     e.preventDefault();
     btn.disabled = true;
     try {
       const { following } = await api.followUser(p.username);
       p.following = following;
-      btn.textContent = following ? '✓' : '+';
+      btn.innerHTML = following ? ICONS.following : ICONS.follow;
       btn.title = following ? 'Following — click to unfollow' : 'Follow';
       btn.classList.toggle('secondary', following);
     } catch { /* ignore */ } finally { btn.disabled = false; }

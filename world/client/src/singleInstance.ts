@@ -1,38 +1,28 @@
-// Prevent the world from running in more than one context of the same browser
-// (a second tab, or the language-stats World iframe + a standalone tab). Two
-// sessions share the same identity/storage and collide in multiplayer.
-// Scoped to this origin via BroadcastChannel, so it also spans iframes.
-export function guardSingleWorld(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (typeof BroadcastChannel === "undefined") return resolve(true);
-    const bc = new BroadcastChannel("strndd-single-world");
-    let active = false;
-    let decided = false;
-
-    bc.onmessage = (e) => {
-      if (e.data === "ping" && active) {
-        bc.postMessage("pong");
-      } else if (e.data === "pong" && !decided) {
-        decided = true;
-        resolve(false);
-      } else if (e.data === "left" && !active && decided) {
-        window.location.reload();
+// Only one window of this browser should be IN THE WORLD at a time (two share
+// the same identity and collide in multiplayer). Called when a window enters the
+// world (not on page load — browsing Terms/room-selection in two tabs is fine).
+// The NEWEST window to enter wins; any window already in the world is evicted
+// (leaves the room). Scoped to this origin via BroadcastChannel (spans iframes).
+export function claimWorld(onEvicted: () => void): () => void {
+  if (typeof BroadcastChannel === 'undefined') return () => {};
+  const bc = new BroadcastChannel('strndd-single-world');
+  // Timestamp of when THIS window entered the world; a strictly-newer entry wins.
+  const birth = Date.now();
+  bc.onmessage = (e: MessageEvent) => {
+    const data = e.data as { type?: string; birth?: number } | undefined;
+    if (data?.type === 'claim' && typeof data.birth === 'number' && data.birth > birth) {
+      try {
+        onEvicted();
+      } finally {
+        bc.close();
       }
-    };
-
-    bc.postMessage("ping");
-    setTimeout(() => {
-      if (decided) return;
-      decided = true;
-      active = true;
-      window.addEventListener("pagehide", () => {
-        try {
-          bc.postMessage("left");
-        } catch {
-          /* closing */
-        }
-      });
-      resolve(true);
-    }, 350);
-  });
+    }
+  };
+  // Announce that this window is now the one in the world.
+  try {
+    bc.postMessage({ type: 'claim', birth });
+  } catch {
+    /* ignore */
+  }
+  return () => bc.close();
 }
