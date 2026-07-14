@@ -7,6 +7,7 @@ import { el, clear, openModal } from '../dom.js';
 import { avatarFor } from '../avatar.js';
 import { signInPrompt } from '../auth.js';
 import { openCharacterCreator } from './characterCreator.js';
+import { languageMultiPicker } from '../langPicker.js';
 
 function section(title, children) {
   return el('section', { class: 'settings-section' }, [
@@ -103,14 +104,8 @@ function profileForm(prof) {
   const location = el('input', { type: 'text', placeholder: 'e.g. London, UK' }); location.value = prof.location || '';
   const interests = el('input', { type: 'text', placeholder: 'interests, comma separated' }); interests.value = prof.interests.join(', ');
 
-  const langChecks = (selected) => el('div', { class: 'lang-picker' }, store.languages.map((l) => {
-    const cb = el('input', { type: 'checkbox', value: l.code });
-    if (selected.has(l.code)) cb.checked = true;
-    return el('label', { class: 'lang-check' }, [cb, ` ${l.name}`]);
-  }));
-  const nativePick = langChecks(new Set(prof.native.map((l) => l.code)));
-  const learnPick = langChecks(new Set(prof.learning.map((l) => l.code)));
-  const checked = (n) => [...n.querySelectorAll('input:checked')].map((i) => i.value);
+  const nativePick = languageMultiPicker(prof.native.map((l) => l.code));
+  const learnPick = languageMultiPicker(prof.learning.map((l) => l.code));
 
   return el('form', {
     onsubmit: async (e) => {
@@ -122,8 +117,8 @@ function profileForm(prof) {
           origin: origin.value,
           location: location.value,
           interests: interests.value.split(',').map((s) => s.trim()).filter(Boolean),
-          native: checked(nativePick),
-          learning: checked(learnPick),
+          native: nativePick.get(),
+          learning: learnPick.get(),
         });
         ok.textContent = 'Saved.';
       } catch (ex) { err.textContent = ex.message; }
@@ -133,8 +128,8 @@ function profileForm(prof) {
     field('From (origin)', origin),
     field('Lives in', location),
     field('Interests', interests),
-    field('Speaks (native)', nativePick),
-    field('Learning', learnPick),
+    field('Speaks (native)', nativePick.el),
+    field('Learning', learnPick.el),
     err, ok,
     el('div', { style: 'margin-top:0.75rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Save profile')]),
   ]);

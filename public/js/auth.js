@@ -5,7 +5,7 @@ import { store } from './store.js';
 import { el, openModal, clear } from './dom.js';
 import { colorModeToggle } from './seen.js';
 import { avatarFor } from './avatar.js';
-import { byImportance } from './langOrder.js';
+import { languageMultiPicker } from './langPicker.js';
 
 // Load the current user on startup (if a valid cookie exists).
 export async function loadCurrentUser() {
@@ -73,27 +73,17 @@ export function openLanguageSetup(onDone = () => {}) {
   const err = el('div', { class: 'error' });
   const nativeSel = el('select', {},
     store.languages.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)));
-  // Scrollable, clearly-toggled language list (same picker style as the options).
-  const langs = [...store.languages].sort(byImportance);
-  const selected = new Set(langs.filter((l) => store.isLearning(l.code)).map((l) => l.code));
-  const checklist = el('div', { class: 'lang-picker-list' }, langs.map((l) => {
-    const item = el('button', {
-      type: 'button',
-      class: 'lang-picker-item' + (selected.has(l.code) ? ' selected' : ''),
-      onclick: () => {
-        if (selected.has(l.code)) { selected.delete(l.code); item.classList.remove('selected'); }
-        else { selected.add(l.code); item.classList.add('selected'); }
-      },
-    }, [el('span', {}, l.name), el('span', { class: 'check' }, '✓')]);
-    return item;
-  }));
+  // Scrollable, clearly-toggled language list (shared component — langPicker.js).
+  const learnPick = languageMultiPicker(
+    store.languages.filter((l) => store.isLearning(l.code)).map((l) => l.code)
+  );
 
   const form = el('form', {
     onsubmit: async (e) => {
       e.preventDefault();
       err.textContent = '';
       const native = nativeSel.value;
-      const learning = [...selected].filter((c) => c !== native);
+      const learning = learnPick.get().filter((c) => c !== native);
       store.setNative(native);
       store.setLearning(learning);
       if (store.user) { try { await api.updateProfile({ native: [native], learning }); } catch { /* ignore */ } }
@@ -105,7 +95,7 @@ export function openLanguageSetup(onDone = () => {}) {
     el('div', { class: 'muted', style: 'font-size:0.78rem; margin-bottom:0.3rem' }, 'Words you click translate into this language.'),
     nativeSel,
     el('label', { style: 'margin-top:0.75rem' }, 'Languages you want to learn'),
-    checklist,
+    learnPick.el,
     err,
     el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Start learning')]),
   ]);

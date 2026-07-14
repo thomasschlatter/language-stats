@@ -8,6 +8,7 @@ import { el, clear, openModal } from '../dom.js';
 import { avatarFor } from '../avatar.js';
 import { nativeSelector, logout } from '../auth.js';
 import { byImportance } from '../langOrder.js';
+import { languageMultiPicker } from '../langPicker.js';
 import { openCharacterCreator } from './characterCreator.js';
 
 export async function renderUserProfile(username) {
@@ -275,18 +276,9 @@ function openEdit(prof) {
   const interests = el('input', { type: 'text', placeholder: 'interests, comma separated' });
   interests.value = prof.interests.join(', ');
 
-  // Multi-select language pickers (checkbox lists).
-  const nativeCodes = new Set(prof.native.map((l) => l.code));
-  const learnCodes = new Set(prof.learning.map((l) => l.code));
-  const picker = (selected) =>
-    el('div', { class: 'lang-picker' }, store.languages.map((l) => {
-      const cb = el('input', { type: 'checkbox', value: l.code });
-      if (selected.has(l.code)) cb.checked = true;
-      return el('label', { class: 'lang-check' }, [cb, ` ${l.name}`]);
-    }));
-  const nativePick = picker(nativeCodes);
-  const learnPick = picker(learnCodes);
-  const checked = (node) => [...node.querySelectorAll('input:checked')].map((i) => i.value);
+  // Multi-select language pickers (shared component — see langPicker.js).
+  const nativePick = languageMultiPicker(prof.native.map((l) => l.code));
+  const learnPick = languageMultiPicker(prof.learning.map((l) => l.code));
 
   const form = el('form', {
     onsubmit: async (e) => {
@@ -298,8 +290,8 @@ function openEdit(prof) {
           origin: origin.value,
           location: location.value,
           interests: interests.value.split(',').map((s) => s.trim()).filter(Boolean),
-          native: checked(nativePick),
-          learning: checked(learnPick),
+          native: nativePick.get(),
+          learning: learnPick.get(),
         });
         close();
         renderUserProfile(prof.username);
@@ -312,8 +304,8 @@ function openEdit(prof) {
     el('label', {}, 'From (origin)'), origin,
     el('label', {}, 'Lives in'), location,
     el('label', {}, 'Interests'), interests,
-    el('label', {}, 'Speaks (native)'), nativePick,
-    el('label', {}, 'Learning'), learnPick,
+    el('label', {}, 'Speaks (native)'), nativePick.el,
+    el('label', {}, 'Learning'), learnPick.el,
     err,
     el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Save')]),
   ]);
