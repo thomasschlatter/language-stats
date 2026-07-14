@@ -25,20 +25,6 @@ export interface WorldInfo {
 
 export const WORLDS: WorldInfo[] = [
   {
-    id: 'skyoffice',
-    name: 'Meadow',
-    description: 'Open grassland with ponds and shady groves — the classic Groupifier world.',
-    map: 'meadow',
-    emoji: '🌳',
-  },
-  {
-    id: 'world_village',
-    name: 'Village',
-    description: 'A cluster of cottages and little gardens with a cosy small-town feel.',
-    map: 'village',
-    emoji: '🏡',
-  },
-  {
     id: 'world_island',
     name: 'Island',
     description: 'Sun, sand and sea — wander the beach island and meet fellow explorers.',
@@ -46,18 +32,18 @@ export const WORLDS: WorldInfo[] = [
     emoji: '🏝️',
   },
   {
-    id: 'world_cafe',
-    name: 'Study Café',
-    description: 'An indoor café full of tables — pull up a chair for a language exchange.',
-    map: 'cafe',
-    emoji: '☕',
-  },
-  {
     id: 'world_town',
     name: 'Town',
-    description: 'City streets, shops and a roundabout — meet up downtown.',
+    description: 'City streets, shops and traffic — meet up downtown.',
     map: 'town',
     emoji: '🏙️',
+  },
+  {
+    id: 'world_cafe',
+    name: 'Office',
+    description: 'An indoor office with desks and meeting spots — pull up a chair for a language exchange.',
+    map: 'cafe',
+    emoji: '🏢',
   },
   {
     id: 'world_osaka',

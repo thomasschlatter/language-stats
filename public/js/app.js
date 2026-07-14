@@ -230,6 +230,7 @@ async function init() {
       a.classList.toggle('active', h === target || (target !== '#/' && h.startsWith(target)));
     });
     document.body.classList.toggle('in-world', h.startsWith('#/world'));
+    document.body.classList.toggle('in-community', h.startsWith('#/community'));
   };
   syncNav();
 

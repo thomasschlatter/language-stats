@@ -40,19 +40,8 @@ export async function renderWorld() {
   }
   const src = `${base}${query}`;
 
-  view.append(
-    el('div', { class: 'world-bar' }, [
-      el('div', {}, [
-        el('strong', {}, 'World'),
-        el('span', { class: 'muted', style: 'margin-left:0.6rem; font-size:0.85rem' }, 'A shared, walkable space. Move with the arrow keys; meet others by video.'),
-      ]),
-      el('div', { class: 'row', style: 'gap:0.5rem' }, [
-        el('a', { class: 'btn small', href: `${base}${query ? query + '&' : '?'}mode=practice`, target: '_blank', rel: 'noopener' }, '🎯 Word game'),
-        el('a', { class: 'btn small secondary', href: src, target: '_blank', rel: 'noopener' }, 'Open in new tab'),
-      ]),
-    ])
-  );
-
+  // The game fills the whole area; a single "open in new tab" control floats on
+  // top of it (no header bar).
   const frame = el('iframe', {
     class: 'world-frame',
     src,
@@ -63,5 +52,11 @@ export async function renderWorld() {
   // is over it.
   frame.addEventListener('load', () => frame.focus());
   frame.addEventListener('mouseenter', () => frame.focus());
-  view.append(frame);
+
+  const openBtn = el('a', {
+    class: 'world-open-btn', href: src, target: '_blank', rel: 'noopener',
+    title: 'Open the world in a new tab',
+  }, '⤢ Open in new tab');
+
+  view.append(el('div', { class: 'world-wrap' }, [frame, openBtn]));
 }

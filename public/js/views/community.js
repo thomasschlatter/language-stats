@@ -29,15 +29,15 @@ export async function renderCommunity() {
   if (!myLearning.length) myLearning = Array.from(store.learning || []);
   if (!myNative.length && store.nativeLang) myNative = [store.nativeLang];
 
-  const langSelect = (priorityCodes) => {
-    const pri = [...new Set((priorityCodes || []).filter((c) => codeName.has(c)))];
-    return el('select', {}, [
+  // Both filters offer just "All" + the user's own languages (native + learning).
+  const myLangs = [...new Set([...myNative, ...myLearning])].filter((c) => codeName.has(c));
+  const langSelect = () =>
+    el('select', {}, [
       el('option', { value: '' }, 'All'),
-      ...pri.map((c) => el('option', { value: c }, codeName.get(c))),
+      ...myLangs.map((c) => el('option', { value: c }, codeName.get(c))),
     ]);
-  };
-  const speaks = langSelect(myNative);
-  const learning = langSelect(myLearning);
+  const speaks = langSelect();
+  const learning = langSelect();
   const q = el('input', { type: 'search', placeholder: 'search @username', style: 'max-width:200px' });
 
   const lbl = (text, node) =>

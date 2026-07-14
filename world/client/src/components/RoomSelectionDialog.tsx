@@ -292,16 +292,8 @@ export default function RoomSelectionDialog() {
                     </WorldCard>
                   ))}
                 </WorldGrid>
-                <PracticeButton onClick={handlePractice}>
-                  🎯 Solo word practice (beta)
-                </PracticeButton>
-                <Button
-                  variant="text"
-                  color="secondary"
-                  onClick={() => setShowCustomRoom(true)}
-                >
-                  or browse custom rooms
-                </Button>
+                {/* Solo practice + custom-room browsing removed for now
+                    (see backlog); the world grid is the only entry point. */}
               </PickerStack>
             </>
           )}
