@@ -73,11 +73,19 @@ export function openLanguageSetup(onDone = () => {}) {
   const err = el('div', { class: 'error' });
   const nativeSel = el('select', {},
     store.languages.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)));
+  // Scrollable, clearly-toggled language list (same picker style as the options).
   const langs = [...store.languages].sort(byImportance);
-  const checklist = el('div', { class: 'lang-picker' }, langs.map((l) => {
-    const cb = el('input', { type: 'checkbox', value: l.code });
-    if (store.isLearning(l.code)) cb.checked = true;
-    return el('label', { class: 'lang-check' }, [cb, ` ${l.name}`]);
+  const selected = new Set(langs.filter((l) => store.isLearning(l.code)).map((l) => l.code));
+  const checklist = el('div', { class: 'lang-picker-list' }, langs.map((l) => {
+    const item = el('button', {
+      type: 'button',
+      class: 'lang-picker-item' + (selected.has(l.code) ? ' selected' : ''),
+      onclick: () => {
+        if (selected.has(l.code)) { selected.delete(l.code); item.classList.remove('selected'); }
+        else { selected.add(l.code); item.classList.add('selected'); }
+      },
+    }, [el('span', {}, l.name), el('span', { class: 'check' }, '✓')]);
+    return item;
   }));
 
   const form = el('form', {
@@ -85,7 +93,7 @@ export function openLanguageSetup(onDone = () => {}) {
       e.preventDefault();
       err.textContent = '';
       const native = nativeSel.value;
-      const learning = [...checklist.querySelectorAll('input:checked')].map((i) => i.value).filter((c) => c !== native);
+      const learning = [...selected].filter((c) => c !== native);
       store.setNative(native);
       store.setLearning(learning);
       if (store.user) { try { await api.updateProfile({ native: [native], learning }); } catch { /* ignore */ } }

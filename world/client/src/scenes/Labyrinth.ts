@@ -3,6 +3,9 @@ import { createCharacterAnims } from '../anims/CharacterAnims'
 import { recordResult } from '../game/progress'
 import { celebrate } from '../game/celebrate'
 import { loadQuiz } from '../game/quiz'
+import store from '../stores'
+import { setPracticeJoystick } from '../stores/RoomStore'
+import { JoystickMovement } from '../components/Joystick'
 
 // Labyrinth: a word appears; walk through a maze to the tile with its correct
 // meaning. Reach a wrong tile and you lose a life. The maze is a fully-connected
@@ -21,7 +24,10 @@ export default class Labyrinth extends Phaser.Scene {
   private lang = 'de-DE'
   private answers: Answer[] = []
   private pointer: { x: number; y: number } | null = null
+  private joy?: JoystickMovement
   private facing: 'up' | 'down' | 'left' | 'right' = 'down'
+
+  handleJoystick(m: JoystickMovement) { this.joy = m }
   // maze geometry
   private cell = 76
   private cols = 6
@@ -50,6 +56,9 @@ export default class Labyrinth extends Phaser.Scene {
 
   async create() {
     createCharacterAnims(this.anims)
+    // Show the touch joystick for this movement game; hide it on the way out.
+    store.dispatch(setPracticeJoystick(true))
+    this.events.once('shutdown', () => { this.joy = undefined; store.dispatch(setPracticeJoystick(false)) })
     const W = this.scale.width
     const H = this.scale.height
     this.cameras.main.setBackgroundColor('#141a2c')
@@ -239,8 +248,13 @@ export default class Labyrinth extends Phaser.Scene {
     else if (this.cursors.right.isDown) vx = speed
     if (this.cursors.up.isDown) vy = -speed
     else if (this.cursors.down.isDown) vy = speed
-    // Touch: steer toward the held pointer.
-    if (vx === 0 && vy === 0 && this.pointer) {
+    // Touch: joystick first, else steer toward a held pointer.
+    if (vx === 0 && vy === 0 && this.joy?.isMoving) {
+      if (this.joy.direction.left) vx = -speed
+      else if (this.joy.direction.right) vx = speed
+      if (this.joy.direction.up) vy = -speed
+      else if (this.joy.direction.down) vy = speed
+    } else if (vx === 0 && vy === 0 && this.pointer) {
       const dx = this.pointer.x - this.player.x
       const dy = this.pointer.y - this.player.y
       if (Math.abs(dx) > 8) vx = Math.sign(dx) * speed

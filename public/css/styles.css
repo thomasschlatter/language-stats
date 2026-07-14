@@ -246,6 +246,12 @@ body.in-world .lang-bar { display: none; }
   padding: 0.45rem 0.6rem; cursor: pointer; color: var(--text); font: inherit; font-size: 0.9rem;
 }
 .lang-picker-item:hover { border-color: var(--accent); color: var(--accent); }
+.lang-picker-item .check { opacity: 0; font-weight: 700; }
+.lang-picker-item.selected {
+  background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600;
+}
+.lang-picker-item.selected:hover { color: #fff; }
+.lang-picker-item.selected .check { opacity: 1; }
 .lang-picker-custom {
   display: block; background: none; border: none; color: var(--accent);
   cursor: pointer; font: inherit; padding: 0.4rem 0;

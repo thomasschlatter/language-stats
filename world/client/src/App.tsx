@@ -13,6 +13,7 @@ import HelperButtonGroup from "./components/HelperButtonGroup";
 import MobileVirtualJoystick from "./components/MobileVirtualJoystick";
 import CharacterCreation from "./components/CharacterCreation";
 import TeamTask from "./components/TeamTask";
+import GameJoystick from "./components/GameJoystick";
 
 const Backdrop = styled.div`
   position: absolute;
@@ -31,13 +32,15 @@ function App() {
   const videoConnected = useAppSelector((state) => state.user.videoConnected);
   const roomJoined = useAppSelector((state) => state.room.roomJoined);
   const practiceMode = useAppSelector((state) => state.room.practiceMode);
+  const practiceJoystick = useAppSelector((state) => state.room.practiceJoystick);
 
   const isMobile = window.innerWidth <= 768;
 
   let ui: JSX.Element;
   if (practiceMode) {
-    // Single-player practice: just the Phaser canvas, no room/chat UI.
-    ui = <></>;
+    // Single-player games: just the Phaser canvas, plus a touch joystick for the
+    // movement games (Word Fall, Labyrinth).
+    ui = practiceJoystick ? <GameJoystick /> : <></>;
   } else if (loggedIn) {
     if (computerDialogOpen) {
       /* Render ComputerDialog if user is using a computer. */

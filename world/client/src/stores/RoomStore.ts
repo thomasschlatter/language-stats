@@ -25,11 +25,16 @@ export const roomSlice = createSlice({
     availableRooms: new Array<RoomAvailable>(),
     teamScore: 0,
     teamGoal: 30,
+    practiceJoystick: false,
   },
   reducers: {
     setTeamTask: (state, action: PayloadAction<{ score: number; goal: number }>) => {
       state.teamScore = action.payload.score;
       state.teamGoal = action.payload.goal;
+    },
+    // Toggled by movement mini-games so the touch joystick shows only when useful.
+    setPracticeJoystick: (state, action: PayloadAction<boolean>) => {
+      state.practiceJoystick = action.payload;
     },
     setLobbyJoined: (state, action: PayloadAction<boolean>) => {
       state.lobbyJoined = action.payload;
@@ -80,6 +85,7 @@ export const {
   setRoomJoined,
   setPracticeMode,
   setTeamTask,
+  setPracticeJoystick,
   setJoinedRoomData,
   setAvailableRooms,
   addAvailableRooms,

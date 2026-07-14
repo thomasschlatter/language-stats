@@ -3,6 +3,9 @@ import { createCharacterAnims } from '../anims/CharacterAnims'
 import { recordResult } from '../game/progress'
 import { celebrate } from '../game/celebrate'
 import { loadQuiz } from '../game/quiz'
+import store from '../stores'
+import { setPracticeJoystick } from '../stores/RoomStore'
+import { JoystickMovement } from '../components/Joystick'
 
 // Word Fall: a word appears up top and its possible meanings drift down the
 // screen. Move along the bottom and catch the correct one. Catch a wrong one
@@ -26,6 +29,9 @@ export default class WordFall extends Phaser.Scene {
   private fallers: Faller[] = []
   private answered = false // current word already resolved (caught/missed)
   private pointerX: number | null = null
+  private joy?: JoystickMovement
+
+  handleJoystick(m: JoystickMovement) { this.joy = m }
   private wordText!: Phaser.GameObjects.Text
   private hudText!: Phaser.GameObjects.Text
   private info!: Phaser.GameObjects.Text
@@ -45,6 +51,9 @@ export default class WordFall extends Phaser.Scene {
 
   async create() {
     createCharacterAnims(this.anims)
+    // Show the touch joystick for this movement game; hide it on the way out.
+    store.dispatch(setPracticeJoystick(true))
+    this.events.once('shutdown', () => { this.joy = undefined; store.dispatch(setPracticeJoystick(false)) })
     const W = this.scale.width
     const H = this.scale.height
     this.cameras.main.setBackgroundColor('#171b2e')
@@ -156,11 +165,13 @@ export default class WordFall extends Phaser.Scene {
     const H = this.scale.height
     const speed = 320
 
-    // Movement: arrows, or steer toward a held pointer.
+    // Movement: arrows, joystick, or steer toward a held pointer.
     let vx = 0
     if (this.cursors.left.isDown) vx = -speed
     else if (this.cursors.right.isDown) vx = speed
-    else if (this.pointerX != null) {
+    else if (this.joy?.isMoving && (this.joy.direction.left || this.joy.direction.right)) {
+      vx = this.joy.direction.left ? -speed : speed
+    } else if (this.pointerX != null) {
       const d = this.pointerX - this.player.x
       if (Math.abs(d) > 6) vx = Math.sign(d) * speed
     }
