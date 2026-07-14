@@ -71,15 +71,24 @@ export async function renderWorld() {
   wrap.append(frame, fsBtn);
   view.append(wrap);
 
-  // Size the game to exactly the space below the top bar (measure it, don't
-  // assume a fixed 57px) — so the game never runs off the bottom of the page.
+  // Pin the game to exactly the space below the top bar (measure the header's
+  // actual bottom edge) so its top is never hidden under the sticky menu and it
+  // never runs off the bottom. Fullscreen uses the whole screen.
   const sizeWrap = () => {
-    if (document.fullscreenElement) { wrap.style.height = ''; return; }
+    wrap.style.position = 'fixed';
+    wrap.style.left = '0';
+    wrap.style.right = '0';
+    wrap.style.bottom = '0';
+    if (document.fullscreenElement) {
+      wrap.style.top = '0';
+      return;
+    }
     const header = document.querySelector('.topbar');
-    const h = header ? Math.ceil(header.getBoundingClientRect().height) : 57;
-    wrap.style.height = `${window.innerHeight - h}px`;
+    const top = header ? Math.ceil(header.getBoundingClientRect().bottom) : 57;
+    wrap.style.top = `${top}px`;
   };
   sizeWrap();
   window.addEventListener('resize', sizeWrap);
+  window.addEventListener('scroll', sizeWrap, { passive: true });
   document.addEventListener('fullscreenchange', sizeWrap);
 }
