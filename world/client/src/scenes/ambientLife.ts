@@ -33,12 +33,51 @@ export class AmbientLife {
   private flits: Flit[] = []
   private t = 0
   private carBodies?: Phaser.Physics.Arcade.StaticGroup
+  private player?: { x: number; y: number }
 
   constructor(private scene: Phaser.Scene) {}
 
   /** The car collision group, so the scene can collide the player with traffic. */
   getCarGroup() {
     return this.carBodies
+  }
+
+  /** Tell the traffic where the player is, so cars stop for a pedestrian. */
+  setPlayer(p: { x: number; y: number }) {
+    this.player = p
+  }
+
+  // Is the player standing in this car's lane, just ahead of it?
+  private pedestrianAhead(c: Car): boolean {
+    if (!this.player) return false
+    const LANE = 26 // how tightly aligned to the lane
+    const GAP = 78 // stop this far before the pedestrian
+    if (c.axis === 'y') {
+      if (Math.abs(this.player.x - c.s.x) > LANE) return false
+      const ahead = (this.player.y - c.s.y) * Math.sign(c.vy)
+      return ahead > 0 && ahead < GAP
+    }
+    if (Math.abs(this.player.y - c.s.y) > LANE) return false
+    const ahead = (this.player.x - c.s.x) * Math.sign(c.vx)
+    return ahead > 0 && ahead < GAP
+  }
+
+  // Is another car stopped/just ahead in the same lane (so we queue behind it)?
+  private carAhead(c: Car): boolean {
+    const GAP = 92
+    for (const o of this.cars) {
+      if (o === c || o.axis !== c.axis) continue
+      if (c.axis === 'y') {
+        if (Math.sign(o.vy) !== Math.sign(c.vy) || Math.abs(o.s.x - c.s.x) > 20) continue
+        const ahead = (o.s.y - c.s.y) * Math.sign(c.vy)
+        if (ahead > 0 && ahead < GAP) return true
+      } else {
+        if (Math.sign(o.vx) !== Math.sign(c.vx) || Math.abs(o.s.y - c.s.y) > 20) continue
+        const ahead = (o.s.x - c.s.x) * Math.sign(c.vx)
+        if (ahead > 0 && ahead < GAP) return true
+      }
+    }
+    return false
   }
 
   /** A few butterflies drifting in lazy loops around (cx, cy). */
@@ -104,9 +143,9 @@ export class AmbientLife {
       { tex: 'car_left', x: 420, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300, stop: 792 },
       { tex: 'car_left', x: 920, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300, stop: 792 },
     ]
-    // Nudge the whole traffic setup up 10px and right 10px onto the asphalt.
-    const OFFX = 10
-    const OFFY = -10
+    // Nudge the whole traffic setup onto the asphalt (right 30px, up 20px).
+    const OFFX = 30
+    const OFFY = -20
     for (const sp of specs) {
       sp.x += OFFX
       sp.y += OFFY
@@ -153,17 +192,22 @@ export class AmbientLife {
 
     for (const c of this.cars) {
       const green = c.axis === 'y' ? vGreen : hGreen
+      // Yield to a pedestrian in front, or queue behind a stopped car.
+      const hold = this.pedestrianAhead(c) || this.carAhead(c)
       if (c.axis === 'y') {
         const ny = c.s.y + c.vy * d
-        // stop at the line only while still approaching the junction
-        if (green) c.s.y = ny
+        if (hold) {
+          /* hold position */
+        } else if (green) c.s.y = ny
         else if (c.vy > 0) c.s.y = c.s.y <= c.stop ? Math.min(ny, c.stop) : ny
         else c.s.y = c.s.y >= c.stop ? Math.max(ny, c.stop) : ny
         if (c.s.y < c.min) c.s.y = c.max
         else if (c.s.y > c.max) c.s.y = c.min
       } else {
         const nx = c.s.x + c.vx * d
-        if (green) c.s.x = nx
+        if (hold) {
+          /* hold position */
+        } else if (green) c.s.x = nx
         else if (c.vx > 0) c.s.x = c.s.x <= c.stop ? Math.min(nx, c.stop) : nx
         else c.s.x = c.s.x >= c.stop ? Math.max(nx, c.stop) : nx
         if (c.s.x < c.min) c.s.x = c.max

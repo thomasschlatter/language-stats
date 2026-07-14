@@ -131,6 +131,7 @@ export default class Game extends Phaser.Scene {
 
     // Ambient life: cars on the Osaka streets, butterflies in the nature worlds.
     this.ambient = new AmbientLife(this)
+    this.ambient.setPlayer(this.myPlayer)
     if (worldMap === 'osaka') {
       this.ambient.addOsakaTraffic()
       // players collide with (and get nudged by) the moving cars
@@ -195,14 +196,29 @@ export default class Game extends Phaser.Scene {
     this.physics.add.overlap(this.myPlayer, this.otherPlayers, this.handlePlayersOverlap, undefined, this)
     this.physics.add.overlap(this.myPlayer, this.botPlayer, this.handleBotOverlap, undefined, this)
 
-    // Click / tap-to-walk: send the player toward the clicked world point.
-    // Can be turned off from the world's helper buttons (settings).
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (!this.myPlayer) return
+    // Click / tap-to-walk: send the player toward the clicked point. Listen on
+    // the window (not Phaser input) because the React UI overlay sits above the
+    // canvas and would otherwise swallow the clicks. Ignore clicks that land on
+    // real UI controls so buttons/inputs still work. Toggle in helper buttons.
+    const onTapToWalk = (e: PointerEvent) => {
+      if (!this.myPlayer || !this.scene.isActive()) return
       if (!store.getState().user.tapToWalk) return
-      const p = this.cameras.main.getWorldPoint(pointer.x, pointer.y)
+      const t = e.target as HTMLElement | null
+      if (
+        t &&
+        t.closest(
+          'button, a, input, textarea, select, label, [role="button"], [role="dialog"], .MuiPaper-root, .MuiButtonBase-root'
+        )
+      )
+        return
+      const canvas = this.game.canvas
+      const rect = canvas.getBoundingClientRect()
+      const p = this.cameras.main.getWorldPoint(e.clientX - rect.left, e.clientY - rect.top)
       this.myPlayer.setMoveTarget(p.x, p.y)
-    })
+    }
+    window.addEventListener('pointerdown', onTapToWalk)
+    this.events.once('shutdown', () => window.removeEventListener('pointerdown', onTapToWalk))
+    this.events.once('destroy', () => window.removeEventListener('pointerdown', onTapToWalk))
 
     this.network.onPlayerJoined(this.handlePlayerJoined, this)
     this.network.onPlayerLeft(this.handlePlayerLeft, this)

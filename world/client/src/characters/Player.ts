@@ -51,6 +51,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       .setFontFamily('Arial')
       .setFontSize(12)
       .setColor('#000000')
+      .setResolution(Math.max(2, Math.ceil((window.devicePixelRatio || 1) * 2))) // crisp under 2x camera zoom
       .setOrigin(0.5)
     this.playerContainer.add(this.playerName)
 
