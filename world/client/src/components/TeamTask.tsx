@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { useAppSelector } from "../hooks";
 import phaserGame from "../PhaserGame";
@@ -20,17 +20,19 @@ const Wrapper = styled.div`
   pointer-events: none;
 `;
 
-const Banner = styled.button`
+const Banner = styled.button<{ $pulse: boolean }>`
   pointer-events: auto;
-  background: #222639e6;
+  background: ${(p) => (p.$pulse ? "#2e7d32e6" : "#222639e6")};
   color: #eee;
-  border: 1px solid #3a3f66;
+  border: 1px solid ${(p) => (p.$pulse ? "#33ac96" : "#3a3f66")};
   border-radius: 999px;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 8px #00000055;
+  transform: ${(p) => (p.$pulse ? "scale(1.06)" : "scale(1)")};
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
   &:hover { border-color: #33ac96; }
 `;
 
@@ -65,6 +67,19 @@ export default function TeamTask() {
   const [feedback, setFeedback] = useState("");
   const queue = useRef<Q[]>([]);
   const lang = useRef("de-DE");
+
+  // Briefly pulse the banner whenever the shared score ticks up (any player).
+  const prevScore = useRef(score);
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    if (score > prevScore.current) {
+      setPulse(true);
+      const t = window.setTimeout(() => setPulse(false), 450);
+      prevScore.current = score;
+      return () => window.clearTimeout(t);
+    }
+    prevScore.current = score;
+  }, [score]);
 
   async function ensureQueue() {
     if (queue.current.length) return;
@@ -116,7 +131,7 @@ export default function TeamTask() {
 
   return (
     <Wrapper>
-      <Banner onClick={openChallenge}>🤝 Team goal {score}/{goal} · answer a word</Banner>
+      <Banner $pulse={pulse} onClick={openChallenge}>🤝 Team goal {score}/{goal} · answer a word</Banner>
       {open && (
         <Popup>
           {q ? (
