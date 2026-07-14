@@ -31,6 +31,16 @@ const Banner = styled.button<{ $pulse: boolean }>`
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 8px #00000055;
+  max-width: 60vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* leave room for the corner controls on small screens */
+  @media (max-width: 768px) {
+    font-size: 12px;
+    padding: 6px 12px;
+    max-width: 46vw;
+  }
   transform: ${(p) => (p.$pulse ? "scale(1.06)" : "scale(1)")};
   transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
   &:hover { border-color: #33ac96; }

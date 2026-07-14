@@ -19,27 +19,26 @@ import Bootstrap from "../scenes/Bootstrap";
 import CookiePopup from "./CookiePopup";
 
 const Backdrop = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 60px;
   align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  /* top/bottom padding so the whole picker is reachable by scrolling on short
+     screens (it used to be vertically centred and got clipped). */
+  padding: 20px 12px 32px;
 `;
 
 const Wrapper = styled.div`
   background: #222639;
   border-radius: 16px;
-  padding: 28px 48px;
+  padding: 20px 28px;
   box-shadow: 0px 0px 5px #0000006f;
   width: 600px;
-  max-width: 90vw;
-  /* Never span the full height — cap to the viewport and scroll inside so the
-     world stays visible above/below the panel. */
-  max-height: 88vh;
-  overflow-y: auto;
+  max-width: 94vw;
 `;
 
 const CustomRoomWrapper = styled.div`
