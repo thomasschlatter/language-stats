@@ -159,7 +159,7 @@ export default class Game extends Phaser.Scene {
     this.botPlayer = this.add.otherPlayer(this.botX, this.botY, 'fox', 'bot', 'Foxy', 1)
     this.botPlayer.setScale(2)
 
-    this.cameras.main.zoom = 1.2
+    this.cameras.main.zoom = 1 // wider view — see more of the world/scene
     this.cameras.main.startFollow(this.myPlayer, true)
     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
     // Keep players inside the map (belt-and-braces with the walls).
