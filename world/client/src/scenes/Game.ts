@@ -187,7 +187,6 @@ export default class Game extends Phaser.Scene {
   // colliders (built up in worldColliders) and network listeners.
   private setupPlayerAndNetwork() {
     this.myPlayer = this.add.myPlayer(this.spawnX, this.spawnY, 'adam', this.network.mySessionId)
-    this.myPlayer.setScale(1.15) // slightly bigger avatars
     this.myPlayer.setDepth(this.myPlayer.y)
     this.playerSelector = new PlayerSelector(this, 0, 0, 16, 16)
     this.otherPlayers = this.physics.add.group({ classType: OtherPlayer })
@@ -864,7 +863,6 @@ export default class Game extends Phaser.Scene {
   // function to add new player to the otherPlayer group
   private handlePlayerJoined(newPlayer: IPlayer, id: string) {
     const otherPlayer = this.add.otherPlayer(newPlayer.x, newPlayer.y, 'adam', id, newPlayer.name)
-    otherPlayer.setScale(1.15) // slightly bigger avatars (match myPlayer)
     this.otherPlayers.add(otherPlayer)
     this.otherPlayerMap.set(id, otherPlayer)
     // If they already have a custom avatar (joined before us), composite it now.

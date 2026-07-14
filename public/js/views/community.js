@@ -98,7 +98,7 @@ function personCard(p) {
   const card = el('div', { class: 'card person-card' }, [
     el('div', { class: 'card-top' }, [
       el('a', { class: 'person-name', href: `#/u/${encodeURIComponent(p.username)}` }, [
-        avatarFor(p.avatar, p.username, 32, p.avatar_image),
+        avatarFor(p.avatar, p.username, 56, p.avatar_image),
         el('strong', {}, `@${p.username}`),
       ]),
       store.user ? followBtn(p) : null,
