@@ -102,9 +102,13 @@ body:not(.authed) .auth-only { display: none !important; }
 @media (max-width: 680px) { .search-form { flex-basis: 140px; margin: 0 0.4rem; } }
 .auth-area { display: flex; align-items: center; gap: 0.6rem; }
 .avatar.sm { width: 28px; height: 28px; font-size: 0.72rem; }
-.person-card .card-top { align-items: center; }
-.person-name { display: flex; align-items: center; gap: 0.5rem; color: var(--text); }
+.person-card .card-top { align-items: center; gap: 0.5rem; }
+.person-name { display: flex; align-items: center; gap: 0.5rem; color: var(--text); min-width: 0; flex: 1 1 auto; }
+.person-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .person-name:hover { text-decoration: none; color: var(--accent); }
+.person-card .card-top .icon-btn { flex-shrink: 0; }
+/* Compact emoji/icon action buttons (follow, message, etc.). */
+.icon-btn { min-width: 34px; padding: 0.3rem 0.55rem; text-align: center; font-size: 1rem; line-height: 1; }
 .prof-counts { font-size: 0.85rem; margin-bottom: 1rem; }
 .auth-area .who { color: var(--muted); font-size: 0.9rem; }
 .welcome-steps { margin: 0.5rem 0 0; padding-left: 1.25rem; }

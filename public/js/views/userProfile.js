@@ -45,13 +45,12 @@ export async function renderUserProfile(username) {
         prof.avatar_image
           ? el('button', { class: 'btn small secondary', onclick: () => removeAvatarImage(prof) }, 'Remove photo')
           : null,
-        el('button', { class: 'btn small secondary', onclick: () => openEdit(prof) }, 'Edit profile'),
         el('button', { class: 'btn small secondary', onclick: () => logout() }, 'Sign out'),
       ])
     : (store.user
         ? el('div', { class: 'row' }, [
             prof.blocked ? null : followBtn(prof),
-            prof.blocked ? null : el('a', { class: 'btn small secondary', href: `#/dm/${encodeURIComponent(prof.username)}` }, 'Message'),
+            prof.blocked ? null : el('a', { class: 'btn small secondary icon-btn', href: `#/dm/${encodeURIComponent(prof.username)}`, title: 'Message' }, '💬'),
             blockBtn(prof),
           ])
         : null);
@@ -92,6 +91,35 @@ export async function renderUserProfile(username) {
 
   // Your own account: language/level settings + word-familiarity, each in a card.
   if (isMe) {
+    // About-you editor as an inline card (was a modal that overflowed the screen).
+    const aboutErr = el('div', { class: 'error' });
+    const aboutOk = el('div', { class: 'ok-msg' });
+    const bioIn = el('textarea', { placeholder: 'A short bio…' }); bioIn.value = prof.bio || '';
+    const originIn = el('input', { type: 'text', placeholder: 'e.g. Munich, Germany' }); originIn.value = prof.origin || '';
+    const locationIn = el('input', { type: 'text', placeholder: 'e.g. London, UK' }); locationIn.value = prof.location || '';
+    const interestsIn = el('input', { type: 'text', placeholder: 'interests, comma separated' }); interestsIn.value = prof.interests.join(', ');
+    const aboutForm = el('form', {
+      onsubmit: async (e) => {
+        e.preventDefault(); aboutErr.textContent = ''; aboutOk.textContent = '';
+        try {
+          await api.updateProfile({
+            bio: bioIn.value, origin: originIn.value, location: locationIn.value,
+            interests: interestsIn.value.split(',').map((s) => s.trim()).filter(Boolean),
+          });
+          aboutOk.textContent = 'Saved.';
+          prof.bio = bioIn.value; prof.origin = originIn.value; prof.location = locationIn.value;
+        } catch (ex) { aboutErr.textContent = ex.message; }
+      },
+    }, [
+      el('label', {}, 'Bio'), bioIn,
+      el('label', {}, 'From (origin)'), originIn,
+      el('label', {}, 'Lives in'), locationIn,
+      el('label', {}, 'Interests'), interestsIn,
+      aboutErr, aboutOk,
+      el('div', { style: 'margin-top:0.75rem' }, [el('button', { class: 'btn small', type: 'submit' }, 'Save')]),
+    ]);
+    profile.append(card([el('div', { class: 'card-title' }, 'About you'), aboutForm]));
+
     profile.append(card([
       el('div', { class: 'card-title' }, 'Languages & level'),
       nativeLanguagesSetting(prof, () => renderUserProfile(prof.username)),
@@ -318,7 +346,7 @@ function followBtn(prof) {
 }
 
 function blockBtn(prof) {
-  const btn = el('button', { class: 'btn small secondary' }, prof.blocked ? 'Unblock' : 'Block');
+  const btn = el('button', { class: 'btn small secondary icon-btn', title: prof.blocked ? 'Unblock' : 'Block' }, prof.blocked ? '↩️' : '🚫');
   btn.addEventListener('click', async () => {
     btn.disabled = true;
     try {

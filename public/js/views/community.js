@@ -44,8 +44,12 @@ export async function renderCommunity() {
     el('label', { class: 'muted', style: 'display:flex;align-items:center;gap:0.3rem;font-size:0.85rem' }, [text, node]);
   const controls = el('div', { class: 'row', style: 'margin:1rem 0; gap:0.7rem; flex-wrap:wrap' }, [
     lbl('Speaks', speaks), lbl('Learning', learning), q,
-    el('button', { class: 'btn small', onclick: () => load() }, 'Search'),
   ]);
+  // Live search: filter as you type (debounced) and when a dropdown changes.
+  let searchTimer;
+  q.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => load(), 250); });
+  speaks.addEventListener('change', () => load());
+  learning.addEventListener('change', () => load());
   view.append(controls);
 
   const grid = el('div', { class: 'card-grid' });
@@ -105,20 +109,24 @@ function personCard(p) {
     langs('Speaks', p.native),
     langs('Learning', p.learning),
     p.bio ? el('p', { class: 'muted card-summary', style: 'margin-top:0.4rem' }, p.bio) : null,
-    store.user ? el('a', { class: 'btn small secondary', href: `#/dm/${encodeURIComponent(p.username)}`, style: 'margin-top:0.5rem' }, 'Message') : null,
+    store.user ? el('a', { class: 'btn small secondary icon-btn', href: `#/dm/${encodeURIComponent(p.username)}`, title: `Message @${p.username}`, style: 'margin-top:0.5rem' }, '💬') : null,
   ]);
   return card;
 }
 
 function followBtn(p) {
-  const btn = el('button', { class: `btn small${p.following ? ' secondary' : ''}` }, p.following ? 'Following' : 'Follow');
+  const btn = el('button', {
+    class: `btn small icon-btn${p.following ? ' secondary' : ''}`,
+    title: p.following ? 'Following — click to unfollow' : 'Follow',
+  }, p.following ? '✓' : '+');
   btn.addEventListener('click', async (e) => {
     e.preventDefault();
     btn.disabled = true;
     try {
       const { following } = await api.followUser(p.username);
       p.following = following;
-      btn.textContent = following ? 'Following' : 'Follow';
+      btn.textContent = following ? '✓' : '+';
+      btn.title = following ? 'Following — click to unfollow' : 'Follow';
       btn.classList.toggle('secondary', following);
     } catch { /* ignore */ } finally { btn.disabled = false; }
   });
