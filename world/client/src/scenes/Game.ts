@@ -260,7 +260,7 @@ export default class Game extends Phaser.Scene {
   // (and thus texture + frame) is resolved per-object from its gid, so layers
   // that mix tilesets render correctly. Collidable layers are collected into
   // worldColliders for setupPlayerAndNetwork().
-  private addTiled(layerName: string, collidable: boolean) {
+  private addTiled(layerName: string, collidable: boolean, fixedDepth?: number) {
     const layer = this.map.getObjectLayer(layerName)
     if (!layer) return
     const group = this.physics.add.staticGroup()
@@ -280,16 +280,30 @@ export default class Game extends Phaser.Scene {
       // walks straight through the walls).
       if (collidable && sprite.refreshBody) sprite.refreshBody()
     }
-    if (collidable) {
-      this.worldColliders.push(group)
-      const k = group.getChildren()
-      console.log('[collide]', layerName, 'sprites:', k.length, 'body0:', (k[0] as any)?.body?.width, 'x', (k[0] as any)?.body?.height, 'enable:', (k[0] as any)?.body?.enable)
-    }
+    // Fixed layer depth (e.g. ObjectsUnder below the player, foreground Objects
+    // above) overrides the per-sprite y-depth for whole-layer stacking.
+    if (fixedDepth !== undefined) group.setDepth(fixedDepth)
+    if (collidable) this.worldColliders.push(group)
   }
 
-  // The DISCO city (Town world): the exterior Tiled cityMap + a city spawn.
+  // The DISCO city (Town world): the exterior cityMap with DISCO's layer depths
+  // (ObjectsUnder under the player, foreground Objects over the player).
   private buildCity() {
-    this.buildExteriorTiled('cityMap')
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key: 'cityMap' })
+    const ext = this.map.addTilesetImage('Modern_Exteriors', 'complete_exterior_tileset')!
+    this.addTiled('ObjectsUnder', false, 1)
+    const ground = this.map.createLayer('Ground', ext, 0, 0)!
+    ground.setCollisionByProperty({ collides: true })
+    this.worldColliders.push(ground)
+    const ground2 = this.map.createLayer('Ground 2', ext, 0, 0)
+    if (ground2) {
+      ground2.setCollisionByProperty({ collides: true })
+      this.worldColliders.push(ground2)
+    }
+    this.addTiled('Objects', false, 1000)
+    this.addTiled('ObjectsOnCollide', true)
+    this.addTiled('ObjectsOnCollide 2', true)
     this.spawnX = 1000
     this.spawnY = 740
     this.botX = 900

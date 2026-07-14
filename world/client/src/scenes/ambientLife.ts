@@ -218,7 +218,7 @@ export class AmbientLife {
    *  traffic light. `mapWidth` sets the off-screen wrap points. */
   addCityTraffic(mapWidth: number, lanes: Array<{ tex: string; anim: string; y: number; dir: 1 | -1 }>) {
     const SP = 90
-    const SCALE = 0.5
+    const SCALE = 0.9
     if (!this.carBodies) this.carBodies = this.scene.physics.add.staticGroup()
     for (const ln of lanes) {
       if (!this.scene.textures.exists(ln.tex)) continue
