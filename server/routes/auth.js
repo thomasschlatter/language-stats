@@ -31,13 +31,18 @@ function lineRedirectUri(req) {
 }
 
 // GET /api/auth/line — kick off the LINE login flow.
+// ?retry=1 disables LINE's auto-login (opening the LINE app), which commonly
+// fails on iOS (private browsing, in-app browsers, some OS versions). Per LINE's
+// guidance we first try auto-login, then fall back to the web form on failure.
 router.get('/line', (req, res) => {
   const channelId = process.env.LINE_CHANNEL_ID;
   if (!channelId) return res.status(503).send('LINE login is not configured.');
+  const retry = req.query.retry === '1';
   const state = crypto.randomBytes(16).toString('hex');
-  res.cookie('line_oauth_state', state, {
-    httpOnly: true, sameSite: 'lax', secure: isProd(), maxAge: 10 * 60 * 1000,
-  });
+  const cookieOpts = { httpOnly: true, sameSite: 'lax', secure: isProd(), maxAge: 10 * 60 * 1000 };
+  res.cookie('line_oauth_state', state, cookieOpts);
+  // Remember whether we've already fallen back, so we don't loop forever.
+  res.cookie('line_retry', retry ? '1' : '0', cookieOpts);
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: channelId,
@@ -45,6 +50,7 @@ router.get('/line', (req, res) => {
     state,
     scope: 'profile openid',
   });
+  if (retry) params.set('disable_auto_login', 'true');
   res.redirect(`${LINE_AUTH_URL}?${params.toString()}`);
 });
 
@@ -52,10 +58,17 @@ router.get('/line', (req, res) => {
 router.get('/line/callback', async (req, res) => {
   const { code, state, error } = req.query;
   if (error) return res.redirect('/#/?login=cancelled');
+  // A missing code or state mismatch is how LINE signals an auto-login failure
+  // (iOS). Retry once with auto-login disabled before giving up, per LINE docs.
   if (!code || !state || state !== req.cookies?.line_oauth_state) {
-    return res.status(400).send('Invalid login state — please try again.');
+    const alreadyRetried = req.cookies?.line_retry === '1';
+    res.clearCookie('line_oauth_state');
+    if (!alreadyRetried) return res.redirect('/api/auth/line?retry=1');
+    res.clearCookie('line_retry');
+    return res.status(400).send('Could not complete LINE login. Please open this site in Safari or Chrome and try again.');
   }
   res.clearCookie('line_oauth_state');
+  res.clearCookie('line_retry');
   try {
     const tokenResp = await fetch(LINE_TOKEN_URL, {
       method: 'POST',

@@ -194,9 +194,35 @@ function openAuthModal(mode) {
     onclick: () => { window.location.href = '/api/auth/line'; },
   }, [el('span', { class: 'line-badge' }, 'LINE'), ' Log in with LINE']);
 
+  // LINE's login page blocks sign-in inside in-app browsers (Facebook, Instagram,
+  // Messenger, etc.), which is a common cause of "cannot log in" on iPhones.
+  // Warn and offer to copy the link so they can open it in Safari/Chrome.
+  const notice = isInAppBrowser()
+    ? el('div', { class: 'inapp-notice' }, [
+        el('div', {}, '⚠️ LINE login often fails inside in-app browsers. For best results, open this site in Safari or Chrome.'),
+        el('button', {
+          class: 'btn small secondary', type: 'button', style: 'margin-top:0.5rem',
+          onclick: async (e) => {
+            const url = window.location.href.split('#')[0];
+            try { await navigator.clipboard.writeText(url); e.target.textContent = '✓ Link copied — paste in Safari'; }
+            catch { e.target.textContent = url; }
+          },
+        }, 'Copy link to open in Safari'),
+      ])
+    : null;
+
   const close = openModal(el('div', {}, [
     title, form,
     el('div', { class: 'auth-divider' }, 'or'),
     lineBtn,
-  ]));
+    notice,
+  ].filter(Boolean)));
+}
+
+// Detects common in-app browsers (webviews) where LINE/OAuth logins are blocked.
+export function isInAppBrowser() {
+  const ua = navigator.userAgent || '';
+  // Facebook, Instagram, Messenger, TikTok, WeChat, KakaoTalk, Snapchat, and
+  // generic Android WebViews. (LINE's own browser handles LINE login fine.)
+  return /FBAN|FBAV|FB_IAB|Instagram|Messenger|MicroMessenger|KAKAOTALK|Snapchat|BytedanceWebview|musical_ly|TikTok|; wv\)/i.test(ua);
 }
