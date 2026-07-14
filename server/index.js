@@ -116,6 +116,15 @@ try {
   console.warn('Frequency ensure failed:', e.message);
 }
 
+// Load official starter decks (frequency words + dictionary glosses) not yet in
+// the DB (idempotent) — same rationale as the frequency lists above.
+try {
+  const { ensureOfficialDecks } = await import('./db/loadOfficialDecks.js');
+  ensureOfficialDecks();
+} catch (e) {
+  console.warn('Official decks ensure failed:', e.message);
+}
+
 app.listen(PORT, () => {
   console.log(`Language Stats running at http://localhost:${PORT}`);
 });
