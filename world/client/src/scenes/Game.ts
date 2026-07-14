@@ -702,6 +702,7 @@ export default class Game extends Phaser.Scene {
     this.otherPlayers.add(otherPlayer)
     this.otherPlayerMap.set(id, otherPlayer)
     // If they already have a custom avatar (joined before us), composite it now.
+    console.log('[avatar] player joined', id, 'avatar=', (newPlayer.avatar || '(none)').slice(0, 60))
     if (newPlayer.avatar) otherPlayer.updateOtherPlayer('avatar', newPlayer.avatar)
   }
 

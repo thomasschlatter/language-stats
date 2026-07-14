@@ -61,11 +61,12 @@ export async function loadRemoteAvatar(
   index: Record<string, number>
 ): Promise<boolean> {
   try {
-    if (!key || !index) return false
+    if (!key || !index) { console.warn('[avatar] bad key/index', key, index); return false }
     if (scene.textures.exists(key)) {
       ensureAnims(scene, key)
       return true
     }
+    console.log('[avatar] compositing', key, index)
 
     const styles = AVATAR_STYLES as Record<string, string[]>
     const imgs: Record<string, HTMLImageElement | null> = {}
@@ -75,6 +76,7 @@ export async function loadRemoteAvatar(
         imgs[layer] = src ? await loadImage(src) : null
       })
     )
+    console.log('[avatar] layers loaded', LAYERS.map((l) => `${l}:${imgs[l] ? 'ok' : 'MISSING'}`).join(' '))
 
     const canvas = document.createElement('canvas')
     canvas.width = 1664 // 52 frames * 32px
@@ -92,14 +94,16 @@ export async function loadRemoteAvatar(
     // Phaser's texture manager wants an <img>, so round-trip through a data URL.
     const dataURL = canvas.toDataURL('image/png')
     const sheet = await loadImage(dataURL)
-    if (!sheet) return false
+    if (!sheet) { console.warn('[avatar] sheet image failed to load', key); return false }
     if (!scene.textures.exists(key)) {
       scene.textures.addSpriteSheet(key, sheet as any, { frameWidth: 32, frameHeight: 48 })
     }
-    if (!scene.textures.exists(key)) return false
+    if (!scene.textures.exists(key)) { console.warn('[avatar] addSpriteSheet failed', key); return false }
     ensureAnims(scene, key)
+    console.log('[avatar] composite OK', key)
     return true
-  } catch {
+  } catch (e) {
+    console.error('[avatar] composite FAILED', key, e)
     return false
   }
 }

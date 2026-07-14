@@ -323,6 +323,7 @@ export default class Network {
   // broadcast this player's custom-avatar descriptor (JSON {key, index}) so
   // peers can composite the same character locally.
   updatePlayerAvatar(avatar: string) {
+    console.log('[avatar] SENDING', avatar?.slice(0, 80));
     this.room?.send(Message.UPDATE_PLAYER_AVATAR, { avatar });
   }
 

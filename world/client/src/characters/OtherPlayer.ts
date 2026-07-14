@@ -88,6 +88,7 @@ export default class OtherPlayer extends Player {
         // recipe, then switch to it. Guarded end-to-end; stays on the default
         // character if anything fails.
         if (typeof value === 'string' && value) {
+          console.log('[avatar] RECEIVED for', this.playerId, value.slice(0, 80))
           try {
             const { key, index } = JSON.parse(value)
             if (key && index && !this.scene.textures.exists(key)) {
