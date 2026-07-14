@@ -24,6 +24,7 @@ interface Flit {
   ang: number
   spd: number
   t: number
+  ground?: boolean // crows sort by y-depth; butterflies fly above everything
 }
 
 export class AmbientLife {
@@ -44,6 +45,25 @@ export class AmbientLife {
         .setDepth(900000) // butterflies fly above everything in the scene
       s.play('butterfly_idle')
       this.flits.push({ s, cx, cy, r, ang, spd: 0.5 + Math.random() * 0.9, t: Math.random() * 100 })
+    }
+  }
+
+  /** A few crows pecking/hopping around fixed ground spots (city worlds). */
+  addCrows(spots: Array<[number, number]>) {
+    if (!this.scene.textures.exists('crow')) return
+    if (!this.scene.anims.exists('crow_idle')) {
+      this.scene.anims.create({
+        key: 'crow_idle',
+        frames: this.scene.anims.generateFrameNumbers('crow', { start: 0, end: 29 }),
+        frameRate: 12,
+        repeat: -1,
+      })
+    }
+    for (const [x, y] of spots) {
+      const s = this.scene.add.sprite(x, y, 'crow').setDepth(y).setScale(1.1)
+      s.play('crow_idle')
+      // reuse the Flit wander with a small radius so they hop around locally
+      this.flits.push({ s, cx: x, cy: y, r: 10 + Math.random() * 22, ang: Math.random() * 6.28, spd: 0.25 + Math.random() * 0.3, t: Math.random() * 100, ground: true })
     }
   }
 
@@ -114,10 +134,18 @@ export class AmbientLife {
       f.t += d
       f.ang += (0.5 + f.spd) * d
       // lazy looping path with a little wobble
-      const tx = f.cx + Math.cos(f.ang) * f.r + Math.sin(f.t * 0.7) * 24
-      const ty = f.cy + Math.sin(f.ang) * f.r * 0.6 + Math.cos(f.t * 0.9) * 18
-      f.s.x += (tx - f.s.x) * 0.05
-      f.s.y += (ty - f.s.y) * 0.05
+      const wob = f.ground ? 6 : 24
+      const tx = f.cx + Math.cos(f.ang) * f.r + Math.sin(f.t * 0.7) * wob
+      const ty = f.cy + Math.sin(f.ang) * f.r * 0.6 + Math.cos(f.t * 0.9) * (f.ground ? 4 : 18)
+      const ease = f.ground ? 0.03 : 0.05
+      f.s.x += (tx - f.s.x) * ease
+      f.s.y += (ty - f.s.y) * ease
+      // face travel direction for crows (flip the sprite horizontally)
+      if (f.ground) {
+        if (tx - f.s.x > 0.3) f.s.setFlipX(false)
+        else if (tx - f.s.x < -0.3) f.s.setFlipX(true)
+        f.s.setDepth(f.s.y)
+      }
     }
   }
 }

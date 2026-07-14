@@ -48,6 +48,7 @@ export default class Bootstrap extends Phaser.Scene {
   ANIMALS = {
     butterfly: ['assets/character/animated_butterfly_2_32x32.png', {frameWidth: 32, frameHeight: 32}],
     fox: ['assets/character/fox.png', {frameWidth: 32, frameHeight: 32}],
+    crow: ['assets/character/crow.png', {frameWidth: 32, frameHeight: 32}],
   }
   
    DOORS = {

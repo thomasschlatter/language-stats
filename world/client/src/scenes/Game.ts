@@ -131,8 +131,16 @@ export default class Game extends Phaser.Scene {
 
     // Ambient life: cars on the Osaka streets, butterflies in the nature worlds.
     this.ambient = new AmbientLife(this)
-    if (worldMap === 'osaka') this.ambient.addOsakaTraffic()
-    else if (worldMap === 'meadow' || worldMap === 'village' || worldMap === 'island')
+    if (worldMap === 'osaka') {
+      this.ambient.addOsakaTraffic()
+      // crows pecking around on the sidewalks/plaza
+      this.ambient.addCrows([
+        [360, 660],
+        [520, 705],
+        [820, 505],
+        [300, 470],
+      ])
+    } else if (worldMap === 'meadow' || worldMap === 'village' || worldMap === 'island')
       this.ambient.addButterflies(this.spawnX, this.spawnY, 6)
   }
 
