@@ -24,22 +24,21 @@ const blockedStyle: React.CSSProperties = {
   background: '#222639', color: '#eee', fontFamily: 'system-ui, sans-serif', padding: 24, textAlign: 'center',
 }
 
-guardSingleWorld().then((guard) => {
-  if (!guard.active) {
+guardSingleWorld().then((ok) => {
+  if (!ok) {
     root.render(
       <div style={blockedStyle}>
         <div style={{ maxWidth: 420 }}>
           <h1>Already in the world</h1>
           <p style={{ color: '#c2c2c2', lineHeight: 1.6 }}>
             The world is already open in another window of this browser. Two at once collide,
-            so switch to that window — or take control here, and the other window will show
-            this message instead.
+            so close the other one (or switch to it) and reload here.
           </p>
           <button
             style={{ padding: '8px 16px', borderRadius: 8, cursor: 'pointer' }}
-            onClick={() => guard.takeOver?.()}
+            onClick={() => window.location.reload()}
           >
-            Choose this window
+            Reload
           </button>
         </div>
       </div>
