@@ -32,9 +32,14 @@ const Backdrop = styled.div`
 const Wrapper = styled.div`
   background: #222639;
   border-radius: 16px;
-  padding: 36px 60px;
+  padding: 28px 48px;
   box-shadow: 0px 0px 5px #0000006f;
   width: 600px;
+  max-width: 90vw;
+  /* Never span the full height — cap to the viewport and scroll inside so the
+     world stays visible above/below the panel. */
+  max-height: 88vh;
+  overflow-y: auto;
 `;
 
 const CustomRoomWrapper = styled.div`
