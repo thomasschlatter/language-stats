@@ -12,10 +12,28 @@ export async function renderCommunity() {
   view.append(el('h1', {}, 'Community'));
   view.append(el('p', { class: 'muted', style: 'margin-top:-0.5rem' }, 'Find people to practise with. Match on the language you’re learning.'));
 
-  const langOptions = (placeholder) =>
-    el('select', {}, [el('option', { value: '' }, placeholder), ...store.languages.map((l) => el('option', { value: l.code }, l.name))]);
-  const speaks = langOptions('Speaks (any)');
-  const learning = langOptions('Learning (any)');
+  // Language filters show the user's OWN languages first, in a separate group,
+  // so partners for what you're learning are one click away.
+  const codeName = new Map(store.languages.map((l) => [l.code, l.name]));
+  const groupedLangOptions = (placeholder, priorityCodes) => {
+    const pri = (priorityCodes || []).filter((c) => codeName.has(c));
+    const priSet = new Set(pri);
+    const children = [el('option', { value: '' }, placeholder)];
+    if (pri.length) {
+      children.push(
+        el('optgroup', { label: 'Your languages' }, pri.map((c) => el('option', { value: c }, codeName.get(c)))),
+        el('optgroup', { label: 'Other languages' }, store.languages.filter((l) => !priSet.has(l.code)).map((l) => el('option', { value: l.code }, l.name)))
+      );
+    } else {
+      children.push(...store.languages.map((l) => el('option', { value: l.code }, l.name)));
+    }
+    return el('select', {}, children);
+  };
+  const myLearning = (store.user && store.user.learning && store.user.learning.length)
+    ? store.user.learning : Array.from(store.learning || []);
+  const myNative = (store.user && store.user.native) || [];
+  const speaks = groupedLangOptions('Speaks (any)', myNative);
+  const learning = groupedLangOptions('Learning (any)', myLearning);
   const q = el('input', { type: 'search', placeholder: 'search @username', style: 'max-width:200px' });
 
   const controls = el('div', { class: 'row', style: 'margin:1rem 0; gap:0.5rem' }, [
