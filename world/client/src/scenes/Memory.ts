@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { recordResult } from '../game/progress'
 import { celebrate } from '../game/celebrate'
+import { loadQuiz } from '../game/quiz'
 
 // Memory Match: a grid of face-down tiles, half words and half meanings. Flip
 // two; if a word meets its meaning they stay up. Clear the board to win. Reuses
@@ -57,18 +58,7 @@ export default class Memory extends Phaser.Scene {
       if (learning && learning.length) this.lang = learning[0]
     } catch { /* keep default */ }
 
-    let items: { front: string; answer: string }[] = []
-    try {
-      const res = await fetch(`/api/flashcards/quiz?lang=${encodeURIComponent(this.lang)}&n=8`, { credentials: 'same-origin' })
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}))
-        throw new Error(e.error || 'could not load a game')
-      }
-      items = (await res.json()).items || []
-    } catch (e: any) {
-      this.info.setText((e.message || 'Could not load a game') + '  ·  Esc for menu')
-      return
-    }
+    const { items } = await loadQuiz(this.lang, 8)
     // Unique fronts, up to 8 pairs (fits a 4-column board nicely).
     const seen = new Set<string>()
     const pairsData = items.filter((it) => (seen.has(it.front) ? false : seen.add(it.front))).slice(0, 8)

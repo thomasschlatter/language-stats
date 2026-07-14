@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import { useAppSelector } from "../hooks";
 import phaserGame from "../PhaserGame";
+import { loadQuiz } from "../game/quiz";
 
 // A lightweight cooperative task shown at the top of the world: everyone in the
 // room chips correct word answers toward a shared goal. Tapping the banner opens
@@ -71,8 +72,8 @@ export default function TeamTask() {
       const me = await fetch("/api/auth/me", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null));
       const learning = me?.user?.learning;
       if (learning && learning.length) lang.current = learning[0];
-      const res = await fetch(`/api/flashcards/quiz?lang=${encodeURIComponent(lang.current)}&n=6`, { credentials: "same-origin" });
-      if (res.ok) queue.current = (await res.json()).items || [];
+      const { items } = await loadQuiz(lang.current, 6);
+      queue.current = items;
     } catch { /* leave queue empty */ }
   }
 

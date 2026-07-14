@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { createCharacterAnims } from '../anims/CharacterAnims'
 import { recordResult } from '../game/progress'
 import { celebrate } from '../game/celebrate'
+import { loadQuiz } from '../game/quiz'
 
 // A self-contained, single-player language mini-game (independent of the
 // multiplayer worlds and Colyseus). A word from the player's decks appears; walk
@@ -156,21 +157,11 @@ export default class Practice extends Phaser.Scene {
     // Beginners get an extra life; recall mode (reverse) unlocks at intermediate.
     this.lives = ['a1', 'a2'].includes(this.level) ? 4 : 3
 
-    try {
-      const res = await fetch(`/api/flashcards/quiz?lang=${encodeURIComponent(this.lang)}&n=${n}`, { credentials: 'same-origin' })
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}))
-        throw new Error(e.error || 'could not load a quiz')
-      }
-      this.items = (await res.json()).items || []
-    } catch (e: any) {
-      this.wordText.setText(e.message || 'Could not load a quiz')
-      this.info.setText('Add cards to a deck for this language, then try again. (Esc to exit)')
-      return
-    }
+    const { items } = await loadQuiz(this.lang, n)
+    this.items = items
     if (!this.items.length) {
-      this.wordText.setText('No cards to practise yet')
-      this.info.setText('Make a flashcard deck first. (Esc to exit)')
+      this.wordText.setText('No words to practise yet')
+      this.info.setText('Add cards to a deck for this language. (Esc for menu)')
       return
     }
     this.showQuestion()

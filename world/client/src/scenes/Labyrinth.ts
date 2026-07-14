@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { createCharacterAnims } from '../anims/CharacterAnims'
 import { recordResult } from '../game/progress'
 import { celebrate } from '../game/celebrate'
+import { loadQuiz } from '../game/quiz'
 
 // Labyrinth: a word appears; walk through a maze to the tile with its correct
 // meaning. Reach a wrong tile and you lose a life. The maze is a fully-connected
@@ -92,21 +93,11 @@ export default class Labyrinth extends Phaser.Scene {
       if (learning && learning.length) this.lang = learning[0]
     } catch { /* keep default */ }
 
-    try {
-      const res = await fetch(`/api/flashcards/quiz?lang=${encodeURIComponent(this.lang)}&n=10`, { credentials: 'same-origin' })
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}))
-        throw new Error(e.error || 'could not load a game')
-      }
-      this.items = (await res.json()).items || []
-    } catch (e: any) {
-      this.wordText.setText(e.message || 'Could not load a game')
-      this.info.setText('Add cards to a deck, then try again. (Esc for menu)')
-      return
-    }
+    const { items } = await loadQuiz(this.lang, 10)
+    this.items = items
     if (this.items.length < 1) {
-      this.wordText.setText('No cards to play yet')
-      this.info.setText('Make a flashcard deck first. (Esc for menu)')
+      this.wordText.setText('No words to play yet')
+      this.info.setText('Add cards to a deck for this language. (Esc for menu)')
       return
     }
     this.showWord()
