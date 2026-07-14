@@ -62,20 +62,24 @@ export class AmbientLife {
     return ahead > 0 && ahead < GAP
   }
 
-  // Is another car stopped/just ahead in the same lane (so we queue behind it)?
+  // Is another car occupying the space just ahead? Checks ALL cars (any
+  // direction), so a car queues behind one in its lane AND yields to cross
+  // traffic passing in front of it at the intersection.
   private carAhead(c: Car): boolean {
-    const GAP = 92
+    const GAP = 90 // how far ahead we look along travel
+    const LAT = 30 // lateral tolerance (narrower than the lane spacing)
     for (const o of this.cars) {
-      if (o === c || o.axis !== c.axis) continue
+      if (o === c) continue
+      let along: number
+      let lateral: number
       if (c.axis === 'y') {
-        if (Math.sign(o.vy) !== Math.sign(c.vy) || Math.abs(o.s.x - c.s.x) > 20) continue
-        const ahead = (o.s.y - c.s.y) * Math.sign(c.vy)
-        if (ahead > 0 && ahead < GAP) return true
+        along = (o.s.y - c.s.y) * Math.sign(c.vy)
+        lateral = Math.abs(o.s.x - c.s.x)
       } else {
-        if (Math.sign(o.vx) !== Math.sign(c.vx) || Math.abs(o.s.y - c.s.y) > 20) continue
-        const ahead = (o.s.x - c.s.x) * Math.sign(c.vx)
-        if (ahead > 0 && ahead < GAP) return true
+        along = (o.s.x - c.s.x) * Math.sign(c.vx)
+        lateral = Math.abs(o.s.y - c.s.y)
       }
+      if (along > 0 && along < GAP && lateral < LAT) return true
     }
     return false
   }
