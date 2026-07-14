@@ -70,4 +70,16 @@ export async function renderWorld() {
 
   wrap.append(frame, fsBtn);
   view.append(wrap);
+
+  // Size the game to exactly the space below the top bar (measure it, don't
+  // assume a fixed 57px) — so the game never runs off the bottom of the page.
+  const sizeWrap = () => {
+    if (document.fullscreenElement) { wrap.style.height = ''; return; }
+    const header = document.querySelector('.topbar');
+    const h = header ? Math.ceil(header.getBoundingClientRect().height) : 57;
+    wrap.style.height = `${window.innerHeight - h}px`;
+  };
+  sizeWrap();
+  window.addEventListener('resize', sizeWrap);
+  document.addEventListener('fullscreenchange', sizeWrap);
 }

@@ -9,17 +9,17 @@ import Game from '../scenes/Game'
 
 const Backdrop = styled.div`
   position: fixed;
-  top: 8px;
-  right: 8px;
-  z-index: 80;
-  max-width: min(260px, 72vw);
+  top: 0;
+  left: 0;
 `
 
 const Wrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  align-items: stretch;
 `
 
 export default function VideoConnectionDialog() {

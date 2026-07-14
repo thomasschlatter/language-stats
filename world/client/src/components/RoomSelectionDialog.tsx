@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import styled from "styled-components";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -19,26 +19,22 @@ import Bootstrap from "../scenes/Bootstrap";
 import CookiePopup from "./CookiePopup";
 
 const Backdrop = styled.div`
-  position: fixed;
-  inset: 0;
-  overflow-y: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
+  gap: 60px;
   align-items: center;
-  justify-content: flex-start;
-  gap: 20px;
-  /* top/bottom padding so the whole picker is reachable by scrolling on short
-     screens (it used to be vertically centred and got clipped). */
-  padding: 20px 12px 32px;
 `;
 
 const Wrapper = styled.div`
   background: #222639;
   border-radius: 16px;
-  padding: 20px 28px;
+  padding: 36px 60px;
   box-shadow: 0px 0px 5px #0000006f;
   width: 600px;
-  max-width: 94vw;
 `;
 
 const CustomRoomWrapper = styled.div`
@@ -178,11 +174,14 @@ export default function RoomSelectionDialog() {
   const [showSnackbar, setShowSnackbar] = useState(false);
   const lobbyJoined = useAppSelector((state) => state.room.lobbyJoined);
 
+  const joiningRef = useRef(false);
   const handleJoinWorld = async (world: WorldInfo) => {
+    if (joiningRef.current) return; // guard against double-tap -> duplicate join
     if (!lobbyJoined) {
       setShowSnackbar(true);
       return;
     }
+    joiningRef.current = true;
     // Group with others learning the same language (server filterBy). Falls back
     // to the shared bucket if the profile fetch fails or no language is set.
     let language: string | undefined;
@@ -199,7 +198,7 @@ export default function RoomSelectionDialog() {
     bootstrap.network
       .joinWorld(world.id, world.map, language)
       .then(() => bootstrap.launchGameWithoutBackground())
-      .catch((error) => console.error(error));
+      .catch((error) => { joiningRef.current = false; console.error(error); });
   };
 
   // Single-player mini-game — no room/Colyseus needed.

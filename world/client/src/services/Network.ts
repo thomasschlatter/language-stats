@@ -89,6 +89,7 @@ export default class Network {
   // join (or create) the persistent room for a selectable world, and remember
   // which map the Game scene should render.
   async joinWorld(roomType: string, map: string, language?: string) {
+    if (this.room) return; // already in a world — never open a second connection
     this.worldMap = map;
     // `language` groups same-language learners via the server's filterBy;
     // "any" is the shared bucket for players who haven't set a learning language.

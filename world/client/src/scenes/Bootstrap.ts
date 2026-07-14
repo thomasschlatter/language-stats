@@ -168,6 +168,7 @@ export default class Bootstrap extends Phaser.Scene {
 
   launchGameWithoutBackground() {
     if (!this.preloadComplete) return
+    if (this.scene.isActive('game')) return // never launch the game scene twice
     this.network.webRTC?.checkPreviousPermission()
     // remove background scene
     this.scene.stop('background')
