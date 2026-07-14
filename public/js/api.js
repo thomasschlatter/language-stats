@@ -6,6 +6,7 @@ async function request(method, path, body) {
     method,
     headers: { 'Content-Type': 'application/json' },
     credentials: 'same-origin', // send the auth cookie
+    cache: 'no-store', // always fresh — never show a stale profile after an edit
   };
   if (body !== undefined) opts.body = JSON.stringify(body);
 

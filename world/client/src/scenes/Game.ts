@@ -357,7 +357,10 @@ export default class Game extends Phaser.Scene {
       const y = obj.y! - obj.height! * 0.5
       const sprite = group.create(x, y, key, obj.gid - ts.firstgid) as Phaser.Physics.Arcade.Sprite
       if (!sprite) continue
-      sprite.setDepth(y)
+      // Depth-sort by the object's BASE (feet) not its centre, so a tall tree
+      // sorts against the player's feet — you're behind it only when actually
+      // above its base, in front when below it.
+      sprite.setDepth(obj.y!)
       // Static bodies don't follow a repositioned sprite — recompute the body at
       // its final spot so the collider actually sits on the tile (else the player
       // walks straight through the walls).

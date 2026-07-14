@@ -105,12 +105,9 @@ function renderSidebar() {
     .sort((a, b) => a.name.localeCompare(b.name));
 
   for (const lang of learning) {
+    // No inline remove here — manage your languages in Settings.
     nav.append(el('div', { class: 'lang-row' }, [
       el('a', { href: `#/lang/${lang.code}`, class: lang.code === currentCode ? 'active' : '' }, lang.name),
-      el('button', {
-        class: 'lang-remove', title: `Remove ${lang.name} from your languages`,
-        onclick: (e) => { e.preventDefault(); store.removeLearning(lang.code); persistLearning(); },
-      }, '×'),
     ]));
   }
   if (!learning.length) {

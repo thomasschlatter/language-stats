@@ -45,7 +45,6 @@ export async function renderCommunity() {
   const controls = el('div', { class: 'row', style: 'margin:1rem 0; gap:0.7rem; flex-wrap:wrap' }, [
     lbl('Speaks', speaks), lbl('Learning', learning), q,
     el('button', { class: 'btn small', onclick: () => load() }, 'Search'),
-    store.user ? el('button', { class: 'btn small secondary', onclick: () => matchMe() }, 'Find my partners') : null,
   ]);
   view.append(controls);
 
