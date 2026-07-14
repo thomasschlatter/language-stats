@@ -181,19 +181,28 @@ const CEFR_OPTIONS = [
   ['c1', 'Advanced (C1)'],
   ['c2', 'Proficient (C2)'],
 ];
+// Proficiency is per learning language — one CEFR picker per language.
 function levelSetting(prof) {
-  const current = prof.level || 'a1';
-  const sel = el('select', {
-    class: 'native-select',
-    onchange: (e) => {
-      api.updateProfile({ level: e.target.value }).catch(() => {});
-      if (store.user) store.set({ user: { ...store.user, level: e.target.value } });
-    },
-  }, CEFR_OPTIONS.map(([v, label]) => el('option', { value: v, selected: v === current ? '' : null }, label)));
-  return el('div', { class: 'prof-setting' }, [
-    el('span', { class: 'prof-langs-label' }, 'Proficiency'),
-    sel,
-  ]);
+  const learning = prof.learning || [];
+  if (!learning.length) {
+    return el('div', { class: 'prof-setting' }, [
+      el('span', { class: 'prof-langs-label' }, 'Proficiency'),
+      el('span', { class: 'muted' }, 'Add a learning language to set your level.'),
+    ]);
+  }
+  return el('div', { class: 'prof-level-list' }, learning.map((lang) => {
+    const sel = el('select', {
+      class: 'native-select',
+      onchange: (e) => {
+        api.setLanguageLevel(lang.code, e.target.value).catch(() => {});
+        lang.level = e.target.value;
+      },
+    }, CEFR_OPTIONS.map(([v, label]) => el('option', { value: v, selected: v === (lang.level || 'a1') ? '' : null }, label)));
+    return el('div', { class: 'prof-level-row' }, [
+      el('span', { class: 'prof-level-lang' }, lang.name),
+      sel,
+    ]);
+  }));
 }
 
 // Persist the current learning set (carousel) to the server so it survives

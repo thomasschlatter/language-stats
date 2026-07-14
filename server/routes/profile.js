@@ -11,6 +11,7 @@ import {
   setAvatar,
   setAvatarImage,
   setLevel,
+  setLanguageLevel,
   profile,
 } from '../models/users.js';
 import { getLanguageByCode } from '../models/languages.js';
@@ -78,6 +79,15 @@ router.put('/', requireAuth, (req, res) => {
   if (learning !== undefined) setUserLanguages(req.user.id, 'learning', idsFromCodes(learning));
   if (avatar !== undefined) setAvatar(req.user.id, avatar);
   if (req.body?.level !== undefined) setLevel(req.user.id, req.body.level);
+  res.json({ profile: profile(getUserById(req.user.id)) });
+});
+
+// PUT /api/profile/language-level { languageCode, level } — per-language CEFR.
+router.put('/language-level', requireAuth, (req, res) => {
+  const { languageCode, level } = req.body ?? {};
+  const lang = getLanguageByCode(languageCode);
+  if (!lang) return res.status(404).json({ error: 'unknown language' });
+  setLanguageLevel(req.user.id, lang.id, String(level || ''));
   res.json({ profile: profile(getUserById(req.user.id)) });
 });
 

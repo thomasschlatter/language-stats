@@ -84,6 +84,7 @@ export const api = {
   // --- profiles ---
   myProfile: () => request('GET', '/profile'),
   updateProfile: (b) => request('PUT', '/profile', b),
+  setLanguageLevel: (languageCode, level) => request('PUT', '/profile/language-level', { languageCode, level }),
   uploadAvatarImage: (dataUrl) => request('POST', '/profile/avatar-image', { dataUrl }),
   removeAvatarImage: () => request('DELETE', '/profile/avatar-image'),
   userProfile: (username) => request('GET', `/users/${encodeURIComponent(username)}`),

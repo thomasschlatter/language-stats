@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS user_languages (
   user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   language_id INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
   role        TEXT NOT NULL,                       -- 'native' | 'learning'
+  level       TEXT NOT NULL DEFAULT 'a1',          -- CEFR proficiency (for 'learning')
   PRIMARY KEY (user_id, language_id, role)
 );
 

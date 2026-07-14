@@ -151,7 +151,8 @@ export default class Practice extends Phaser.Scene {
       const me = await fetch('/api/auth/me', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null))
       const learning = me?.user?.learning
       if (learning && learning.length) this.lang = learning[0]
-      this.level = me?.user?.level || 'a1'
+      // Per-language proficiency (falls back to the legacy global level).
+      this.level = me?.user?.levels?.[this.lang] || me?.user?.level || 'a1'
       n = ({ a1: 8, a2: 10, b1: 12, b2: 14, c1: 16, c2: 20 } as Record<string, number>)[this.level] || 10
     } catch { /* keep defaults */ }
     // Beginners get an extra life; recall mode (reverse) unlocks at intermediate.

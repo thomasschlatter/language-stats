@@ -123,13 +123,23 @@ export function setLevel(userId, level) {
   db.prepare('UPDATE users SET level = ? WHERE id = ?').run(level, userId);
 }
 
-// Replace a user's languages for a given role ('native' | 'learning').
+// Set the CEFR proficiency for a single learning language.
+export function setLanguageLevel(userId, languageId, level) {
+  if (!CEFR_LEVELS.includes(level)) return;
+  db.prepare("UPDATE user_languages SET level = ? WHERE user_id = ? AND language_id = ? AND role = 'learning'")
+    .run(level, userId, languageId);
+}
+
+// Replace a user's languages for a given role ('native' | 'learning'),
+// preserving each language's existing proficiency level across edits.
 export function setUserLanguages(userId, role, languageIds) {
+  const prev = db.prepare('SELECT language_id, level FROM user_languages WHERE user_id = ? AND role = ?').all(userId, role);
+  const levelOf = new Map(prev.map((r) => [r.language_id, r.level || 'a1']));
   const del = db.prepare('DELETE FROM user_languages WHERE user_id = ? AND role = ?');
-  const ins = db.prepare('INSERT OR IGNORE INTO user_languages (user_id, language_id, role) VALUES (?, ?, ?)');
+  const ins = db.prepare('INSERT OR IGNORE INTO user_languages (user_id, language_id, role, level) VALUES (?, ?, ?, ?)');
   const tx = db.transaction(() => {
     del.run(userId, role);
-    for (const lid of languageIds) ins.run(userId, lid, role);
+    for (const lid of languageIds) ins.run(userId, lid, role, levelOf.get(lid) || 'a1');
   });
   tx();
 }
@@ -137,7 +147,7 @@ export function setUserLanguages(userId, role, languageIds) {
 export function getUserLanguages(userId) {
   return db
     .prepare(
-      `SELECT ul.role, l.code, l.name
+      `SELECT ul.role, ul.level, l.code, l.name
        FROM user_languages ul JOIN languages l ON l.id = ul.language_id
        WHERE ul.user_id = ?
        ORDER BY ul.role, l.name`
@@ -190,9 +200,9 @@ export function profile(user) {
     location: user.location || null,
     avatar,
     avatar_image: user.avatar_image || null,
-    level: user.level || 'a1',
+    level: user.level || 'a1', // legacy global; per-language levels are on `learning`
     native: langs.filter((l) => l.role === 'native').map(({ code, name }) => ({ code, name })),
-    learning: langs.filter((l) => l.role === 'learning').map(({ code, name }) => ({ code, name })),
+    learning: langs.filter((l) => l.role === 'learning').map(({ code, name, level }) => ({ code, name, level: level || 'a1' })),
     created_at: user.created_at,
   };
 }

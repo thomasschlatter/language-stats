@@ -592,6 +592,9 @@ body.in-world .lang-bar { display: none; }
 }
 .profile-card .profile-head { margin-bottom: 0.75rem; }
 .profile-card .prof-counts { margin-bottom: 0; }
+.prof-level-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem; }
+.prof-level-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.prof-level-lang { color: var(--text); font-size: 0.9rem; }
 .profile-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
 .avatar {
   width: 56px; height: 56px; border-radius: 50%;

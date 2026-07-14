@@ -39,7 +39,14 @@ if (!userCols.includes('dm_last_read_id')) {
   db.exec('ALTER TABLE users ADD COLUMN dm_last_read_id INTEGER NOT NULL DEFAULT 0'); // for the unread-DM badge
 }
 if (!userCols.includes('level')) {
-  db.exec("ALTER TABLE users ADD COLUMN level TEXT NOT NULL DEFAULT 'a1'"); // self-rated CEFR proficiency
+  db.exec("ALTER TABLE users ADD COLUMN level TEXT NOT NULL DEFAULT 'a1'"); // self-rated CEFR proficiency (legacy global)
+}
+// Per-language proficiency: each learning language has its own CEFR level.
+const ulCols = db.prepare('PRAGMA table_info(user_languages)').all().map((c) => c.name);
+if (!ulCols.includes('level')) {
+  db.exec("ALTER TABLE user_languages ADD COLUMN level TEXT NOT NULL DEFAULT 'a1'");
+  // Seed existing learning rows from the old global users.level so nobody loses their rating.
+  db.exec("UPDATE user_languages SET level = (SELECT level FROM users WHERE users.id = user_languages.user_id) WHERE role = 'learning'");
 }
 // UNIQUE index tolerates many NULLs but keeps LINE ids one-per-account.
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_line_user_id ON users(line_user_id)');
