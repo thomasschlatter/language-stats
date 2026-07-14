@@ -90,6 +90,13 @@ export function getPublicDeck(id, viewerId = null) {
   return d;
 }
 
+// All cards of a shared deck (for the full deck-view page). Null if not shared.
+export function listPublicDeckCards(id) {
+  const d = db.prepare('SELECT id FROM decks WHERE id = ? AND (is_official = 1 OR is_public = 1)').get(id);
+  if (!d) return null;
+  return db.prepare('SELECT front, back FROM cards WHERE deck_id = ? ORDER BY id').all(id);
+}
+
 export function voteDeck(userId, deckId) {
   const existing = db.prepare('SELECT 1 FROM deck_votes WHERE user_id = ? AND deck_id = ?').get(userId, deckId);
   db.transaction(() => {

@@ -137,6 +137,7 @@ export const api = {
     return request('GET', `/flashcards/browse${qs ? `?${qs}` : ''}`);
   },
   publicDeck: (id) => request('GET', `/flashcards/public/${id}`),
+  publicDeckCards: (id) => request('GET', `/flashcards/public/${id}/cards`),
   voteDeck: (id) => request('POST', `/flashcards/${id}/vote`),
   copyDeck: (id) => request('POST', `/flashcards/${id}/copy`),
   publishDeck: (id, isPublic) => request('POST', `/flashcards/${id}/publish`, { public: isPublic }),

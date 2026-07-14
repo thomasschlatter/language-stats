@@ -4,7 +4,7 @@ import { getLanguageByCode } from '../models/languages.js';
 import {
   createDeck, getDeck, listDecks, deleteDeck,
   addCards, dueCards, reviewCard, familiarityMap, listCards, deckHasCard, quizCards,
-  listPublicDecks, getPublicDeck, voteDeck, setDeckPublic, copyDeckForUser,
+  listPublicDecks, getPublicDeck, listPublicDeckCards, voteDeck, setDeckPublic, copyDeckForUser,
 } from '../models/flashcards.js';
 import { topWords, totalCount } from '../models/frequency.js';
 import { unpredictableGenderNouns } from '../models/analysis.js';
@@ -36,6 +36,13 @@ router.get('/public/:id', (req, res) => {
   const deck = getPublicDeck(Number(req.params.id), req.user?.id || null);
   if (!deck) return res.status(404).json({ error: 'deck not found' });
   res.json({ deck });
+});
+
+// GET /api/flashcards/public/:id/cards — every card in a shared deck
+router.get('/public/:id/cards', (req, res) => {
+  const cards = listPublicDeckCards(Number(req.params.id));
+  if (!cards) return res.status(404).json({ error: 'deck not found' });
+  res.json({ cards });
 });
 
 // POST /api/flashcards/:id/vote — toggle an upvote
