@@ -2,7 +2,7 @@
 // Add any to your own collection (copies the cards with fresh SRS state).
 import { api } from '../api.js';
 import { store } from '../store.js';
-import { el, clear } from '../dom.js';
+import { el, clear, openModal } from '../dom.js';
 import { navigate } from '../router.js';
 
 const LEVELS = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
@@ -75,19 +75,66 @@ export async function renderBrowseDecks() {
 }
 
 function deckCard(d) {
+  const title = el('button', { class: 'deck-title-link', title: 'Preview the cards' }, d.name);
+  title.addEventListener('click', () => openPreview(d));
   return el('div', { class: 'card person-card' }, [
-    el('strong', {}, d.name),
+    title,
     el('div', { class: 'muted', style: 'font-size:0.8rem; margin-top:0.2rem' }, [
       d.is_official ? el('span', { class: 'badge official' }, 'Official') : el('span', { class: 'badge user' }, `@${d.author || 'user'}`),
       ` · ${d.lang_name} · ${d.total} cards${d.level ? ' · ' + d.level.toUpperCase() : ''}`,
     ]),
     el('div', { class: 'person-actions' }, [
       voteBtn(d),
+      el('button', { class: 'btn small secondary', onclick: () => openPreview(d) }, 'Preview'),
       store.user
         ? el('button', { class: 'btn small', onclick: (e) => addToMine(d, e.currentTarget) }, '+ Add to my decks')
         : null,
     ]),
   ]);
+}
+
+// Modal: show the deck's cards before deciding to add it.
+async function openPreview(d) {
+  const body = el('div', { class: 'deck-preview' }, [
+    el('h2', {}, d.name),
+    el('div', { class: 'muted', style: 'font-size:0.85rem; margin:-0.4rem 0 0.8rem' },
+      [d.is_official ? el('span', { class: 'badge official' }, 'Official') : el('span', { class: 'badge user' }, `@${d.author || 'user'}`),
+        ` · ${d.lang_name} · ${d.total} cards${d.level ? ' · ' + d.level.toUpperCase() : ''}`]),
+    el('p', { class: 'muted' }, 'Loading cards…'),
+  ]);
+  const close = openModal(body);
+  try {
+    const { deck } = await api.publicDeck(d.id);
+    clear(body);
+    body.append(
+      el('h2', {}, deck.name),
+      el('div', { class: 'muted', style: 'font-size:0.85rem; margin:-0.4rem 0 0.8rem' },
+        [deck.is_official ? el('span', { class: 'badge official' }, 'Official') : el('span', { class: 'badge user' }, `@${deck.author || 'user'}`),
+          ` · ${deck.lang_name} · ${deck.total} cards${deck.level ? ' · ' + deck.level.toUpperCase() : ''}`]),
+    );
+    const table = el('div', { class: 'deck-preview-list' });
+    for (const c of deck.preview || []) {
+      table.append(el('div', { class: 'deck-preview-row' }, [
+        el('span', { class: 'dp-front' }, c.front),
+        el('span', { class: 'dp-back muted' }, c.back || ''),
+      ]));
+    }
+    body.append(table);
+    if (deck.total > (deck.preview || []).length) {
+      body.append(el('p', { class: 'muted', style: 'font-size:0.8rem; margin-top:0.5rem' },
+        `Showing the first ${(deck.preview || []).length} of ${deck.total} cards.`));
+    }
+    const addBtn = store.user
+      ? el('button', { class: 'btn', onclick: (e) => addToMine(d, e.currentTarget) }, '+ Add to my decks')
+      : el('span', { class: 'muted' }, 'Sign in to add this deck.');
+    body.append(el('div', { class: 'row', style: 'justify-content:flex-end; gap:0.6rem; margin-top:1rem' }, [
+      el('button', { class: 'btn small secondary', onclick: () => close() }, 'Close'),
+      addBtn,
+    ]));
+  } catch (ex) {
+    clear(body).append(el('p', { class: 'error' }, ex.message),
+      el('div', { class: 'row', style: 'justify-content:flex-end' }, [el('button', { class: 'btn small', onclick: () => close() }, 'Close')]));
+  }
 }
 
 function voteBtn(d) {

@@ -85,7 +85,7 @@ export function getPublicDeck(id, viewerId = null) {
   ).get(id);
   if (!d) return null;
   d.total = db.prepare('SELECT COUNT(*) AS n FROM cards WHERE deck_id = ?').get(id).n;
-  d.preview = db.prepare('SELECT front, back FROM cards WHERE deck_id = ? ORDER BY id LIMIT 12').all(id);
+  d.preview = db.prepare('SELECT front, back FROM cards WHERE deck_id = ? ORDER BY id LIMIT 60').all(id);
   if (viewerId) d.voted = !!db.prepare('SELECT 1 FROM deck_votes WHERE user_id = ? AND deck_id = ?').get(viewerId, id);
   return d;
 }
