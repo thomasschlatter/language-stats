@@ -19,6 +19,7 @@ export async function renderDecks() {
       el('span', { class: 'muted' }, 'Your decks — studying them turns those words greener in “Studied” colour mode.'),
       el('div', { class: 'row' }, [
         // Word game button removed for now (TODO: put it back — openWordGame still exists).
+        el('a', { class: 'btn small secondary', href: '#/decks/browse' }, '🔍 Browse shared'),
         el('button', { class: 'btn small secondary', onclick: () => openGenerate(() => renderDecks()) }, '✨ Generate (AI)'),
         el('button', { class: 'btn small', onclick: () => openImport(() => renderDecks()) }, '+ Import deck'),
       ]),
@@ -66,12 +67,34 @@ export async function renderDecks() {
             d.total > 0
               ? el('a', { class: 'btn small secondary', href: `/api/flashcards/decks/${d.id}/export?format=csv`, download: '', title: 'Download as CSV' }, 'CSV')
               : null,
+            d.is_official ? null : shareBtn(d),
             el('button', { class: 'btn small secondary', onclick: () => removeDeck(d) }, 'Delete'),
           ]),
         ]),
       ])
     );
   }
+
+  // Toggle whether a deck is published to the community browse list.
+  function shareBtn(d) {
+    const label = () => (d.is_public ? `✓ Shared · ▲${d.votes || 0}` : 'Share');
+    const btn = el('button', {
+      class: `btn small secondary${d.is_public ? ' active' : ''}`,
+      title: d.is_public ? 'Published to the community — click to unshare' : 'Publish to the community browse list',
+    }, label());
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      try {
+        await api.publishDeck(d.id, !d.is_public);
+        d.is_public = d.is_public ? 0 : 1;
+        btn.textContent = label();
+        btn.classList.toggle('active', !!d.is_public);
+      } catch (ex) { err_alert(ex); } finally { btn.disabled = false; }
+    });
+    return btn;
+  }
+
+  function err_alert(ex) { alert(ex.message); }
 
   function removeDeck(d) {
     const close = openModal(el('div', {}, [

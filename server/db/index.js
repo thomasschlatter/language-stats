@@ -54,4 +54,29 @@ if (!ulCols.includes('level')) {
 // UNIQUE index tolerates many NULLs but keeps LINE ids one-per-account.
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_line_user_id ON users(line_user_id)');
 
+// --- shared/official decks: browse + upvote (like tips/articles) ---
+const deckCols = db.prepare('PRAGMA table_info(decks)').all().map((c) => c.name);
+if (!deckCols.includes('is_official')) {
+  db.exec('ALTER TABLE decks ADD COLUMN is_official INTEGER NOT NULL DEFAULT 0');
+}
+if (!deckCols.includes('is_public')) {
+  db.exec('ALTER TABLE decks ADD COLUMN is_public INTEGER NOT NULL DEFAULT 0');
+}
+if (!deckCols.includes('votes')) {
+  db.exec('ALTER TABLE decks ADD COLUMN votes INTEGER NOT NULL DEFAULT 0');
+}
+if (!deckCols.includes('level')) {
+  db.exec('ALTER TABLE decks ADD COLUMN level TEXT'); // CEFR a1..c2 for leveled decks
+}
+if (!deckCols.includes('copied_from')) {
+  db.exec('ALTER TABLE decks ADD COLUMN copied_from INTEGER'); // source deck when copied to study
+}
+db.exec(`CREATE TABLE IF NOT EXISTS deck_votes (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  deck_id INTEGER NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, deck_id)
+)`);
+db.exec('CREATE INDEX IF NOT EXISTS idx_decks_public ON decks(is_public, is_official)');
+
 export default db;

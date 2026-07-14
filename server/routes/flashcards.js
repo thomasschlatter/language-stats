@@ -4,6 +4,7 @@ import { getLanguageByCode } from '../models/languages.js';
 import {
   createDeck, getDeck, listDecks, deleteDeck,
   addCards, dueCards, reviewCard, familiarityMap, listCards, deckHasCard, quizCards,
+  listPublicDecks, getPublicDeck, voteDeck, setDeckPublic, copyDeckForUser,
 } from '../models/flashcards.js';
 import { topWords, totalCount } from '../models/frequency.js';
 import { unpredictableGenderNouns } from '../models/analysis.js';
@@ -12,6 +13,50 @@ import { parseApkg } from '../lib/anki.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+
+// --- shared decks: browse / upvote / copy / publish (like tips) ---
+
+// GET /api/flashcards/browse?lang=de-DE&level=a1&q=&offset=0
+router.get('/browse', (req, res) => {
+  const lang = req.query.lang ? getLanguageByCode(req.query.lang) : null;
+  const decks = listPublicDecks({
+    viewerId: req.user?.id || null,
+    languageId: lang?.id || null,
+    level: req.query.level ? String(req.query.level) : null,
+    q: req.query.q ? String(req.query.q) : null,
+    limit: 30,
+    offset: Math.max(0, Number(req.query.offset) || 0),
+  });
+  res.json({ decks, hasMore: decks.length === 30 });
+});
+
+// GET /api/flashcards/public/:id — a shared deck with a small preview
+router.get('/public/:id', (req, res) => {
+  const deck = getPublicDeck(Number(req.params.id), req.user?.id || null);
+  if (!deck) return res.status(404).json({ error: 'deck not found' });
+  res.json({ deck });
+});
+
+// POST /api/flashcards/:id/vote — toggle an upvote
+router.post('/:id/vote', requireAuth, (req, res) => {
+  const deck = getPublicDeck(Number(req.params.id));
+  if (!deck) return res.status(404).json({ error: 'deck not found' });
+  res.json(voteDeck(req.user.id, Number(req.params.id)));
+});
+
+// POST /api/flashcards/:id/copy — copy a shared deck into my study decks
+router.post('/:id/copy', requireAuth, (req, res) => {
+  const newId = copyDeckForUser(req.user.id, Number(req.params.id));
+  if (!newId) return res.status(404).json({ error: 'deck not found' });
+  res.json({ ok: true, deckId: newId });
+});
+
+// POST /api/flashcards/:id/publish { public: true|false } — share my own deck
+router.post('/:id/publish', requireAuth, (req, res) => {
+  const ok = setDeckPublic(req.user.id, Number(req.params.id), !!req.body?.public);
+  if (!ok) return res.status(404).json({ error: 'deck not found (or not yours)' });
+  res.json({ ok: true, public: !!req.body?.public });
+});
 
 // Parse pasted CSV / TSV (also Anki's plain-text export). front = col 0,
 // back = col 1. Auto-detects tab vs comma; strips a wrapping quote pair.

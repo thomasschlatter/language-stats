@@ -25,6 +25,7 @@ import { renderSearch } from './views/search.js';
 import { renderWorld } from './views/world.js';
 import { renderGames } from './views/games.js';
 import { renderDecks } from './views/decks.js';
+import { renderBrowseDecks } from './views/browseDecks.js';
 import { renderStudy } from './views/study.js';
 
 const routes = [
@@ -48,6 +49,7 @@ const routes = [
     else navigate('#/');
   } },
   { pattern: /^#\/decks$/, handler: () => renderDecks(), auth: true },
+  { pattern: /^#\/decks\/browse$/, handler: () => renderBrowseDecks() },
   { pattern: /^#\/study$/, handler: () => renderStudy(), auth: true }, // all decks
   { pattern: /^#\/study\/(\d+)$/, handler: (m) => renderStudy(Number(m[1])), auth: true },
   { pattern: /^#\/messages$/, handler: () => renderMessages(), auth: true },

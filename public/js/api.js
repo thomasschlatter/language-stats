@@ -131,6 +131,15 @@ export const api = {
   importApkg: (b) => request('POST', '/flashcards/import-apkg', b),
   generateDeck: (b) => request('POST', '/flashcards/generate', b),
   genderDeck: (b) => request('POST', '/flashcards/gender-deck', b),
+  // Shared decks (official + user-published, upvotable)
+  browseDecks: (params = {}) => {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v || v === 0)).toString();
+    return request('GET', `/flashcards/browse${qs ? `?${qs}` : ''}`);
+  },
+  publicDeck: (id) => request('GET', `/flashcards/public/${id}`),
+  voteDeck: (id) => request('POST', `/flashcards/${id}/vote`),
+  copyDeck: (id) => request('POST', `/flashcards/${id}/copy`),
+  publishDeck: (id, isPublic) => request('POST', `/flashcards/${id}/publish`, { public: isPublic }),
   study: (deckId) => request('GET', `/flashcards/study${deckId ? `?deck=${deckId}` : ''}`),
   review: (b) => request('POST', '/flashcards/review', b),
   familiarity: (lang) => request('GET', `/flashcards/familiarity?lang=${encodeURIComponent(lang)}`),
