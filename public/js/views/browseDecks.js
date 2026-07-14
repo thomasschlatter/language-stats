@@ -79,11 +79,17 @@ function voteBtn(d) {
 }
 
 async function addToMine(d, btn) {
+  // Once added, the same button becomes a shortcut to My decks (the click
+  // handler is attached once via el(), so we branch on the added flag here
+  // rather than swapping handlers — which would double-fire and re-copy).
+  if (btn.dataset.added) { navigate('#/decks'); return; }
   btn.disabled = true;
   btn.textContent = 'Adding…';
   try {
     await api.copyDeck(d.id);
-    btn.textContent = '✓ Added to My decks';
+    btn.dataset.added = '1';
+    btn.textContent = '✓ Added — go to My decks';
+    btn.disabled = false;
   } catch (ex) {
     btn.textContent = '+ Add to my decks';
     btn.disabled = false;
