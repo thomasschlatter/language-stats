@@ -34,9 +34,7 @@ export async function renderArticles(langCode) {
   view.append(
     el('div', { class: 'section-head' }, [
       langControl,
-      store.user
-        ? el('button', { class: 'btn small', onclick: () => openTipEditor(language, () => renderArticles(langCode)) }, '+ Add')
-        : signInPrompt('to add cards & tips'),
+      store.user ? null : signInPrompt('to add cards & tips'),
     ])
   );
   const note = el('p', { class: 'muted', style: 'margin-top:-0.5rem' });
@@ -86,8 +84,17 @@ export async function renderArticles(langCode) {
     : mode === 'all'
       ? `No cards in your native language or English yet — showing all.`
       : '';
-  if (!entries.length) {
-    grid.append(el('p', { class: 'muted' }, 'Nothing here yet. Add the first card or tip!'));
+  // The "add" tile is the first card in the grid, same size as the others.
+  if (store.user) {
+    grid.append(
+      el('button', { class: 'card add-card', onclick: () => openTipEditor(language, () => renderArticles(langCode)) }, [
+        el('span', { class: 'add-card-plus' }, '+'),
+        el('span', {}, 'Add a card or tip'),
+      ])
+    );
+  }
+  if (!entries.length && !store.user) {
+    grid.append(el('p', { class: 'muted' }, 'Nothing here yet. Sign in to add the first card or tip!'));
   }
   for (const e of entries) {
     grid.append(

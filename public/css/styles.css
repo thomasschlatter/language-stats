@@ -424,6 +424,17 @@ body.in-msg .view { overflow-y: auto; }
 }
 .article-card:hover { border-color: var(--accent); text-decoration: none; transform: translateY(-2px); }
 .article-card h3 { margin: 0.5rem 0 0.35rem; }
+
+/* "Add a card/tip" tile — first in the grid, same height as the cards. */
+.add-card {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.4rem; min-height: 120px;
+  border: 2px dashed var(--border); background: transparent;
+  color: var(--muted); font: inherit; font-size: 0.95rem; cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.add-card:hover { border-color: var(--accent); color: var(--accent); background: var(--surface); }
+.add-card-plus { font-size: 2rem; line-height: 1; font-weight: 300; }
 .card-summary { font-size: 0.9rem; margin: 0; }
 .badge {
   display: inline-block;
