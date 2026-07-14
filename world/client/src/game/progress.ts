@@ -2,7 +2,7 @@
 // specific game. Progress persists in localStorage. The menu shows the current
 // task; finishing a game that satisfies it advances you to the next level.
 
-export type GameId = 'shooter' | 'memory'
+export type GameId = 'shooter' | 'memory' | 'wordfall'
 
 export interface GameResult {
   game: GameId
@@ -26,7 +26,9 @@ export const LEVELS: Level[] = [
   { id: 3, title: 'On a roll', game: 'shooter', goal: 'Reach a 5-answer streak', check: (r) => r.game === 'shooter' && r.bestStreak >= 5 },
   { id: 4, title: 'Sharpshooter', game: 'shooter', goal: 'Score 15 in Shooter', check: (r) => r.game === 'shooter' && r.score >= 15 },
   { id: 5, title: 'Memory master', game: 'memory', goal: 'Match a full 8-pair board', check: (r) => r.game === 'memory' && (r.pairs || 0) >= 8 },
-  { id: 6, title: 'Word warrior', game: 'shooter', goal: 'Score 25 in Shooter', check: (r) => r.game === 'shooter' && r.score >= 25 },
+  { id: 6, title: 'Quick hands', game: 'wordfall', goal: 'Catch 6 in Word Fall', check: (r) => r.game === 'wordfall' && r.score >= 6 },
+  { id: 7, title: 'Word warrior', game: 'shooter', goal: 'Score 25 in Shooter', check: (r) => r.game === 'shooter' && r.score >= 25 },
+  { id: 8, title: 'Falling star', game: 'wordfall', goal: 'Catch 12 in Word Fall', check: (r) => r.game === 'wordfall' && r.score >= 12 },
 ]
 
 const KEY = 'game-progress'

@@ -22,10 +22,11 @@ export default class GameMenu extends Phaser.Scene {
     const games: { scene: string; emoji: string; name: string; desc: string }[] = [
       { scene: 'practice', emoji: '🎯', name: 'Shooter', desc: 'Shoot the correct word' },
       { scene: 'memory', emoji: '🧠', name: 'Memory Match', desc: 'Match words to their meanings' },
+      { scene: 'wordfall', emoji: '🌧️', name: 'Word Fall', desc: 'Catch the correct meaning as it falls' },
     ]
     const cardW = Math.min(460, W * 0.86)
     games.forEach((g, i) => {
-      const y = H * 0.44 + i * 100
+      const y = H * 0.40 + i * 92
       const card = this.add.rectangle(W / 2, y, cardW, 82, 0x232a49, 0.96)
         .setStrokeStyle(2, 0x3a4470).setInteractive({ useHandCursor: true })
       const left = W / 2 - cardW / 2

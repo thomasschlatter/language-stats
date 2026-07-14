@@ -54,7 +54,7 @@ const Popup = styled.div`
   .choices button:hover { background: #35507e; }
 `;
 
-type Q = { front: string; answer: string; choices: string[] };
+type Q = { id?: number; front: string; answer: string; choices: string[] };
 
 export default function TeamTask() {
   const score = useAppSelector((s) => s.room.teamScore);
@@ -93,7 +93,17 @@ export default function TeamTask() {
 
   function answer(choice: string) {
     if (!q) return;
-    if (choice === q.answer) {
+    const correct = choice === q.answer;
+    // Also advance the player's real SRS schedule, like the solo games.
+    if (q.id != null) {
+      fetch("/api/flashcards/review", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cardId: q.id, rating: correct ? 3 : 1 }),
+      }).catch(() => { /* still counts toward the team even if sync fails */ });
+    }
+    if (correct) {
       (phaserGame.scene.keys.game as any)?.network?.sendScorePoint();
       setFeedback("✅  +1 for the team!");
     } else {

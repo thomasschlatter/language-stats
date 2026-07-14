@@ -8,6 +8,7 @@ import Island from './scenes/Island'
 import Practice from './scenes/Practice'
 import GameMenu from './scenes/GameMenu'
 import Memory from './scenes/Memory'
+import WordFall from './scenes/WordFall'
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -27,7 +28,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   autoFocus: true,
-  scene: [Bootstrap, Background, Game, LobbyScene, Lobby, Island, Practice, GameMenu, Memory],
+  scene: [Bootstrap, Background, Game, LobbyScene, Lobby, Island, Practice, GameMenu, Memory, WordFall],
 }
 
 const phaserGame = new Phaser.Game(config)
