@@ -49,30 +49,39 @@ export async function renderDecks() {
     );
   }
 
+  // Group decks by language so a learner's decks sit together.
+  const groups = new Map();
   for (const d of decks) {
-    list.append(
-      el('div', { class: 'card deck-card' }, [
-        el('div', { class: 'card-top' }, [
-          el('div', {}, [
-            el('strong', {}, d.name),
-            el('div', { class: 'muted', style: 'font-size:0.82rem' }, `${d.lang_name} · ${d.total} cards · ${d.due} due`),
-          ]),
-          el('div', { class: 'row' }, [
-            d.due > 0
-              ? el('a', { class: 'btn small', href: `#/study/${d.id}` }, `Study (${d.due})`)
-              : el('span', { class: 'muted', style: 'font-size:0.82rem' }, 'All caught up'),
-            d.total > 0
-              ? el('a', { class: 'btn small secondary', href: `/api/flashcards/decks/${d.id}/export?format=anki`, download: '', title: 'Download as Anki text (.txt)' }, 'Anki')
-              : null,
-            d.total > 0
-              ? el('a', { class: 'btn small secondary', href: `/api/flashcards/decks/${d.id}/export?format=csv`, download: '', title: 'Download as CSV' }, 'CSV')
-              : null,
-            d.is_official ? null : shareBtn(d),
-            el('button', { class: 'btn small secondary', onclick: () => removeDeck(d) }, 'Delete'),
-          ]),
+    if (!groups.has(d.lang_name)) groups.set(d.lang_name, []);
+    groups.get(d.lang_name).push(d);
+  }
+  for (const langName of [...groups.keys()].sort((a, b) => a.localeCompare(b))) {
+    list.append(el('h3', { class: 'deck-lang-head' }, langName));
+    for (const d of groups.get(langName)) list.append(deckCard(d));
+  }
+
+  function deckCard(d) {
+    return el('div', { class: 'card deck-card' }, [
+      el('div', { class: 'card-top' }, [
+        el('div', {}, [
+          el('strong', {}, d.name),
+          el('div', { class: 'muted', style: 'font-size:0.82rem' }, `${d.total} cards · ${d.due} due`),
         ]),
-      ])
-    );
+        el('div', { class: 'row' }, [
+          d.due > 0
+            ? el('a', { class: 'btn small', href: `#/study/${d.id}` }, `Study (${d.due})`)
+            : el('span', { class: 'muted', style: 'font-size:0.82rem' }, 'All caught up'),
+          d.total > 0
+            ? el('a', { class: 'btn small secondary', href: `/api/flashcards/decks/${d.id}/export?format=anki`, download: '', title: 'Download as Anki text (.txt)' }, 'Anki')
+            : null,
+          d.total > 0
+            ? el('a', { class: 'btn small secondary', href: `/api/flashcards/decks/${d.id}/export?format=csv`, download: '', title: 'Download as CSV' }, 'CSV')
+            : null,
+          d.is_official ? null : shareBtn(d),
+          el('button', { class: 'btn small secondary', onclick: () => removeDeck(d) }, 'Delete'),
+        ]),
+      ]),
+    ]);
   }
 
   // Toggle whether a deck is published to the community browse list.
