@@ -73,11 +73,17 @@ export class AmbientLife {
       { tex: 'car_left', x: 420, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300 },
       { tex: 'car_left', x: 920, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300 },
     ]
+    let made = 0
     for (const sp of specs) {
       if (!this.scene.textures.exists(sp.tex)) continue
       const s = this.scene.add.image(sp.x, sp.y, sp.tex).setScale(SCALE).setDepth(sp.y)
       this.cars.push({ s, vx: sp.vx, vy: sp.vy, axis: sp.axis, min: sp.min, max: sp.max })
+      made++
     }
+    // eslint-disable-next-line no-console
+    console.log(
+      `[traffic] made ${made}/${specs.length} cars; car_up tex=${this.scene.textures.exists('car_up')}`
+    )
   }
 
   update(dt: number) {
