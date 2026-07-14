@@ -60,7 +60,8 @@ a:hover { text-decoration: underline; }
   top: 0;
   z-index: 10;
 }
-.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); display: flex; align-items: center; }
+.brand img { height: 30px; width: 30px; border-radius: 7px; display: block; }
 .brand:hover { text-decoration: none; color: var(--accent); }
 .topnav { display: flex; gap: 1rem; margin-left: 1.5rem; flex: 1; }
 /* Sections that require an account are hidden until signed in (body.authed is
@@ -190,7 +191,7 @@ body.in-community .lang-bar { display: none; }
 .sidebar-title .caret { transition: transform 0.12s; }
 .sidebar-title.collapsed .caret { transform: rotate(-90deg); }
 /* Horizontal padding keeps the first/last pill clear of the viewport fade mask. */
-.language-list { display: flex; flex-direction: row; align-items: center; gap: 0.4rem; padding: 2px 14px; }
+.language-list { display: flex; flex-direction: row; align-items: center; gap: 0.1rem; padding: 2px 14px; }
 .language-list a {
   display: block;
   padding: 0.3rem 0.7rem;
@@ -782,10 +783,12 @@ label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.85rem; color: va
   .search-form { order: 2; flex: 1 1 120px; margin: 0; }
   .auth-area { order: 3; margin-left: auto; }
   .topnav {
-    order: 4; flex-basis: 100%; margin-left: 0; gap: 1.1rem;
+    order: 4; flex-basis: 100%; margin-left: 0; gap: 0.9rem;
     overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
     padding-bottom: 0.15rem;
   }
+  /* Bigger, easier-to-tap nav links on phones. */
+  .topnav a { font-size: 1.02rem; padding: 0.25rem 0.15rem; }
   .native-picker .who { display: none; }
 }
 /* Wide content (tables, word clouds) scrolls inside itself, never the page. */

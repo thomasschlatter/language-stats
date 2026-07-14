@@ -46,16 +46,16 @@
     <script src="/js/intro.js"></script>
 
     <header class="topbar">
-      <a class="brand" href="#/">Group<b>ifier</b></a>
+      <a class="brand" href="#/" aria-label="Groupifier home"><img src="/apple-touch-icon.png" alt="Groupifier" /></a>
       <nav class="topnav">
         <a href="#/community">Community</a>
         <a href="#/tips">Tips</a>
         <a class="auth-only" href="#/chat">Chat</a>
         <a class="auth-only" href="#/world">World</a>
-        <!-- Games nav item hidden for now (focusing on World); route still works -->
+        <!-- Games hidden for now; route still works -->
         <a class="auth-only" href="#/decks">Flashcards</a>
         <a class="auth-only" href="#/messages">Messages</a>
-        <a class="auth-only" href="#/settings">Settings</a>
+        <!-- Settings moved into your profile (tap your avatar). -->
       </nav>
       <form id="search-form" class="search-form">
         <input id="search-input" type="search" placeholder="Search words…" autocomplete="off" />

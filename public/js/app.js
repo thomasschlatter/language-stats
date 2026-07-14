@@ -94,6 +94,14 @@ function setupLangCarousel() {
   update();
 }
 
+// Country flag emoji from a locale code's region (e.g. 'de-DE' -> 🇩🇪).
+function flagEmoji(code) {
+  const cc = (String(code).split('-')[1] || '').toUpperCase();
+  if (cc.length !== 2 || !/^[A-Z]{2}$/.test(cc)) return '';
+  const A = 0x1f1e6;
+  return String.fromCodePoint(A + cc.charCodeAt(0) - 65, A + cc.charCodeAt(1) - 65);
+}
+
 function renderSidebar() {
   const nav = clear(document.getElementById('language-list'));
   const currentCode = decodeURIComponent((window.location.hash.match(/#\/lang\/([^/]+)/) || [])[1] || '');
@@ -106,8 +114,10 @@ function renderSidebar() {
 
   for (const lang of learning) {
     // No inline remove here — manage your languages in Settings.
+    const flag = flagEmoji(lang.code);
     nav.append(el('div', { class: 'lang-row' }, [
-      el('a', { href: `#/lang/${lang.code}`, class: lang.code === currentCode ? 'active' : '' }, lang.name),
+      el('a', { href: `#/lang/${lang.code}`, class: lang.code === currentCode ? 'active' : '' },
+        flag ? `${flag} ${lang.name}` : lang.name),
     ]));
   }
   if (!learning.length) {
