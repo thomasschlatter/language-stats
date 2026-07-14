@@ -37,14 +37,19 @@ export function deleteDeck(id, userId) {
 // Deck sources that come from official exam boards / institutes (Goethe, DELF…),
 // as opposed to Groupifier's own curated "official" decks (freq+freedict).
 export const EXAM_SOURCES = ['goethe', 'cefrlex', 'dele', 'delf', 'dalf', 'hsk', 'jlpt', 'topik', 'telc'];
+// Course-book vocabulary (extracted from officially-free publisher files).
+export const TEXTBOOK_SOURCES = ['menschen', 'schritte', 'netzwerk', 'aspekte'];
+// Everything that is NOT plain Groupifier "official" (freq+freedict).
+const NON_PLAIN = [...EXAM_SOURCES, ...TEXTBOOK_SOURCES];
 
 export function listPublicDecks({ viewerId = null, languageId = null, q = null, level = null, kind = null, limit = 30, offset = 0 }) {
   const where = ['(d.is_official = 1 OR d.is_public = 1)'];
   const params = [];
-  const examList = EXAM_SOURCES.map(() => '?').join(',');
+  const ph = (arr) => arr.map(() => '?').join(',');
   if (kind === 'community') where.push('d.is_official = 0');
-  else if (kind === 'exam') { where.push(`(d.is_official = 1 AND d.source IN (${examList}))`); params.push(...EXAM_SOURCES); }
-  else if (kind === 'official') { where.push(`(d.is_official = 1 AND (d.source IS NULL OR d.source NOT IN (${examList})))`); params.push(...EXAM_SOURCES); }
+  else if (kind === 'exam') { where.push(`(d.is_official = 1 AND d.source IN (${ph(EXAM_SOURCES)}))`); params.push(...EXAM_SOURCES); }
+  else if (kind === 'textbook') { where.push(`(d.is_official = 1 AND d.source IN (${ph(TEXTBOOK_SOURCES)}))`); params.push(...TEXTBOOK_SOURCES); }
+  else if (kind === 'official') { where.push(`(d.is_official = 1 AND (d.source IS NULL OR d.source NOT IN (${ph(NON_PLAIN)})))`); params.push(...NON_PLAIN); }
   if (languageId) { where.push('d.language_id = ?'); params.push(languageId); }
   if (level) { where.push('d.level = ?'); params.push(level); }
   if (q) { where.push('d.name LIKE ?'); params.push(`%${q}%`); }

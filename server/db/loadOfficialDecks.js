@@ -29,7 +29,8 @@ function ensureSystemUser() {
 export function ensureOfficialDecks() {
   let files;
   try {
-    files = readdirSync(deckDir).filter((f) => /^[a-z]{2,3}\.json$/.test(f));
+    // {base}.json (frequency decks) or {base}-{tag}.json (e.g. de-menschen.json).
+    files = readdirSync(deckDir).filter((f) => /^[a-z]{2,3}(-[a-z0-9]+)?\.json$/.test(f));
   } catch {
     return;
   }
@@ -38,17 +39,18 @@ export function ensureOfficialDecks() {
   const pickLang = db.prepare(
     'SELECT id, code FROM languages WHERE lang = ? ORDER BY (code = ?) DESC, id LIMIT 1'
   );
-  const hasOfficial = db.prepare(
-    "SELECT 1 FROM decks WHERE language_id = ? AND is_official = 1 AND source = 'freq+freedict' LIMIT 1"
+  // Deck-level idempotency: skip a deck we already created (by language + name),
+  // so adding a new file to an already-loaded language still loads just the new decks.
+  const deckExists = db.prepare(
+    'SELECT 1 FROM decks WHERE language_id = ? AND is_official = 1 AND name = ? LIMIT 1'
   );
 
   let systemUserId = null;
-  let loadedLangs = 0;
   let loadedDecks = 0;
   for (const f of files) {
-    const base = f.replace('.json', '');
+    const base = f.replace('.json', '').split('-')[0];
     const lang = pickLang.get(base, `${base}-${base.toUpperCase()}`);
-    if (!lang || hasOfficial.get(lang.id)) continue;
+    if (!lang) continue;
     let decks;
     try {
       decks = JSON.parse(readFileSync(join(deckDir, f), 'utf8'));
@@ -57,23 +59,21 @@ export function ensureOfficialDecks() {
       continue;
     }
     if (!Array.isArray(decks) || !decks.length) continue;
-    if (systemUserId === null) systemUserId = ensureSystemUser();
-    try {
-      db.transaction(() => {
-        for (const d of decks) {
+    for (const d of decks) {
+      if (!d?.name || deckExists.get(lang.id, d.name)) continue;
+      if (systemUserId === null) systemUserId = ensureSystemUser();
+      try {
+        db.transaction(() => {
           const deckId = createOfficialDeck({
             systemUserId, languageId: lang.id, name: d.name, level: d.level || null, source: d.source || 'freq+freedict',
           });
           addCards({ deckId, userId: systemUserId, languageId: lang.id, rows: d.cards || [] });
-          loadedDecks += 1;
-        }
-      })();
-      loadedLangs += 1;
-    } catch (e) {
-      console.warn(`Official decks load failed for ${lang.code}:`, e.message);
+        })();
+        loadedDecks += 1;
+      } catch (e) {
+        console.warn(`Official deck load failed (${lang.code} / ${d.name}):`, e.message);
+      }
     }
   }
-  if (loadedDecks) {
-    console.log(`Official decks: loaded ${loadedDecks} deck(s) across ${loadedLangs} language(s).`);
-  }
+  if (loadedDecks) console.log(`Official decks: loaded ${loadedDecks} new deck(s).`);
 }

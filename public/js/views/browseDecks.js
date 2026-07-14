@@ -26,7 +26,7 @@ export async function renderBrowseDecks() {
 
   // Type filter: which kind of deck. Exam = official exam boards (Goethe, DELF…).
   const KINDS = [
-    ['', 'All'], ['official', 'Official'], ['exam', 'Exam boards'], ['community', 'Community'],
+    ['', 'All'], ['official', 'Official'], ['textbook', 'Textbook'], ['exam', 'Exam boards'], ['community', 'Community'],
   ];
   let kind = '';
   const seg = el('div', { class: 'seg' });
@@ -58,8 +58,9 @@ export async function renderBrowseDecks() {
       clear(grid);
       if (!decks.length) {
         const msg = kind === 'exam' ? 'No exam-board decks yet (Goethe, DELF, DELE… coming soon).'
-          : kind === 'community' ? 'No community decks yet. Share one from your decks!'
-            : 'No shared decks yet.';
+          : kind === 'textbook' ? 'No textbook decks for this filter yet.'
+            : kind === 'community' ? 'No community decks yet. Share one from your decks!'
+              : 'No shared decks yet.';
         grid.append(el('p', { class: 'muted' }, msg));
         return;
       }
