@@ -12,32 +12,38 @@ export async function renderCommunity() {
   view.append(el('h1', {}, 'Community'));
   view.append(el('p', { class: 'muted', style: 'margin-top:-0.5rem' }, 'Find people to practise with. Match on the language you’re learning.'));
 
-  // Language filters show the user's OWN languages first, in a separate group,
-  // so partners for what you're learning are one click away.
+  // Filters list only the user's OWN languages (+ an "All" catch-all), so finding
+  // partners for what you speak / are learning is one click away. The user's
+  // languages live in their profile, not store.user.
   const codeName = new Map(store.languages.map((l) => [l.code, l.name]));
-  const groupedLangOptions = (placeholder, priorityCodes) => {
-    const pri = (priorityCodes || []).filter((c) => codeName.has(c));
-    const priSet = new Set(pri);
-    const children = [el('option', { value: '' }, placeholder)];
-    if (pri.length) {
-      children.push(
-        el('optgroup', { label: 'Your languages' }, pri.map((c) => el('option', { value: c }, codeName.get(c)))),
-        el('optgroup', { label: 'Other languages' }, store.languages.filter((l) => !priSet.has(l.code)).map((l) => el('option', { value: l.code }, l.name)))
-      );
-    } else {
-      children.push(...store.languages.map((l) => el('option', { value: l.code }, l.name)));
-    }
-    return el('select', {}, children);
+  let myLearning = [];
+  let myNative = [];
+  if (store.user) {
+    try {
+      const { profile } = await api.myProfile();
+      myLearning = (profile.learning || []).map((l) => l.code || l);
+      myNative = (profile.native || []).map((l) => l.code || l);
+    } catch { /* no profile — just show All */ }
+  }
+  // Fallbacks from local state if the profile had none.
+  if (!myLearning.length) myLearning = Array.from(store.learning || []);
+  if (!myNative.length && store.nativeLang) myNative = [store.nativeLang];
+
+  const langSelect = (priorityCodes) => {
+    const pri = [...new Set((priorityCodes || []).filter((c) => codeName.has(c)))];
+    return el('select', {}, [
+      el('option', { value: '' }, 'All'),
+      ...pri.map((c) => el('option', { value: c }, codeName.get(c))),
+    ]);
   };
-  const myLearning = (store.user && store.user.learning && store.user.learning.length)
-    ? store.user.learning : Array.from(store.learning || []);
-  const myNative = (store.user && store.user.native) || [];
-  const speaks = groupedLangOptions('Speaks (any)', myNative);
-  const learning = groupedLangOptions('Learning (any)', myLearning);
+  const speaks = langSelect(myNative);
+  const learning = langSelect(myLearning);
   const q = el('input', { type: 'search', placeholder: 'search @username', style: 'max-width:200px' });
 
-  const controls = el('div', { class: 'row', style: 'margin:1rem 0; gap:0.5rem' }, [
-    speaks, learning, q,
+  const lbl = (text, node) =>
+    el('label', { class: 'muted', style: 'display:flex;align-items:center;gap:0.3rem;font-size:0.85rem' }, [text, node]);
+  const controls = el('div', { class: 'row', style: 'margin:1rem 0; gap:0.7rem; flex-wrap:wrap' }, [
+    lbl('Speaks', speaks), lbl('Learning', learning), q,
     el('button', { class: 'btn small', onclick: () => load() }, 'Search'),
     store.user ? el('button', { class: 'btn small secondary', onclick: () => matchMe() }, 'Find my partners') : null,
   ]);
