@@ -133,6 +133,21 @@ body:not(.authed) .auth-only { display: none !important; }
 body.in-world .lang-bar { display: none; }
 /* Community is about people, not a language you're reading — hide the lang bar. */
 body.in-community .lang-bar { display: none; }
+
+/* Fixed, non-scrolling pages (chat + messages): fill below the header and scroll
+   the content internally instead of the whole page. */
+body.in-chat, body.in-msg {
+  height: 100vh; height: 100dvh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+body.in-chat .layout, body.in-msg .layout { flex: 1 1 auto; min-height: 0; display: flex; }
+body.in-chat .view, body.in-msg .view { flex: 1 1 auto; min-height: 0; }
+/* Chat: message list fills, the input stays pinned at the bottom. */
+body.in-chat .view { display: flex; flex-direction: column; overflow: hidden; }
+body.in-chat .chat-list { flex: 1 1 auto; height: auto; min-height: 0; }
+body.in-chat .chat-form { flex: 0 0 auto; }
+/* Messages/DM list scrolls inside the view. */
+body.in-msg .view { overflow-y: auto; }
 /* Carousel viewport: scrolls horizontally, scrollbar hidden (arrows drive it). */
 .lang-viewport {
   flex: 1;

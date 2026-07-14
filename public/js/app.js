@@ -238,6 +238,9 @@ async function init() {
     });
     document.body.classList.toggle('in-world', h.startsWith('#/world'));
     document.body.classList.toggle('in-community', h.startsWith('#/community'));
+    // Fixed, non-page-scrolling layouts (content scrolls internally).
+    document.body.classList.toggle('in-chat', h.startsWith('#/chat'));
+    document.body.classList.toggle('in-msg', h.startsWith('#/messages') || h.startsWith('#/dm/'));
   };
   syncNav();
 

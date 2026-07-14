@@ -20,7 +20,7 @@ import { MessageType, setFocused, setShowChat } from "../stores/ChatStore";
 
 const Backdrop = styled.div`
   position: fixed;
-  bottom: 60px;
+  bottom: 0;
   left: 0;
   height: 400px;
   width: 500px;
