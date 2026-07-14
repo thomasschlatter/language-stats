@@ -246,6 +246,9 @@ body.in-world .lang-bar { display: none; }
   padding: 0.45rem 0.6rem; cursor: pointer; color: var(--text); font: inherit; font-size: 0.9rem;
 }
 .lang-picker-item:hover { border-color: var(--accent); color: var(--accent); }
+.magic-block { margin-bottom: 0.5rem; }
+.magic-block input { width: 100%; box-sizing: border-box; margin-bottom: 0.5rem; }
+.magic-block .btn { width: 100%; }
 .inapp-notice {
   margin-top: 0.9rem; padding: 0.7rem 0.8rem;
   background: var(--surface-2); border: 1px solid var(--border);

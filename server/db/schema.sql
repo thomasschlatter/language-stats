@@ -42,6 +42,16 @@ CREATE TABLE IF NOT EXISTS users (
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Passwordless "magic link" login tokens. We store only a hash of the token.
+CREATE TABLE IF NOT EXISTS login_tokens (
+  token_hash  TEXT PRIMARY KEY,
+  email       TEXT NOT NULL,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  expires_at  TEXT NOT NULL,
+  used        INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_login_tokens_email ON login_tokens(email);
+
 -- Which languages a user speaks natively vs is learning (drives partner match).
 CREATE TABLE IF NOT EXISTS user_languages (
   user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

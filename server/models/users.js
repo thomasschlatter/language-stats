@@ -40,6 +40,23 @@ export function createLineUser({ lineId, displayName, email }) {
   return getUserById(info.lastInsertRowid);
 }
 
+// Find an existing user by email, or create a passwordless one (magic-link
+// signup). The password is a throwaway random value; the username is derived
+// from the email and made unique.
+export function findOrCreateByEmail(email) {
+  const existing = getUserByEmail(email);
+  if (existing) return { user: getUserById(existing.id), isNew: false };
+  const password_hash = bcrypt.hashSync(crypto.randomBytes(24).toString('hex'), 10);
+  let base = String(email.split('@')[0] || 'user').normalize('NFKD').replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 24);
+  if (base.length < 2) base = 'user';
+  let username = base;
+  while (getUserByUsername(username)) username = `${base}_${crypto.randomBytes(2).toString('hex')}`.slice(0, 30);
+  const info = db
+    .prepare('INSERT INTO users (email, username, password_hash) VALUES (?, ?, ?)')
+    .run(email, username, password_hash);
+  return { user: getUserById(info.lastInsertRowid), isNew: true };
+}
+
 export function getUserById(id) {
   return db
     .prepare('SELECT id, email, username, bio, interests, origin, location, avatar, avatar_image, created_at FROM users WHERE id = ?')

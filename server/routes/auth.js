@@ -13,11 +13,85 @@ import {
   changePassword,
   deleteUser,
   publicUser,
+  findOrCreateByEmail,
 } from '../models/users.js';
 import { issueToken, clearToken, requireAuth } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rateLimit.js';
+import { sendMail, mailConfigured } from '../lib/mail.js';
+import db from '../db/index.js';
 
 const router = Router();
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// ---- Passwordless "magic link" login --------------------------------------
+// GET /api/auth/methods — lets the client show only the login options that work.
+router.get('/methods', (_req, res) => {
+  res.json({ magicLink: mailConfigured() || !isProd(), line: !!process.env.LINE_CHANNEL_ID });
+});
+
+function appOrigin(req) {
+  return process.env.APP_ORIGIN || `${req.protocol}://${req.get('host')}`;
+}
+
+// POST /api/auth/magic/request { email } — email a one-time login link.
+router.post('/magic/request', rateLimit({ max: 6 }), async (req, res) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  if (!email || email.length > 200 || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'a valid email is required' });
+  }
+  if (!mailConfigured() && isProd()) return res.status(503).json({ error: 'email login is not set up yet' });
+
+  // Throttle per-email: at most one live link every 60s.
+  const recent = db.prepare(
+    "SELECT 1 FROM login_tokens WHERE email = ? AND used = 0 AND created_at > datetime('now', '-60 seconds') LIMIT 1"
+  ).get(email);
+  if (recent) return res.json({ ok: true }); // pretend success (don't leak / don't spam)
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  db.prepare(
+    "INSERT INTO login_tokens (token_hash, email, expires_at) VALUES (?, ?, datetime('now', '+20 minutes'))"
+  ).run(tokenHash, email);
+
+  const link = `${appOrigin(req)}/api/auth/magic/verify?token=${token}`;
+  const text = `Sign in to Groupifier by opening this link (valid for 20 minutes):\n\n${link}\n\nIf you didn't request this, you can ignore this email.`;
+  const html = `<p>Sign in to <b>Groupifier</b> by clicking the button below (valid for 20 minutes):</p>`
+    + `<p><a href="${link}" style="display:inline-block;padding:12px 20px;background:#33ac96;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Sign in to Groupifier</a></p>`
+    + `<p style="color:#888;font-size:13px">Or paste this link: <br>${link}</p>`
+    + `<p style="color:#888;font-size:13px">If you didn't request this, you can ignore this email.</p>`;
+  let result;
+  try {
+    result = await sendMail({ to: email, subject: 'Your Groupifier sign-in link', text, html });
+  } catch (e) {
+    console.error('magic-link email failed:', e?.message);
+    return res.status(502).json({ error: 'could not send the email — please try again' });
+  }
+  const out = { ok: true };
+  // In dev/test (no SMTP), surface the link directly so the flow is testable.
+  if (result?.dev && !isProd()) out.devLink = link;
+  res.json(out);
+});
+
+// GET /api/auth/magic/verify?token=... — consume the link and sign the user in.
+router.get('/magic/verify', (req, res) => {
+  const token = String(req.query.token || '');
+  const fail = (msg) => res.status(400).send(msg);
+  if (!token) return fail('Invalid or missing login link.');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const row = db.prepare('SELECT * FROM login_tokens WHERE token_hash = ?').get(tokenHash);
+  if (!row || row.used) return fail('This login link has already been used. Please request a new one.');
+  if (new Date(row.expires_at + 'Z').getTime() < Date.now()) {
+    return fail('This login link has expired. Please request a new one.');
+  }
+  db.prepare('UPDATE login_tokens SET used = 1 WHERE token_hash = ?').run(tokenHash);
+  // One-time cleanup of old tokens.
+  db.prepare("DELETE FROM login_tokens WHERE expires_at < datetime('now', '-1 day')").run();
+
+  const { user, isNew } = findOrCreateByEmail(row.email);
+  issueToken(res, user);
+  res.redirect(isNew ? '/?welcome=1#/' : '/#/');
+});
 
 // ---- LINE Login (OAuth 2.0 / OpenID Connect v2.1, web) --------------------
 const LINE_AUTH_URL = 'https://access.line.me/oauth2/v2.1/authorize';

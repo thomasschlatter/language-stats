@@ -115,6 +115,26 @@ test('quiz needs 4+ cards and returns recognition + recall choices', async () =>
   }
 });
 
+test('magic-link login creates an account and signs in (one-time)', async () => {
+  const req = await api('/api/auth/magic/request', { method: 'POST', body: { email: 'magic@test.io' } });
+  assert.equal(req.status, 200);
+  assert.ok(req.data.devLink, 'dev link returned outside production');
+  const token = new URL(req.data.devLink).searchParams.get('token');
+
+  // Consume the link (manual redirect so we can read the auth cookie).
+  const vr = await fetch(`${base}/api/auth/magic/verify?token=${token}`, { redirect: 'manual' });
+  assert.ok(vr.status === 302 || vr.status === 200, 'verify redirects on success');
+  const cookie = vr.headers.getSetCookie?.()[0]?.split(';')[0];
+  assert.ok(cookie, 'auth cookie set');
+
+  const me = await api('/api/auth/me', { cookie });
+  assert.equal(me.data.user.email, 'magic@test.io');
+
+  // The link is single-use.
+  const reuse = await fetch(`${base}/api/auth/magic/verify?token=${token}`, { redirect: 'manual' });
+  assert.equal(reuse.status, 400);
+});
+
 test('auth required for protected routes', async () => {
   const protectedPaths = [
     '/api/flashcards/decks',

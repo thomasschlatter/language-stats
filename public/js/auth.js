@@ -201,8 +201,43 @@ function openAuthModal(mode) {
       ])
     : null;
 
+  // Passwordless "magic link": enter an email, get a one-time sign-in link.
+  // Hidden until we confirm the server has email configured (/auth/methods).
+  const magicEmail = el('input', { type: 'email', placeholder: 'you@email.com', autocomplete: 'email' });
+  const magicMsg = el('div', { class: 'muted', style: 'font-size:0.82rem; margin-top:0.4rem' });
+  const magicBtn = el('button', {
+    class: 'btn', type: 'button',
+    onclick: async () => {
+      const email = magicEmail.value.trim();
+      if (!email) { magicMsg.textContent = 'Enter your email first.'; return; }
+      magicBtn.disabled = true; magicMsg.textContent = 'Sending…';
+      try {
+        const r = await fetch('/api/auth/magic/request', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin', body: JSON.stringify({ email }),
+        });
+        const data = await r.json().catch(() => ({}));
+        magicMsg.textContent = r.ok ? '✓ Check your email for a sign-in link.' : (data.error || 'Could not send the link.');
+      } catch { magicMsg.textContent = 'Network error — please try again.'; }
+      finally { magicBtn.disabled = false; }
+    },
+  }, '✉️ Email me a login link');
+  const magicBlock = el('div', { class: 'magic-block', style: 'display:none' }, [
+    el('label', {}, 'Sign in with just your email'),
+    el('div', { class: 'muted', style: 'font-size:0.8rem; margin-bottom:0.4rem' }, 'No password needed — we’ll email you a link.'),
+    magicEmail, magicBtn, magicMsg,
+    el('div', { class: 'auth-divider' }, 'or use a password'),
+  ]);
+  // Reveal once we know email login is available.
+  fetch('/api/auth/methods', { credentials: 'same-origin' })
+    .then((r) => (r.ok ? r.json() : {}))
+    .then((m) => { if (m.magicLink) magicBlock.style.display = ''; })
+    .catch(() => {});
+
   const close = openModal(el('div', {}, [
-    title, form,
+    title,
+    magicBlock,
+    form,
     el('div', { class: 'auth-divider' }, 'or'),
     lineBtn,
     notice,
