@@ -23,10 +23,30 @@ export async function renderBrowseDecks() {
     ...LEVELS.map((lv) => el('option', { value: lv }, lv.toUpperCase())),
   ]);
   const q = el('input', { type: 'search', placeholder: 'search decks', style: 'max-width:180px' });
-  view.append(el('div', { class: 'row', style: 'margin:1rem 0; gap:0.6rem; flex-wrap:wrap' }, [
+
+  // Type filter: which kind of deck. Exam = official exam boards (Goethe, DELF…).
+  const KINDS = [
+    ['', 'All'], ['official', 'Official'], ['exam', 'Exam boards'], ['community', 'Community'],
+  ];
+  let kind = '';
+  const seg = el('div', { class: 'seg' });
+  const segBtns = KINDS.map(([val, label]) => {
+    const b = el('button', { class: `seg-btn${val === kind ? ' active' : ''}`, type: 'button' }, label);
+    b.addEventListener('click', () => {
+      if (kind === val) return;
+      kind = val;
+      segBtns.forEach((x, i) => x.classList.toggle('active', KINDS[i][0] === kind));
+      load();
+    });
+    return b;
+  });
+  seg.append(...segBtns);
+
+  view.append(el('div', { class: 'row', style: 'margin:1rem 0 0.6rem; gap:0.6rem; flex-wrap:wrap' }, [
     el('a', { class: 'btn small secondary', href: '#/decks' }, '← My decks'),
     langSel, levelSel, q,
   ]));
+  view.append(el('div', { class: 'row', style: 'margin:0 0 1rem' }, [seg]));
 
   const grid = el('div', { class: 'card-grid' });
   view.append(grid);
@@ -34,9 +54,15 @@ export async function renderBrowseDecks() {
   async function load() {
     clear(grid).append(el('span', { class: 'muted' }, 'Loading…'));
     try {
-      const { decks } = await api.browseDecks({ lang: langSel.value, level: levelSel.value, q: q.value });
+      const { decks } = await api.browseDecks({ lang: langSel.value, level: levelSel.value, q: q.value, kind });
       clear(grid);
-      if (!decks.length) { grid.append(el('p', { class: 'muted' }, 'No shared decks yet — publish one from your decks!')); return; }
+      if (!decks.length) {
+        const msg = kind === 'exam' ? 'No exam-board decks yet (Goethe, DELF, DELE… coming soon).'
+          : kind === 'community' ? 'No community decks yet. Share one from your decks!'
+            : 'No shared decks yet.';
+        grid.append(el('p', { class: 'muted' }, msg));
+        return;
+      }
       for (const d of decks) grid.append(deckCard(d));
     } catch (ex) { clear(grid).append(el('p', { class: 'error' }, ex.message)); }
   }

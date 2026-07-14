@@ -24,6 +24,7 @@ router.get('/browse', (req, res) => {
     languageId: lang?.id || null,
     level: req.query.level ? String(req.query.level) : null,
     q: req.query.q ? String(req.query.q) : null,
+    kind: ['official', 'community', 'exam'].includes(req.query.kind) ? req.query.kind : null,
     limit: 30,
     offset: Math.max(0, Number(req.query.offset) || 0),
   });
