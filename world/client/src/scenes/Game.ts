@@ -5,6 +5,7 @@ import { createCharacterAnims } from '../anims/CharacterAnims'
 import { buildTestAnims } from '../anims/testAnims'
 import { OSAKA_WALKABLE, OSAKA_SPAWN, OSAKA_BOT } from './osakaCollision'
 import { AmbientLife } from './ambientLife'
+import { NavGrid, findPath } from './nav'
 
 import Item from '../items/Item'
 import Chair from '../items/Chair'
@@ -48,6 +49,9 @@ export default class Game extends Phaser.Scene {
 
   // Ambient decoration: butterflies (nature worlds) + cars (Osaka).
   private ambient?: AmbientLife
+
+  // Tile grid for click-to-walk pathfinding (built from the world's colliders).
+  private navGrid?: NavGrid
 
   // Set by the per-world builders, consumed by setupPlayerAndNetwork().
   private spawnX = 0
@@ -128,6 +132,7 @@ export default class Game extends Phaser.Scene {
     else this.buildProcedural(worldMap)
 
     this.setupPlayerAndNetwork()
+    this.buildNavGrid() // static-collider grid for click-to-walk pathfinding
 
     // Ambient life: cars on the Osaka streets, butterflies in the nature worlds.
     this.ambient = new AmbientLife(this)
@@ -183,6 +188,37 @@ export default class Game extends Phaser.Scene {
     this.testSprite?.anims.stop()
   }
 
+  // Build a tile walkability grid from the world's static colliders (tilemap
+  // collision layers + static object groups). Cars/animals are excluded (they're
+  // not in worldColliders), so the path routes around buildings/walls only.
+  private buildNavGrid() {
+    const cols = this.map.width
+    const rows = this.map.height
+    const tile = this.map.tileWidth || 32
+    const walkable: boolean[][] = Array.from({ length: rows }, () => Array(cols).fill(true))
+    const blockRect = (px: number, py: number, pw: number, ph: number) => {
+      const x0 = Math.floor(px / tile)
+      const x1 = Math.floor((px + pw - 1) / tile)
+      const y0 = Math.floor(py / tile)
+      const y1 = Math.floor((py + ph - 1) / tile)
+      for (let ty = Math.max(0, y0); ty <= Math.min(rows - 1, y1); ty++)
+        for (let tx = Math.max(0, x0); tx <= Math.min(cols - 1, x1); tx++) walkable[ty][tx] = false
+    }
+    for (const c of this.worldColliders) {
+      if ((c as any).forEachTile) {
+        ;(c as Phaser.Tilemaps.TilemapLayer).forEachTile((t) => {
+          if (t.collides && t.y >= 0 && t.y < rows && t.x >= 0 && t.x < cols) walkable[t.y][t.x] = false
+        })
+      } else {
+        for (const ch of (c as Phaser.Physics.Arcade.StaticGroup).getChildren()) {
+          const b = (ch as any).body as Phaser.Physics.Arcade.StaticBody | undefined
+          if (b) blockRect(b.x, b.y, b.width, b.height)
+        }
+      }
+    }
+    this.navGrid = { walkable, cols, rows, tile }
+  }
+
   // Shared across every world: spawn the player + bot, set up the camera,
   // colliders (built up in worldColliders) and network listeners.
   private setupPlayerAndNetwork() {
@@ -226,6 +262,14 @@ export default class Game extends Phaser.Scene {
       const canvas = this.game.canvas
       const rect = canvas.getBoundingClientRect()
       const p = this.cameras.main.getWorldPoint(e.clientX - rect.left, e.clientY - rect.top)
+      // Route around obstacles when we have a nav grid; else walk straight.
+      if (this.navGrid) {
+        const path = findPath(this.navGrid, this.myPlayer.x, this.myPlayer.y, p.x, p.y)
+        if (path && path.length) {
+          this.myPlayer.setMovePath(path)
+          return
+        }
+      }
       this.myPlayer.setMoveTarget(p.x, p.y)
     }
     window.addEventListener('pointerdown', onTapToWalk)

@@ -26,10 +26,18 @@ export default class MyPlayer extends Player {
   // Click/tap-to-walk destination (world coords); cleared on arrival, on wall
   // contact, or when the player takes manual keyboard/joystick control.
   private moveTarget?: { x: number; y: number };
+  private movePath?: Array<{ x: number; y: number }>;
 
-  /** Set a click/tap-to-walk destination (world coordinates). */
+  /** Set a click/tap-to-walk destination (world coordinates), straight-line. */
   setMoveTarget(x: number, y: number) {
     this.moveTarget = { x, y };
+    this.movePath = undefined;
+  }
+
+  /** Follow a pathfound route (pixel waypoints) around obstacles. */
+  setMovePath(path: Array<{ x: number; y: number }>) {
+    this.movePath = path.length ? path.slice() : undefined;
+    this.moveTarget = undefined;
   }
   constructor(
     scene: Phaser.Scene,
@@ -172,6 +180,7 @@ export default class MyPlayer extends Player {
           chairItem.setDialogBox("Press E to leave");
           this.chairOnSit = chairItem;
           this.moveTarget = undefined;
+          this.movePath = undefined;
           this.playerBehavior = PlayerBehavior.SITTING;
           return;
         }
@@ -205,27 +214,38 @@ export default class MyPlayer extends Player {
           this.setDepth(this.y); //change player.depth if player.y changes
         }
 
-        // Click/tap-to-walk: when not steering manually, head toward the last
-        // clicked point; stop on arrival or when a wall blocks the way.
+        // Click/tap-to-walk: follow the A* path (routing around obstacles), or a
+        // single straight-line target. Manual input takes over instantly.
         if (vx !== 0 || vy !== 0) {
-          this.moveTarget = undefined; // manual input takes over
-        } else if (this.moveTarget) {
-          const dx = this.moveTarget.x - this.x;
-          const dy = this.moveTarget.y - this.y;
-          const dist = Math.hypot(dx, dy);
-          const b = this.body.blocked;
-          if (
-            dist < 4 ||
-            (dx > 4 && b.right) ||
-            (dx < -4 && b.left) ||
-            (dy > 4 && b.down) ||
-            (dy < -4 && b.up)
-          ) {
-            this.moveTarget = undefined;
-          } else {
-            vx = (dx / dist) * speed;
-            vy = (dy / dist) * speed;
-            this.setDepth(this.y);
+          this.moveTarget = undefined;
+          this.movePath = undefined;
+        } else {
+          // drop path waypoints we've already reached
+          while (this.movePath && this.movePath.length) {
+            const wp = this.movePath[0];
+            if (Math.hypot(wp.x - this.x, wp.y - this.y) < 6) this.movePath.shift();
+            else break;
+          }
+          if (this.movePath && !this.movePath.length) this.movePath = undefined;
+
+          const target = (this.movePath && this.movePath[0]) || this.moveTarget;
+          if (target) {
+            const dx = target.x - this.x;
+            const dy = target.y - this.y;
+            const dist = Math.hypot(dx, dy);
+            const b = this.body.blocked;
+            if (!this.movePath && dist < 4) {
+              this.moveTarget = undefined; // arrived at a straight-line target
+            } else if (
+              !this.movePath &&
+              ((dx > 4 && b.right) || (dx < -4 && b.left) || (dy > 4 && b.down) || (dy < -4 && b.up))
+            ) {
+              this.moveTarget = undefined; // straight-line move hit a wall
+            } else if (dist > 0.001) {
+              vx = (dx / dist) * speed;
+              vy = (dy / dist) * speed;
+              this.setDepth(this.y);
+            }
           }
         }
 
