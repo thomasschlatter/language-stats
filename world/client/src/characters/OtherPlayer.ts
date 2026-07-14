@@ -78,6 +78,7 @@ export default class OtherPlayer extends Player {
             // fall back to the default character's matching animation until it is.
             const suffix = value.split('_').slice(1).join('_') || 'idle_down'
             const fallback = `adam_${suffix}`
+            console.log('[anim] update', this.playerId, value, '-> exists?', this.anims.exists(value), 'fallback', fallback, this.anims.exists(fallback))
             if (this.anims.exists(fallback)) this.anims.play(fallback, true)
           }
         }
