@@ -1,6 +1,7 @@
 // AUTO-GENERATED from STRANDED character assets. Layer sprite paths (served
 // from /) + the idle-down frame rect used to draw a single character portrait.
-export const FRAME = { x: 1, y: 80, w: 32, h: 48 };
+// Front-facing (idle-down) frame — matches the world's verified IDLE_DOWN rect.
+export const FRAME = { x: 576, y: 74, w: 32, h: 54 };
 // z-order for drawing (bottom -> top)
 export const DRAW_ORDER = ['Bodies', 'Outfits', 'Eyes', 'Hairstyles', 'Accessories'];
 // order + labels for the creator's cycle controls
