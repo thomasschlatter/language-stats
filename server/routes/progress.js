@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { getLanguageByCode, listLanguages } from '../models/languages.js';
 import { getUserLanguages } from '../models/users.js';
-import { markWord, wordStatus, summary, suggestions, recordSeen, seenMap, seenWordCount } from '../models/progress.js';
+import { markWord, wordStatus, summary, suggestions, recordSeen, seenMap, seenWordCount, resetProgress } from '../models/progress.js';
 import { familiarityMap } from '../models/flashcards.js';
 import { SEEN_POLICIES, CURRENT_SEEN_POLICY, isValidPolicy } from '../lib/seenPolicy.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -30,6 +30,14 @@ router.get('/rundown', requireAuth, (req, res) => {
     }
   }
   res.json({ rundown });
+});
+
+// POST /api/progress/reset  { lang }  -> wipe word familiarity for one language
+router.post('/reset', requireAuth, (req, res) => {
+  const language = getLanguageByCode(req.body?.lang);
+  if (!language) return res.status(404).json({ error: 'unknown language' });
+  const removed = resetProgress(req.user.id, language.id);
+  res.json({ ok: true, removed });
 });
 
 // GET /api/progress/policy  -> the current + available "seen" policies

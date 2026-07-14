@@ -75,6 +75,11 @@ export default class MyPlayer extends Player {
   ) {
     if (!cursors) return;
 
+    // Glue the name/dialog container to the character every frame (it has no
+    // independent collision now), so the label never drifts off when a wall or
+    // car blocks the body.
+    this.playContainerBody.reset(this.x, this.y - 30);
+
     const item = playerSelector.selectedItem;
 
     if (Phaser.Input.Keyboard.JustDown(keyR)) {
@@ -227,9 +232,6 @@ export default class MyPlayer extends Player {
         // update character velocity
         this.setVelocity(vx, vy);
         this.body.velocity.setLength(speed);
-        // also update playerNameContainer velocity
-        this.playContainerBody.setVelocity(vx, vy);
-        this.playContainerBody.velocity.setLength(speed);
 
         // update animation according to velocity and send new location and anim to server
         if (vx !== 0 || vy !== 0)

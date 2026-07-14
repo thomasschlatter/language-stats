@@ -5,6 +5,15 @@
 import db from '../db/index.js';
 import { totalCount } from './frequency.js';
 
+// Wipe ALL word familiarity (seen + known/learning) for one language. Other
+// languages' data is untouched, so a previously-learned language keeps its data
+// even when it's no longer in the current learning list.
+export function resetProgress(userId, languageId) {
+  return db
+    .prepare('DELETE FROM user_words WHERE user_id = ? AND language_id = ?')
+    .run(userId, languageId).changes;
+}
+
 // Mark a word. status 'known' | 'learning' upserts; 'none' clears it.
 export function markWord({ userId, languageId, wordLc, status }) {
   if (status === 'none') {

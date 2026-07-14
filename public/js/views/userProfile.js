@@ -103,8 +103,11 @@ export async function renderUserProfile(username) {
     famBody.append(el('p', { class: 'muted' }, 'Loading…'));
     api.rundown().then(({ rundown }) => {
       clear(famBody);
-      if (!rundown.length) { famBody.append(el('p', { class: 'muted' }, 'Start reading and studying to build familiarity.')); return; }
-      for (const r of rundown) {
+      // Only list currently-learned languages; data for previously-learned ones
+      // stays on the server (they just aren't shown).
+      const rows = rundown.filter((r) => store.isLearning(r.code));
+      if (!rows.length) { famBody.append(el('p', { class: 'muted' }, 'Start reading and studying to build familiarity.')); return; }
+      for (const r of rows) {
         famBody.append(
           el('div', { class: 'fam-row' }, [
             el('div', { class: 'fam-lang' }, r.name),
@@ -115,6 +118,10 @@ export async function renderUserProfile(username) {
               famStat(r.known, 'marked known'),
               r.coveragePct != null ? famStat(`${r.coveragePct}%`, 'conversation') : null,
             ].filter(Boolean)),
+            el('button', {
+              class: 'btn small secondary', title: `Reset ${r.name} word familiarity`,
+              onclick: () => confirmResetFamiliarity(r, () => renderUserProfile(prof.username)),
+            }, 'Reset'),
           ])
         );
       }
@@ -252,6 +259,25 @@ function famStat(value, label) {
     el('div', { class: 'fam-value' }, String(value)),
     el('div', { class: 'fam-label' }, label),
   ]);
+}
+
+// "Are you sure?" before wiping a language's word familiarity.
+function confirmResetFamiliarity(r, onDone) {
+  const close = openModal(el('div', { style: 'max-width:360px' }, [
+    el('h3', { style: 'margin-top:0' }, 'Reset word familiarity?'),
+    el('p', { class: 'muted' }, `This clears your seen and known words for ${r.name}. It can't be undone (your flashcard decks are not affected).`),
+    el('div', { class: 'row', style: 'gap:0.5rem; justify-content:flex-end; margin-top:1rem' }, [
+      el('button', { class: 'btn small secondary', onclick: () => close() }, 'Cancel'),
+      el('button', {
+        class: 'btn small', style: 'background:#c0392b; color:#fff',
+        onclick: async (e) => {
+          e.target.disabled = true;
+          try { await api.resetFamiliarity(r.code); close(); onDone(); }
+          catch (ex) { e.target.disabled = false; alert(ex.message); }
+        },
+      }, 'Reset'),
+    ]),
+  ]));
 }
 
 // Display helper: "board games" -> "Board Games" (doesn't mutate stored value).

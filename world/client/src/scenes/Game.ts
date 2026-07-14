@@ -137,7 +137,7 @@ export default class Game extends Phaser.Scene {
       // players collide with (and get nudged by) the moving cars
       const carGroup = this.ambient.getCarGroup()
       if (carGroup)
-        this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], carGroup)
+        this.physics.add.collider(this.myPlayer, carGroup)
       // ravens flying across the sky + a couple of static ground crows
       const w = this.map.widthInPixels
       this.ambient.addFlyingRaven(150, w)
@@ -155,7 +155,7 @@ export default class Game extends Phaser.Scene {
       ])
       const carGroup = this.ambient.getCarGroup()
       if (carGroup)
-        this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], carGroup)
+        this.physics.add.collider(this.myPlayer, carGroup)
       this.ambient.addFlyingRaven(120, w)
     } else if (worldMap === 'meadow' || worldMap === 'village' || worldMap === 'island')
       this.ambient.addButterflies(this.spawnX, this.spawnY, 6)
@@ -187,7 +187,7 @@ export default class Game extends Phaser.Scene {
   // colliders (built up in worldColliders) and network listeners.
   private setupPlayerAndNetwork() {
     this.myPlayer = this.add.myPlayer(this.spawnX, this.spawnY, 'adam', this.network.mySessionId)
-    this.myPlayer.setScale(1.35) // bigger avatars
+    this.myPlayer.setScale(1.15) // slightly bigger avatars
     this.myPlayer.setDepth(this.myPlayer.y)
     this.playerSelector = new PlayerSelector(this, 0, 0, 16, 16)
     this.otherPlayers = this.physics.add.group({ classType: OtherPlayer })
@@ -204,7 +204,7 @@ export default class Game extends Phaser.Scene {
     clampToWorld(this.myPlayer.body)
     clampToWorld((this.myPlayer.playerContainer as any).body)
     for (const c of this.worldColliders)
-      this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], c)
+      this.physics.add.collider(this.myPlayer, c)
 
     this.physics.add.overlap(this.myPlayer, this.otherPlayers, this.handlePlayersOverlap, undefined, this)
     this.physics.add.overlap(this.myPlayer, this.botPlayer, this.handleBotOverlap, undefined, this)
@@ -864,7 +864,7 @@ export default class Game extends Phaser.Scene {
   // function to add new player to the otherPlayer group
   private handlePlayerJoined(newPlayer: IPlayer, id: string) {
     const otherPlayer = this.add.otherPlayer(newPlayer.x, newPlayer.y, 'adam', id, newPlayer.name)
-    otherPlayer.setScale(1.35) // bigger avatars (match myPlayer)
+    otherPlayer.setScale(1.15) // slightly bigger avatars (match myPlayer)
     this.otherPlayers.add(otherPlayer)
     this.otherPlayerMap.set(id, otherPlayer)
     // If they already have a custom avatar (joined before us), composite it now.
