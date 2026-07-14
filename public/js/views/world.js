@@ -53,10 +53,21 @@ export async function renderWorld() {
   frame.addEventListener('load', () => frame.focus());
   frame.addEventListener('mouseenter', () => frame.focus());
 
-  const openBtn = el('a', {
-    class: 'world-open-btn', href: src, target: '_blank', rel: 'noopener',
-    title: 'Open the world in a new tab',
-  }, '⤢ Open in new tab');
+  const wrap = el('div', { class: 'world-wrap' });
+  const fsBtn = el('button', { class: 'world-open-btn', title: 'Toggle fullscreen' }, '⛶ Fullscreen');
+  fsBtn.addEventListener('click', () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      (wrap.requestFullscreen || frame.requestFullscreen || (() => {})).call(
+        wrap.requestFullscreen ? wrap : frame
+      );
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    fsBtn.textContent = document.fullscreenElement ? '⛶ Exit fullscreen' : '⛶ Fullscreen';
+  });
 
-  view.append(el('div', { class: 'world-wrap' }, [frame, openBtn]));
+  wrap.append(frame, fsBtn);
+  view.append(wrap);
 }

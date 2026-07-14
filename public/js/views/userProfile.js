@@ -10,6 +10,7 @@ import { logout } from '../auth.js';
 import { byImportance } from '../langOrder.js';
 import { languageMultiPicker, nativeLanguagesSetting } from '../langPicker.js';
 import { openCharacterCreator } from './characterCreator.js';
+import { themeControl, changePasswordForm, confirmDeleteAccount } from './settings.js';
 
 export async function renderUserProfile(username) {
   const view = clear(document.getElementById('view'));
@@ -126,6 +127,23 @@ export async function renderUserProfile(username) {
         );
       }
     }).catch(() => { clear(famBody).append(el('p', { class: 'muted' }, 'Could not load familiarity.')); });
+
+    // Appearance + account (consolidated here from the old Settings page).
+    const nativeSelect = el('select', { onchange: (e) => store.setNative(e.target.value) },
+      store.languages.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.name)));
+    profile.append(card([
+      el('div', { class: 'card-title' }, 'Appearance'),
+      el('div', { class: 'settings-field' }, [el('label', {}, 'Theme'), themeControl(() => renderUserProfile(prof.username))]),
+      el('div', { class: 'settings-field' }, [el('label', {}, 'Native language (words translate into this)'), nativeSelect]),
+    ]));
+    profile.append(card([
+      el('div', { class: 'card-title' }, 'Account'),
+      changePasswordForm(),
+      el('div', { class: 'row', style: 'margin-top:1rem; gap:0.5rem' }, [
+        el('button', { class: 'btn small secondary', onclick: async () => { await api.logout(); store.set({ user: null }); location.hash = '#/'; } }, 'Sign out'),
+        el('button', { class: 'btn small danger', onclick: confirmDeleteAccount }, 'Delete account'),
+      ]),
+    ]));
   }
 }
 

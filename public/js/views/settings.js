@@ -167,7 +167,7 @@ export function confirmDeleteAccount() {
   ]));
 }
 
-function changePasswordForm() {
+export function changePasswordForm() {
   const err = el('div', { class: 'error' });
   const ok = el('div', { class: 'ok-msg' });
   const cur = el('input', { type: 'password', placeholder: 'current password' });

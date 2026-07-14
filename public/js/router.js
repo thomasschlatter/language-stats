@@ -42,7 +42,11 @@ const routes = [
   { pattern: /^#\/world$/, handler: () => renderWorld(), auth: true },
   { pattern: /^#\/games$/, handler: () => renderGames(), auth: true },
   { pattern: /^#\/search\/(.+)$/, handler: (m) => renderSearch(dec(m[1])) },
-  { pattern: /^#\/settings$/, handler: () => renderSettings(), auth: true },
+  // Settings now live on your profile (/me). Send the Settings link there.
+  { pattern: /^#\/settings$/, handler: () => {
+    if (store.user) navigate(`#/u/${encodeURIComponent(store.user.username)}`);
+    else navigate('#/');
+  } },
   { pattern: /^#\/decks$/, handler: () => renderDecks(), auth: true },
   { pattern: /^#\/study$/, handler: () => renderStudy(), auth: true }, // all decks
   { pattern: /^#\/study\/(\d+)$/, handler: (m) => renderStudy(Number(m[1])), auth: true },
