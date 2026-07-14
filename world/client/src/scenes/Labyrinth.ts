@@ -10,7 +10,7 @@ type Answer = { rect: Phaser.GameObjects.Rectangle; label: Phaser.GameObjects.Te
 export default class Labyrinth extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
-  private wallGroup!: Phaser.Physics.Arcade.StaticGroup
+  private walls: Phaser.GameObjects.Rectangle[] = []
   private items: { front: string; answer: string; choices: string[] }[] = []
   private idx = 0
   private score = 0
@@ -43,6 +43,7 @@ export default class Labyrinth extends Phaser.Scene {
     this.pointer = null
     this.facing = 'down'
     this.openCells = []
+    this.walls = []
   }
 
   async create() {
@@ -68,7 +69,6 @@ export default class Labyrinth extends Phaser.Scene {
     this.ox = Math.floor((W - this.cols * this.cell) / 2)
     this.oy = 96
 
-    this.wallGroup = this.physics.add.staticGroup()
     this.buildMaze()
 
     const start = this.cellCenter(0, 0)
@@ -76,7 +76,7 @@ export default class Labyrinth extends Phaser.Scene {
     this.player.setCollideWorldBounds(true)
     ;(this.player.body as Phaser.Physics.Arcade.Body).setSize(18, 20).setOffset(7, 24)
     this.physics.world.setBounds(this.ox, this.oy, this.cols * this.cell, this.rows * this.cell)
-    this.physics.add.collider(this.player, this.wallGroup)
+    this.physics.add.collider(this.player, this.walls)
     this.player.anims.play('adam_idle_down', true)
 
     this.cursors = this.input.keyboard!.createCursorKeys()
@@ -149,9 +149,8 @@ export default class Labyrinth extends Phaser.Scene {
     const t = 8 // wall thickness
     const addWall = (x: number, y: number, w: number, h: number) => {
       const rect = this.add.rectangle(x, y, w, h, 0x39456e).setDepth(4)
-      this.wallGroup.add(rect)
-      const body = rect.body as Phaser.Physics.Arcade.StaticBody
-      body.updateFromGameObject()
+      this.physics.add.existing(rect, true) // static body (proven approach)
+      this.walls.push(rect)
     }
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
