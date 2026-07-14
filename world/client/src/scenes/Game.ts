@@ -121,7 +121,7 @@ export default class Game extends Phaser.Scene {
     // Dispatch to the right map builder based on the world the player picked.
     const worldMap = (this.network as any).worldMap || 'meadow'
     if (worldMap === 'cafe') this.buildInterior('tilemap')
-    else if (worldMap === 'town') this.buildInterior('lobbyMap')
+    else if (worldMap === 'town') this.buildCity()
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else if (worldMap === 'osaka')
       this.buildImageWorld('osaka_map', OSAKA_WALKABLE, OSAKA_SPAWN, OSAKA_BOT)
@@ -146,6 +146,17 @@ export default class Game extends Phaser.Scene {
         [360, 660],
         [820, 505],
       ])
+    } else if (worldMap === 'town') {
+      // DISCO city: animated cars driving the bottom streets + a flying raven.
+      const w = this.map.widthInPixels
+      this.ambient.addCityTraffic(w, [
+        { tex: 'car_white', anim: 'car_white_driving_right', y: 870, dir: 1 },
+        { tex: 'car_blue', anim: 'car_blue_driving_left', y: 790, dir: -1 },
+      ])
+      const carGroup = this.ambient.getCarGroup()
+      if (carGroup)
+        this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], carGroup)
+      this.ambient.addFlyingRaven(120, w)
     } else if (worldMap === 'meadow' || worldMap === 'village' || worldMap === 'island')
       this.ambient.addButterflies(this.spawnX, this.spawnY, 6)
   }
@@ -274,6 +285,15 @@ export default class Game extends Phaser.Scene {
       const k = group.getChildren()
       console.log('[collide]', layerName, 'sprites:', k.length, 'body0:', (k[0] as any)?.body?.width, 'x', (k[0] as any)?.body?.height, 'enable:', (k[0] as any)?.body?.enable)
     }
+  }
+
+  // The DISCO city (Town world): the exterior Tiled cityMap + a city spawn.
+  private buildCity() {
+    this.buildExteriorTiled('cityMap')
+    this.spawnX = 1000
+    this.spawnY = 740
+    this.botX = 900
+    this.botY = 700
   }
 
   // A designed exterior Tiled map (the island / beach world).

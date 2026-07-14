@@ -26,6 +26,7 @@ export default class Bootstrap extends Phaser.Scene {
     classroomMap: 'assets/map/classroomMap.json',
     lobbyMap: 'assets/map/lobbyMap.json',
     tilemap: 'assets/map/map.json',
+    cityMap: 'assets/map/cityMap.json',
   }
   
    OBJECTS = {
@@ -124,6 +125,9 @@ export default class Bootstrap extends Phaser.Scene {
     this.load.image('car_down', 'assets/vehicles/car_down.png')
     this.load.image('car_left', 'assets/vehicles/car_left.png')
     this.load.image('car_right', 'assets/vehicles/car_right.png')
+    // Animated driving cars for the city (DISCO) world.
+    this.load.spritesheet('car_white', 'assets/vehicles/car_white.png', { frameWidth: 192, frameHeight: 71 })
+    this.load.spritesheet('car_blue', 'assets/vehicles/car_blue.png', { frameWidth: 192, frameHeight: 71 })
 
     this.load.on('complete', () => {
       this.preloadComplete = true

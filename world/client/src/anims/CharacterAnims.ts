@@ -532,4 +532,22 @@ export const createCharacterAnims = (anims: Phaser.Animations.AnimationManager) 
     repeat: -1,
     frameRate: animsFrameRate * 0.6,
   })
+
+  // City cars (DISCO): animated driving loops.
+  if (!anims.exists('car_white_driving_right')) {
+    anims.create({
+      key: 'car_white_driving_right',
+      frames: anims.generateFrameNumbers('car_white', { start: 0, end: 5 }),
+      repeat: -1,
+      frameRate: animsFrameRate * 0.6,
+    })
+  }
+  if (!anims.exists('car_blue_driving_left')) {
+    anims.create({
+      key: 'car_blue_driving_left',
+      frames: anims.generateFrameNumbers('car_blue', { start: 10, end: 12 }),
+      repeat: -1,
+      frameRate: animsFrameRate * 0.6,
+    })
+  }
 }

@@ -6,7 +6,7 @@ import Phaser from 'phaser'
 // integrated from Game.update(dt).
 
 interface Car {
-  s: Phaser.GameObjects.Image
+  s: Phaser.GameObjects.Sprite
   vx: number
   vy: number
   min: number // wrap bounds along the axis of travel
@@ -15,6 +15,7 @@ interface Car {
   cross: number // fixed lane coord on the perpendicular axis
   phase: number // per-car bob offset
   stop: number // coord to hold at when the light is red (before the junction)
+  light: boolean // obeys the intersection traffic light (Osaka) vs just drives
 }
 
 interface Flit {
@@ -193,7 +194,7 @@ export class AmbientLife {
     this.carBodies = this.scene.physics.add.staticGroup()
     for (const sp of specs) {
       if (!this.scene.textures.exists(sp.tex)) continue
-      const s = this.scene.add.image(sp.x, sp.y, sp.tex).setScale(SCALE).setDepth(sp.y)
+      const s = this.scene.add.sprite(sp.x, sp.y, sp.tex).setScale(SCALE).setDepth(sp.y)
       // static physics body so players collide with (and get nudged by) traffic
       this.carBodies.add(s)
       ;(s.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject()
@@ -207,7 +208,41 @@ export class AmbientLife {
         cross: sp.axis === 'y' ? sp.x : sp.y,
         phase: Math.random() * Math.PI * 2,
         stop: sp.stop,
+        light: true,
       })
+    }
+  }
+
+  /** Animated cars driving horizontally across a city map (DISCO-style), on
+   *  fixed lanes. They yield to pedestrians and queue, but ignore the Osaka
+   *  traffic light. `mapWidth` sets the off-screen wrap points. */
+  addCityTraffic(mapWidth: number, lanes: Array<{ tex: string; anim: string; y: number; dir: 1 | -1 }>) {
+    const SP = 90
+    const SCALE = 0.5
+    if (!this.carBodies) this.carBodies = this.scene.physics.add.staticGroup()
+    for (const ln of lanes) {
+      if (!this.scene.textures.exists(ln.tex)) continue
+      // two cars per lane, spaced out
+      for (const startFrac of [0.15, 0.62]) {
+        const x = mapWidth * startFrac
+        const s = this.scene.add.sprite(x, ln.y, ln.tex).setScale(SCALE).setDepth(ln.y)
+        if (this.scene.anims.exists(ln.anim)) s.play(ln.anim)
+        if (ln.dir < 0) s.setFlipX(false) // sheet already faces its drawn direction
+        this.carBodies.add(s)
+        ;(s.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject()
+        this.cars.push({
+          s,
+          vx: SP * ln.dir,
+          vy: 0,
+          axis: 'x',
+          min: -220,
+          max: mapWidth + 220,
+          cross: ln.y,
+          phase: Math.random() * Math.PI * 2,
+          stop: 0,
+          light: false,
+        })
+      }
     }
   }
 
@@ -221,7 +256,7 @@ export class AmbientLife {
     const hGreen = phase >= 6.5 && phase < 12
 
     for (const c of this.cars) {
-      const green = c.axis === 'y' ? vGreen : hGreen
+      const green = !c.light ? true : c.axis === 'y' ? vGreen : hGreen
       // Yield to a pedestrian in front, or queue behind a stopped car.
       const hold = this.pedestrianAhead(c) || this.carAhead(c)
       if (c.axis === 'y') {
