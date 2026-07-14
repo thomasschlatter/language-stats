@@ -23,6 +23,14 @@ export default class MyPlayer extends Player {
   private playContainerBody: Phaser.Physics.Arcade.Body;
   private chairOnSit?: Chair;
   public joystickMovement?: JoystickMovement;
+  // Click/tap-to-walk destination (world coords); cleared on arrival, on wall
+  // contact, or when the player takes manual keyboard/joystick control.
+  private moveTarget?: { x: number; y: number };
+
+  /** Set a click/tap-to-walk destination (world coordinates). */
+  setMoveTarget(x: number, y: number) {
+    this.moveTarget = { x, y };
+  }
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -158,6 +166,7 @@ export default class MyPlayer extends Player {
           chairItem.clearDialogBox();
           chairItem.setDialogBox("Press E to leave");
           this.chairOnSit = chairItem;
+          this.moveTarget = undefined;
           this.playerBehavior = PlayerBehavior.SITTING;
           return;
         }
@@ -190,6 +199,31 @@ export default class MyPlayer extends Player {
           vy += speed;
           this.setDepth(this.y); //change player.depth if player.y changes
         }
+
+        // Click/tap-to-walk: when not steering manually, head toward the last
+        // clicked point; stop on arrival or when a wall blocks the way.
+        if (vx !== 0 || vy !== 0) {
+          this.moveTarget = undefined; // manual input takes over
+        } else if (this.moveTarget) {
+          const dx = this.moveTarget.x - this.x;
+          const dy = this.moveTarget.y - this.y;
+          const dist = Math.hypot(dx, dy);
+          const b = this.body.blocked;
+          if (
+            dist < 4 ||
+            (dx > 4 && b.right) ||
+            (dx < -4 && b.left) ||
+            (dy > 4 && b.down) ||
+            (dy < -4 && b.up)
+          ) {
+            this.moveTarget = undefined;
+          } else {
+            vx = (dx / dist) * speed;
+            vy = (dy / dist) * speed;
+            this.setDepth(this.y);
+          }
+        }
+
         // update character velocity
         this.setVelocity(vx, vy);
         this.body.velocity.setLength(speed);

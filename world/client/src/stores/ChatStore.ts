@@ -9,6 +9,34 @@ export enum MessageType {
   REGULAR_MESSAGE,
 }
 
+// Flavour text for join/leave, themed per world (island keeps the original
+// "washed ashore"). Falls back to plain "joined"/"left" for unknown worlds.
+const JOIN_PHRASE: Record<string, string> = {
+  meadow: "wandered into the meadow",
+  village: "strolled into the village",
+  island: "washed ashore",
+  cafe: "stepped into the café",
+  town: "arrived downtown",
+  osaka: "arrived in Osaka",
+};
+const LEAVE_PHRASE: Record<string, string> = {
+  meadow: "wandered off",
+  village: "headed home",
+  island: "swam away",
+  cafe: "headed out",
+  town: "left downtown",
+  osaka: "left Osaka",
+};
+
+function currentWorldMap(): string {
+  try {
+    const game = phaserGame.scene.keys.game as Game;
+    return (game as any)?.network?.worldMap || "meadow";
+  } catch {
+    return "meadow";
+  }
+}
+
 export const chatSlice = createSlice({
   name: "chat",
   initialState: {
@@ -32,7 +60,7 @@ export const chatSlice = createSlice({
         chatMessage: {
           createdAt: new Date().getTime(),
           author: action.payload,
-          content: "washed ashore",
+          content: JOIN_PHRASE[currentWorldMap()] || "joined",
         } as IChatMessage,
       });
     },
@@ -42,7 +70,7 @@ export const chatSlice = createSlice({
         chatMessage: {
           createdAt: new Date().getTime(),
           author: action.payload,
-          content: "swam away",
+          content: LEAVE_PHRASE[currentWorldMap()] || "left",
         } as IChatMessage,
       });
     },
