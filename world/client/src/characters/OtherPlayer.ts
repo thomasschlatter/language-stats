@@ -71,15 +71,16 @@ export default class OtherPlayer extends Player {
 
       case 'anim':
         if (typeof value === 'string') {
-          if (this.anims.exists(value)) {
+          // Existence must be checked on the scene's (global) animation manager,
+          // NOT this.anims (the sprite's AnimationState), or it always returns false.
+          if (this.scene.anims.exists(value)) {
             this.anims.play(value, true)
           } else {
             // Their custom sheet may not be composited yet (or unavailable):
             // fall back to the default character's matching animation until it is.
             const suffix = value.split('_').slice(1).join('_') || 'idle_down'
             const fallback = `adam_${suffix}`
-            console.log('[anim] update', this.playerId, value, '-> exists?', this.anims.exists(value), 'fallback', fallback, this.anims.exists(fallback))
-            if (this.anims.exists(fallback)) this.anims.play(fallback, true)
+            if (this.scene.anims.exists(fallback)) this.anims.play(fallback, true)
           }
         }
         break
@@ -89,16 +90,15 @@ export default class OtherPlayer extends Player {
         // recipe, then switch to it. Guarded end-to-end; stays on the default
         // character if anything fails.
         if (typeof value === 'string' && value) {
-          console.log('[avatar] RECEIVED for', this.playerId, value.slice(0, 80))
           try {
             const { key, index } = JSON.parse(value)
             if (key && index && !this.scene.textures.exists(key)) {
               loadRemoteAvatar(this.scene, key, index).then((ok) => {
-                if (ok && this.active && this.anims.exists(`${key}_idle_down`)) {
+                if (ok && this.active && this.scene.anims.exists(`${key}_idle_down`)) {
                   this.anims.play(`${key}_idle_down`, true)
                 }
               })
-            } else if (key && this.scene.textures.exists(key) && this.anims.exists(`${key}_idle_down`)) {
+            } else if (key && this.scene.textures.exists(key) && this.scene.anims.exists(`${key}_idle_down`)) {
               this.anims.play(`${key}_idle_down`, true)
             }
           } catch { /* malformed recipe — keep default character */ }
