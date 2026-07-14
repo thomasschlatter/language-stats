@@ -31,6 +31,64 @@
     <div class="video-grid"></div>
     <div class="button-grid"></div>
     <div id="phaser-container"></div>
+
+    <!-- Boot loading screen: the Groupifier logo shown until the world is ready
+         (removed on the 'world-ready' event from the Bootstrap scene). -->
+    <div id="boot-loader">
+      <img src="/groupifier-logo.png" alt="Groupifier" />
+      <div class="boot-spinner"></div>
+    </div>
+    <style>
+      #boot-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 26px;
+        background: #222639;
+        transition: opacity 0.5s ease;
+      }
+      #boot-loader.hide { opacity: 0; pointer-events: none; }
+      #boot-loader img {
+        width: 96px;
+        height: 96px;
+        border-radius: 22px;
+        animation: boot-pulse 1.4s ease-in-out infinite;
+      }
+      #boot-loader .boot-spinner {
+        width: 34px;
+        height: 34px;
+        border: 4px solid rgba(255, 255, 255, 0.15);
+        border-top-color: #2dd4bf;
+        border-radius: 50%;
+        animation: boot-spin 0.9s linear infinite;
+      }
+      @keyframes boot-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.85; }
+        50% { transform: scale(1.08); opacity: 1; }
+      }
+      @keyframes boot-spin { to { transform: rotate(360deg); } }
+    </style>
+    <script>
+      (function () {
+        var loader = document.getElementById('boot-loader');
+        if (!loader) return;
+        var done = false;
+        function hide() {
+          if (done) return;
+          done = true;
+          loader.classList.add('hide');
+          setTimeout(function () { loader.remove(); }, 600);
+        }
+        window.addEventListener('world-ready', hide);
+        // Fallback: never leave the loader stuck if the event is missed.
+        setTimeout(hide, 12000);
+      })();
+    </script>
+
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

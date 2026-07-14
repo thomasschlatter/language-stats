@@ -119,6 +119,12 @@ export default class Bootstrap extends Phaser.Scene {
 
     this.load.on('complete', () => {
       this.preloadComplete = true
+      // Tell the HTML boot loader (Groupifier logo) it can fade out.
+      try {
+        window.dispatchEvent(new Event('world-ready'))
+      } catch {
+        /* ignore */
+      }
       // Deep-link: /game?mode=practice jumps straight into the solo word game
       // (used by the main app's "Word game" button) instead of world selection.
       if (new URLSearchParams(window.location.search).get('mode') === 'practice') {
