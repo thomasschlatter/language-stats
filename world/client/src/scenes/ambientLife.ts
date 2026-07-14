@@ -12,6 +12,8 @@ interface Car {
   min: number // wrap bounds along the axis of travel
   max: number
   axis: 'x' | 'y'
+  cross: number // fixed lane coord on the perpendicular axis
+  phase: number // per-car bob offset
 }
 
 interface Flit {
@@ -27,6 +29,7 @@ interface Flit {
 export class AmbientLife {
   private cars: Car[] = []
   private flits: Flit[] = []
+  private t = 0
 
   constructor(private scene: Phaser.Scene) {}
 
@@ -73,21 +76,25 @@ export class AmbientLife {
       { tex: 'car_left', x: 420, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300 },
       { tex: 'car_left', x: 920, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300 },
     ]
-    let made = 0
     for (const sp of specs) {
       if (!this.scene.textures.exists(sp.tex)) continue
       const s = this.scene.add.image(sp.x, sp.y, sp.tex).setScale(SCALE).setDepth(sp.y)
-      this.cars.push({ s, vx: sp.vx, vy: sp.vy, axis: sp.axis, min: sp.min, max: sp.max })
-      made++
+      this.cars.push({
+        s,
+        vx: sp.vx,
+        vy: sp.vy,
+        axis: sp.axis,
+        min: sp.min,
+        max: sp.max,
+        cross: sp.axis === 'y' ? sp.x : sp.y,
+        phase: Math.random() * Math.PI * 2,
+      })
     }
-    // eslint-disable-next-line no-console
-    console.log(
-      `[traffic] made ${made}/${specs.length} cars; car_up tex=${this.scene.textures.exists('car_up')}`
-    )
   }
 
   update(dt: number) {
     const d = dt / 1000
+    this.t += d
 
     for (const c of this.cars) {
       c.s.x += c.vx * d
@@ -95,6 +102,11 @@ export class AmbientLife {
       const p = c.axis === 'x' ? c.s.x : c.s.y
       if (p < c.min) c.axis === 'x' ? (c.s.x = c.max) : (c.s.y = c.max)
       else if (p > c.max) c.axis === 'x' ? (c.s.x = c.min) : (c.s.y = c.min)
+      // subtle suspension bob on the perpendicular axis (the cars are
+      // single-frame sprites, so this stands in for a driving animation).
+      const bob = Math.sin(this.t * 9 + c.phase) * 0.8
+      if (c.axis === 'y') c.s.x = c.cross + bob
+      else c.s.y = c.cross + bob
       c.s.setDepth(c.s.y)
     }
 

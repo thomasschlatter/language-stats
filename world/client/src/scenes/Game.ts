@@ -130,8 +130,6 @@ export default class Game extends Phaser.Scene {
     this.setupPlayerAndNetwork()
 
     // Ambient life: cars on the Osaka streets, butterflies in the nature worlds.
-    // eslint-disable-next-line no-console
-    console.log('[ambient] worldMap =', worldMap)
     this.ambient = new AmbientLife(this)
     if (worldMap === 'osaka') this.ambient.addOsakaTraffic()
     else if (worldMap === 'meadow' || worldMap === 'village' || worldMap === 'island')
