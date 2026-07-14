@@ -240,14 +240,14 @@ export default class Game extends Phaser.Scene {
 
     this.addTiled('Wall', true)
     this.addTiled('Basement', true)
-    this.addTiled('Objects', false)
+    this.addTiled('Objects', true) // wall fronts/sides + office furniture -> solid
     this.addTiled('ObjectsOnCollide', true)
-    this.addTiled('GenericObjects', false)
+    this.addTiled('GenericObjects', true) // plants + generic decor -> solid
     this.addTiled('GenericObjectsOnCollide', true)
     this.addTiled('VendingMachine', true)
-    this.addTiled('Chair', false)
-    this.addTiled('Computer', false)
-    this.addTiled('Whiteboard', false)
+    this.addTiled('Chair', true) // chairs -> solid
+    this.addTiled('Computer', false) // interactive — keep walkable
+    this.addTiled('Whiteboard', false) // interactive — keep walkable
 
     this.spawnX = 705
     this.spawnY = 500
