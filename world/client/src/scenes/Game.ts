@@ -183,14 +183,19 @@ export default class Game extends Phaser.Scene {
       if (!ts || !key) continue
       const x = obj.x! + obj.width! * 0.5
       const y = obj.y! - obj.height! * 0.5
-      const sprite = group.get(x, y, key, obj.gid - ts.firstgid) as Phaser.Physics.Arcade.Sprite
+      const sprite = group.create(x, y, key, obj.gid - ts.firstgid) as Phaser.Physics.Arcade.Sprite
+      if (!sprite) continue
       sprite.setDepth(y)
       // Static bodies don't follow a repositioned sprite — recompute the body at
       // its final spot so the collider actually sits on the tile (else the player
       // walks straight through the walls).
       if (collidable && sprite.refreshBody) sprite.refreshBody()
     }
-    if (collidable) this.worldColliders.push(group)
+    if (collidable) {
+      this.worldColliders.push(group)
+      const k = group.getChildren()
+      console.log('[collide]', layerName, 'sprites:', k.length, 'body0:', (k[0] as any)?.body?.width, 'x', (k[0] as any)?.body?.height, 'enable:', (k[0] as any)?.body?.enable)
+    }
   }
 
   // A designed exterior Tiled map (the island / beach world).
