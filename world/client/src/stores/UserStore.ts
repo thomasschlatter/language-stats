@@ -19,6 +19,10 @@ export const userSlice = createSlice({
     loggedIn: false,
     playerNameMap: new Map<string, string>(),
     showJoystick: window.innerWidth < 650,
+    tapToWalk:
+      typeof localStorage !== 'undefined' && localStorage.getItem('gf_tap_to_walk') === 'off'
+        ? false
+        : true,
   },
   reducers: {
     toggleBackgroundMode: (state) => {
@@ -47,6 +51,14 @@ export const userSlice = createSlice({
     setShowJoystick: (state, action: PayloadAction<boolean>) => {
       state.showJoystick = action.payload
     },
+    setTapToWalk: (state, action: PayloadAction<boolean>) => {
+      state.tapToWalk = action.payload
+      try {
+        localStorage.setItem('gf_tap_to_walk', action.payload ? 'on' : 'off')
+      } catch {
+        /* ignore */
+      }
+    },
   },
 })
 
@@ -58,6 +70,7 @@ export const {
   setPlayerNameMap,
   removePlayerNameMap,
   setShowJoystick,
+  setTapToWalk,
 } = userSlice.actions
 
 export default userSlice.reducer

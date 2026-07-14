@@ -18,7 +18,8 @@ import VideogameAssetIcon from '@mui/icons-material/VideogameAsset'
 import VideogameAssetOffIcon from '@mui/icons-material/VideogameAssetOff'
 
 import { BackgroundMode } from '../../../types/BackgroundMode'
-import { setShowJoystick, toggleBackgroundMode } from '../stores/UserStore'
+import TouchAppIcon from '@mui/icons-material/TouchApp'
+import { setShowJoystick, setTapToWalk, toggleBackgroundMode } from '../stores/UserStore'
 import { useAppSelector, useAppDispatch } from '../hooks'
 import { getAvatarString, getColorByString } from '../util'
 import { Link } from '@mui/material'
@@ -112,6 +113,7 @@ export default function HelperButtonGroup() {
   const [showLegal, setShowLegal] = useState(false)
   const [showRoomInfo, setShowRoomInfo] = useState(false)
   const showJoystick = useAppSelector((state) => state.user.showJoystick)
+  const tapToWalk = useAppSelector((state) => state.user.tapToWalk)
   const backgroundMode = useAppSelector((state) => state.user.backgroundMode)
   const roomJoined = useAppSelector((state) => state.room.roomJoined)
   const roomId = useAppSelector((state) => state.room.roomId)
@@ -126,6 +128,13 @@ export default function HelperButtonGroup() {
           <Tooltip title={showJoystick ? 'Disable virtual joystick' : 'Enable virtual joystick'}>
             <StyledFab size="small" onClick={() => dispatch(setShowJoystick(!showJoystick))}>
               {showJoystick ? <VideogameAssetOffIcon /> : <VideogameAssetIcon />}
+            </StyledFab>
+          </Tooltip>
+        )}
+        {roomJoined && (
+          <Tooltip title={tapToWalk ? 'Disable tap-to-walk' : 'Enable tap-to-walk'}>
+            <StyledFab size="small" onClick={() => dispatch(setTapToWalk(!tapToWalk))}>
+              <TouchAppIcon style={tapToWalk ? undefined : { opacity: 0.4 }} />
             </StyledFab>
           </Tooltip>
         )}

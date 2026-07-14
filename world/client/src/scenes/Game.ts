@@ -192,8 +192,10 @@ export default class Game extends Phaser.Scene {
     this.physics.add.overlap(this.myPlayer, this.botPlayer, this.handleBotOverlap, undefined, this)
 
     // Click / tap-to-walk: send the player toward the clicked world point.
+    // Can be turned off from the world's helper buttons (settings).
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (!this.myPlayer) return
+      if (!store.getState().user.tapToWalk) return
       const p = this.cameras.main.getWorldPoint(pointer.x, pointer.y)
       this.myPlayer.setMoveTarget(p.x, p.y)
     })
