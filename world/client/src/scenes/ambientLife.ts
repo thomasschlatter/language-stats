@@ -32,8 +32,14 @@ export class AmbientLife {
   private cars: Car[] = []
   private flits: Flit[] = []
   private t = 0
+  private carBodies?: Phaser.Physics.Arcade.StaticGroup
 
   constructor(private scene: Phaser.Scene) {}
+
+  /** The car collision group, so the scene can collide the player with traffic. */
+  getCarGroup() {
+    return this.carBodies
+  }
 
   /** A few butterflies drifting in lazy loops around (cx, cy). */
   addButterflies(cx: number, cy: number, count: number) {
@@ -98,9 +104,30 @@ export class AmbientLife {
       { tex: 'car_left', x: 420, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300, stop: 792 },
       { tex: 'car_left', x: 920, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300, stop: 792 },
     ]
+    // Nudge the whole traffic setup up 10px and right 10px onto the asphalt.
+    const OFFX = 10
+    const OFFY = -10
+    for (const sp of specs) {
+      sp.x += OFFX
+      sp.y += OFFY
+      if (sp.axis === 'y') {
+        sp.min += OFFY
+        sp.max += OFFY
+        sp.stop += OFFY
+      } else {
+        sp.min += OFFX
+        sp.max += OFFX
+        sp.stop += OFFX
+      }
+    }
+
+    this.carBodies = this.scene.physics.add.staticGroup()
     for (const sp of specs) {
       if (!this.scene.textures.exists(sp.tex)) continue
       const s = this.scene.add.image(sp.x, sp.y, sp.tex).setScale(SCALE).setDepth(sp.y)
+      // static physics body so players collide with (and get nudged by) traffic
+      this.carBodies.add(s)
+      ;(s.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject()
       this.cars.push({
         s,
         vx: sp.vx,
@@ -148,6 +175,8 @@ export class AmbientLife {
       if (c.axis === 'y') c.s.x = c.cross + bob
       else c.s.y = c.cross + bob
       c.s.setDepth(c.s.y)
+      // keep the collision body in sync with the moving sprite
+      ;(c.s.body as Phaser.Physics.Arcade.StaticBody | undefined)?.updateFromGameObject()
     }
 
     for (const f of this.flits) {

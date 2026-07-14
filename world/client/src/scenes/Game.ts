@@ -133,6 +133,10 @@ export default class Game extends Phaser.Scene {
     this.ambient = new AmbientLife(this)
     if (worldMap === 'osaka') {
       this.ambient.addOsakaTraffic()
+      // players collide with (and get nudged by) the moving cars
+      const carGroup = this.ambient.getCarGroup()
+      if (carGroup)
+        this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], carGroup)
       // crows pecking around on the sidewalks/plaza
       this.ambient.addCrows([
         [360, 660],
