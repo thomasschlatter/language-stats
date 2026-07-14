@@ -14,6 +14,7 @@ import MobileVirtualJoystick from "./components/MobileVirtualJoystick";
 import CharacterCreation from "./components/CharacterCreation";
 import TeamTask from "./components/TeamTask";
 import GameJoystick from "./components/GameJoystick";
+import AnimTester from "./components/AnimTester";
 
 const Backdrop = styled.div`
   position: absolute;
@@ -55,6 +56,8 @@ function App() {
           <Chat />
           {/* Cooperative team task banner (shared word goal for the room). */}
           <TeamTask />
+          {/* Dev overlay: click to preview each body-sheet animation. */}
+          <AnimTester />
           {/* Render VideoConnectionDialog if user is not connected to a webcam. */}
           {!videoConnected && <VideoConnectionDialog />}
           <MobileVirtualJoystick />

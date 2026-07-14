@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 import { debugDraw } from '../utils/debug'
 import { createCharacterAnims } from '../anims/CharacterAnims'
+import { buildTestAnims } from '../anims/testAnims'
 
 import Item from '../items/Item'
 import Chair from '../items/Chair'
@@ -39,6 +40,9 @@ export default class Game extends Phaser.Scene {
 
   isNearBot = false
   userHasInteracted = true
+
+  // Animation-tester overlay: a scaled-up sprite that plays a chosen test_ anim.
+  private testSprite?: Phaser.GameObjects.Sprite
 
   // Set by the per-world builders, consumed by setupPlayerAndNetwork().
   private spawnX = 0
@@ -107,6 +111,7 @@ export default class Game extends Phaser.Scene {
     }
 
     createCharacterAnims(this.anims)
+    buildTestAnims(this) // register test_<name> anims from the full body sheet
 
     // Dispatch to the right map builder based on the world the player picked.
     const worldMap = (this.network as any).worldMap || 'meadow'
@@ -116,6 +121,28 @@ export default class Game extends Phaser.Scene {
     else this.buildProcedural(worldMap)
 
     this.setupPlayerAndNetwork()
+  }
+
+  /** Called from the React AnimTester panel — plays a test_ anim on a big sprite
+   *  floating above the player so we can eyeball each row of the body sheet. */
+  playTestAnim(name: string) {
+    if (!this.myPlayer) return
+    if (!this.testSprite) {
+      this.testSprite = this.add
+        .sprite(this.myPlayer.x, this.myPlayer.y - 70, 'bodytest')
+        .setScale(3)
+        .setDepth(1_000_000)
+    }
+    this.testSprite
+      .setPosition(this.myPlayer.x, this.myPlayer.y - 70)
+      .setVisible(true)
+    const key = `test_${name}`
+    if (this.anims.exists(key)) this.testSprite.anims.play(key, true)
+  }
+
+  stopTestAnim() {
+    this.testSprite?.setVisible(false)
+    this.testSprite?.anims.stop()
   }
 
   // Shared across every world: spawn the player + bot, set up the camera,
@@ -784,6 +811,9 @@ export default class Game extends Phaser.Scene {
     if (this.myPlayer && this.network) {
       this.playerSelector.update(this.myPlayer, this.cursors)
       this.myPlayer.update(this.playerSelector, this.cursors, this.keyE, this.keyR, this.keySpace, this.network)
+      // Keep the animation-tester sprite hovering above the player.
+      if (this.testSprite?.visible)
+        this.testSprite.setPosition(this.myPlayer.x, this.myPlayer.y - 70)
     }
   }
 }

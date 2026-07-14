@@ -108,6 +108,11 @@ export default class Bootstrap extends Phaser.Scene {
       this.load.spritesheet(key, value[0], value[1])
     }
 
+    // Full-animation body sheet (idle/walk/sleep/sit/phone/shoot/… — see
+    // Spritesheet_animations_GUIDE.png). Loaded as a plain image; testAnims.ts
+    // slices the irregular rows into frames itself.
+    this.load.image('bodytest', 'assets/character/Bodies/32x32/Body_32x32_08.png')
+
     this.load.on('complete', () => {
       this.preloadComplete = true
       // Deep-link: /game?mode=practice jumps straight into the solo word game
