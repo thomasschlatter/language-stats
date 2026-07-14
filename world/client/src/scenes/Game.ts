@@ -4,6 +4,7 @@ import { debugDraw } from '../utils/debug'
 import { createCharacterAnims } from '../anims/CharacterAnims'
 import { buildTestAnims } from '../anims/testAnims'
 import { OSAKA_WALKABLE, OSAKA_SPAWN, OSAKA_BOT } from './osakaCollision'
+import { AmbientLife } from './ambientLife'
 
 import Item from '../items/Item'
 import Chair from '../items/Chair'
@@ -44,6 +45,9 @@ export default class Game extends Phaser.Scene {
 
   // Animation-tester overlay: a scaled-up sprite that plays a chosen test_ anim.
   private testSprite?: Phaser.GameObjects.Sprite
+
+  // Ambient decoration: butterflies (nature worlds) + cars (Osaka).
+  private ambient?: AmbientLife
 
   // Set by the per-world builders, consumed by setupPlayerAndNetwork().
   private spawnX = 0
@@ -124,6 +128,12 @@ export default class Game extends Phaser.Scene {
     else this.buildProcedural(worldMap)
 
     this.setupPlayerAndNetwork()
+
+    // Ambient life: cars on the Osaka streets, butterflies in the nature worlds.
+    this.ambient = new AmbientLife(this)
+    if (worldMap === 'osaka') this.ambient.addOsakaTraffic()
+    else if (worldMap === 'meadow' || worldMap === 'village' || worldMap === 'island')
+      this.ambient.addButterflies(this.spawnX, this.spawnY, 6)
   }
 
   /** Called from the React AnimTester panel — plays a test_ anim on a big sprite
@@ -872,5 +882,6 @@ export default class Game extends Phaser.Scene {
       if (this.testSprite?.visible)
         this.testSprite.setPosition(this.myPlayer.x, this.myPlayer.y - 70)
     }
+    this.ambient?.update(dt)
   }
 }

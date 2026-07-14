@@ -117,6 +117,12 @@ export default class Bootstrap extends Phaser.Scene {
     // as an image world; collision comes from osakaCollision.ts.
     this.load.image('osaka_map', 'assets/guttykreum/osaka/OsakaWorld.png')
 
+    // Cars (LimeZu Modern Exteriors) — one per direction, for street traffic.
+    this.load.image('car_up', 'assets/vehicles/car_up.png')
+    this.load.image('car_down', 'assets/vehicles/car_down.png')
+    this.load.image('car_left', 'assets/vehicles/car_left.png')
+    this.load.image('car_right', 'assets/vehicles/car_right.png')
+
     this.load.on('complete', () => {
       this.preloadComplete = true
       // Tell the HTML boot loader (Groupifier logo) it can fade out.
