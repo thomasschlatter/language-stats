@@ -138,12 +138,13 @@ export default class Game extends Phaser.Scene {
       const carGroup = this.ambient.getCarGroup()
       if (carGroup)
         this.physics.add.collider([this.myPlayer, this.myPlayer.playerContainer], carGroup)
-      // crows pecking around on the sidewalks/plaza
+      // ravens flying across the sky + a couple of static ground crows
+      const w = this.map.widthInPixels
+      this.ambient.addFlyingRaven(150, w)
+      this.ambient.addFlyingRaven(90, w)
       this.ambient.addCrows([
         [360, 660],
-        [520, 705],
         [820, 505],
-        [300, 470],
       ])
     } else if (worldMap === 'meadow' || worldMap === 'village' || worldMap === 'island')
       this.ambient.addButterflies(this.spawnX, this.spawnY, 6)

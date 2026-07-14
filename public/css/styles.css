@@ -519,9 +519,9 @@ body.in-world .lang-bar { display: none; }
 .prof-place { font-size: 0.9rem; margin: 0.25rem 0 0.5rem; }
 
 /* ---- World (embedded STRANDED) ---- */
-.world-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.world-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
 .world-frame {
-  width: 100%; height: calc(100vh - 210px); min-height: 420px;
+  width: 100%; height: calc(100vh - 120px); min-height: 460px;
   border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); display: block;
 }
 

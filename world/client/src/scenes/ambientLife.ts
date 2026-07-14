@@ -106,11 +106,37 @@ export class AmbientLife {
       })
     }
     for (const [x, y] of spots) {
-      const s = this.scene.add.sprite(x, y, 'crow').setDepth(y).setScale(1.1)
-      s.play('crow_idle')
-      // reuse the Flit wander with a small radius so they hop around locally
-      this.flits.push({ s, cx: x, cy: y, r: 10 + Math.random() * 22, ang: Math.random() * 6.28, spd: 0.25 + Math.random() * 0.3, t: Math.random() * 100, ground: true })
+      // Static — sits in one spot and plays its pecking/idle animation (no wander).
+      this.scene.add.sprite(x, y, 'crow').setDepth(y).setScale(1.1).play('crow_idle')
     }
+  }
+
+  /** A raven flying across the sky, looping (city worlds). */
+  addFlyingRaven(y: number, mapWidth: number) {
+    if (!this.scene.textures.exists('crow_flying')) return
+    if (!this.scene.anims.exists('crow_flying_left')) {
+      this.scene.anims.create({
+        key: 'crow_flying_left',
+        frames: this.scene.anims.generateFrameNumbers('crow_flying', { start: 0, end: 5 }),
+        frameRate: 10,
+        repeat: -1,
+      })
+    }
+    const raven = this.scene.add
+      .sprite(mapWidth + 60, y, 'crow_flying')
+      .setScale(0.9)
+      .setDepth(900000)
+    raven.play('crow_flying_left')
+    this.scene.tweens.add({
+      targets: raven,
+      x: -80,
+      duration: 13000,
+      ease: 'Linear',
+      repeat: -1,
+      onRepeat: () => {
+        raven.x = mapWidth + 60
+      },
+    })
   }
 
   /** Cars looping along the two Osaka roads (they stay on the streets by design). */
