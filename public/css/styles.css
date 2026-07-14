@@ -67,13 +67,14 @@ a:hover { text-decoration: underline; }
 /* Sections that require an account are hidden until signed in (body.authed is
    toggled by renderAuthArea). Hidden by default so they never flash pre-auth. */
 body:not(.authed) .auth-only { display: none !important; }
-/* Icon nav: emoji symbols, dimmed until active/hovered. */
+/* Icon nav: single-colour line icons (currentColor), themed + accent when active. */
 .topnav a {
-  position: relative; font-size: 1.35rem; line-height: 1; opacity: 0.6;
-  transition: opacity 0.15s ease, transform 0.15s ease; text-decoration: none;
+  position: relative; display: flex; align-items: center; color: var(--muted);
+  transition: color 0.15s ease; text-decoration: none;
 }
-.topnav a:hover { opacity: 1; text-decoration: none; }
-.topnav a.active { opacity: 1; transform: scale(1.15); }
+.topnav a svg { width: 22px; height: 22px; display: block; }
+.topnav a:hover { color: var(--text); text-decoration: none; }
+.topnav a.active { color: var(--accent); }
 .due-badge {
   display: inline-block; margin-left: 0.3rem; background: var(--accent-2); color: #04160f;
   border-radius: 999px; font-size: 0.68rem; font-weight: 700; padding: 0.02rem 0.35rem; vertical-align: middle;
@@ -805,9 +806,9 @@ label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.85rem; color: va
     overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
     padding-bottom: 0.15rem;
   }
-  /* Bigger, easier-to-tap symbol nav on phones. */
-  .topnav { gap: 1.4rem; }
-  .topnav a { font-size: 1.6rem; }
+  /* Bigger, easier-to-tap icon nav on phones. */
+  .topnav { gap: 1.5rem; }
+  .topnav a svg { width: 26px; height: 26px; }
   .native-picker .who { display: none; }
 }
 /* Wide content (tables, word clouds) scrolls inside itself, never the page. */
