@@ -123,6 +123,12 @@ export function setLevel(userId, level) {
   db.prepare('UPDATE users SET level = ? WHERE id = ?').run(level, userId);
 }
 
+// Set which native language is primary (drives click-to-translate). Stored as a
+// code; profile() falls back to the first native if it's no longer a native.
+export function setPrimaryNative(userId, code) {
+  db.prepare('UPDATE users SET primary_native = ? WHERE id = ?').run(code || null, userId);
+}
+
 // Set the CEFR proficiency for a single learning language.
 export function setLanguageLevel(userId, languageId, level) {
   if (!CEFR_LEVELS.includes(level)) return;
@@ -191,6 +197,10 @@ export function profile(user) {
   const langs = getUserLanguages(user.id);
   let avatar = null;
   try { avatar = user.avatar ? JSON.parse(user.avatar) : null; } catch { avatar = null; }
+  const nativeCodes = langs.filter((l) => l.role === 'native').map((l) => l.code);
+  const primaryNative = (user.primary_native && nativeCodes.includes(user.primary_native))
+    ? user.primary_native
+    : (nativeCodes[0] || null);
   return {
     id: user.id,
     username: user.username,
@@ -202,6 +212,7 @@ export function profile(user) {
     avatar_image: user.avatar_image || null,
     level: user.level || 'a1', // legacy global; per-language levels are on `learning`
     native: langs.filter((l) => l.role === 'native').map(({ code, name }) => ({ code, name })),
+    primaryNative,
     learning: langs.filter((l) => l.role === 'learning').map(({ code, name, level }) => ({ code, name, level: level || 'a1' })),
     created_at: user.created_at,
   };

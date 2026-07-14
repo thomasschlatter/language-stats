@@ -6,9 +6,9 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { avatarFor } from '../avatar.js';
-import { nativeSelector, logout } from '../auth.js';
+import { logout } from '../auth.js';
 import { byImportance } from '../langOrder.js';
-import { languageMultiPicker } from '../langPicker.js';
+import { languageMultiPicker, nativeLanguagesSetting } from '../langPicker.js';
 import { openCharacterCreator } from './characterCreator.js';
 
 export async function renderUserProfile(username) {
@@ -93,7 +93,7 @@ export async function renderUserProfile(username) {
   if (isMe) {
     profile.append(card([
       el('div', { class: 'card-title' }, 'Languages & level'),
-      el('div', { class: 'prof-setting' }, nativeSelector()),
+      nativeLanguagesSetting(prof, () => renderUserProfile(prof.username)),
       learningLanguagesSetting(),
       levelSetting(prof),
     ]));

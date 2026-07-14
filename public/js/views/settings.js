@@ -7,7 +7,7 @@ import { el, clear, openModal } from '../dom.js';
 import { avatarFor } from '../avatar.js';
 import { signInPrompt } from '../auth.js';
 import { openCharacterCreator } from './characterCreator.js';
-import { languageMultiPicker } from '../langPicker.js';
+import { languageMultiPicker, nativeLanguagesSetting } from '../langPicker.js';
 
 function section(title, children) {
   return el('section', { class: 'settings-section' }, [
@@ -83,8 +83,11 @@ export async function renderSettings() {
     ]),
   ]));
 
-  // Profile (bio, origin, location, interests, languages)
-  view.append(section('Profile', [profileForm(prof)]));
+  // Profile (native languages + primary, then bio, origin, location, interests, learning)
+  view.append(section('Profile', [
+    nativeLanguagesSetting(prof, () => renderSettings()),
+    profileForm(prof),
+  ]));
 
   // Account
   view.append(section('Account', [
@@ -104,7 +107,8 @@ function profileForm(prof) {
   const location = el('input', { type: 'text', placeholder: 'e.g. London, UK' }); location.value = prof.location || '';
   const interests = el('input', { type: 'text', placeholder: 'interests, comma separated' }); interests.value = prof.interests.join(', ');
 
-  const nativePick = languageMultiPicker(prof.native.map((l) => l.code));
+  // Native languages are managed by the shared nativeLanguagesSetting (with a
+  // primary) above this form, so they stay in sync with the profile page.
   const learnPick = languageMultiPicker(prof.learning.map((l) => l.code));
 
   return el('form', {
@@ -117,7 +121,6 @@ function profileForm(prof) {
           origin: origin.value,
           location: location.value,
           interests: interests.value.split(',').map((s) => s.trim()).filter(Boolean),
-          native: nativePick.get(),
           learning: learnPick.get(),
         });
         ok.textContent = 'Saved.';
@@ -128,7 +131,6 @@ function profileForm(prof) {
     field('From (origin)', origin),
     field('Lives in', location),
     field('Interests', interests),
-    field('Speaks (native)', nativePick.el),
     field('Learning', learnPick.el),
     err, ok,
     el('div', { style: 'margin-top:0.75rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Save profile')]),

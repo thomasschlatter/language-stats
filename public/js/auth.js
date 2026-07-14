@@ -16,6 +16,8 @@ export async function loadCurrentUser() {
     // across devices). Only override if the server actually has languages, so a
     // returning user's local carousel isn't wiped by an empty server list.
     if (user.learning && user.learning.length) store.setLearning(user.learning);
+    // Primary native = the click-to-translate target; server is the source of truth.
+    if (user.primaryNative) store.setNative(user.primaryNative);
   } catch {
     store.set({ user: null });
   }

@@ -243,10 +243,13 @@ router.post('/logout', (req, res) => {
 router.get('/me', requireAuth, (req, res) => {
   const user = getUserById(req.user.id);
   const avatar = user.avatar ? JSON.parse(user.avatar) : null;
-  const learnLangs = getUserLanguages(req.user.id).filter((l) => l.role === 'learning');
+  const allLangs = getUserLanguages(req.user.id);
+  const learnLangs = allLangs.filter((l) => l.role === 'learning');
+  const nativeCodes = allLangs.filter((l) => l.role === 'native').map((l) => l.code);
   const learning = learnLangs.map((l) => l.code);
   const levels = Object.fromEntries(learnLangs.map((l) => [l.code, l.level || 'a1']));
-  res.json({ user: { ...publicUser(user), avatar, avatar_image: user.avatar_image || null, level: user.level || 'a1', learning, levels } });
+  const primaryNative = (user.primary_native && nativeCodes.includes(user.primary_native)) ? user.primary_native : (nativeCodes[0] || null);
+  res.json({ user: { ...publicUser(user), avatar, avatar_image: user.avatar_image || null, level: user.level || 'a1', learning, levels, native: nativeCodes, primaryNative } });
 });
 
 // POST /api/auth/change-password  { currentPassword, newPassword }

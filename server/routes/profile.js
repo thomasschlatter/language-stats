@@ -12,6 +12,7 @@ import {
   setAvatarImage,
   setLevel,
   setLanguageLevel,
+  setPrimaryNative,
   profile,
 } from '../models/users.js';
 import { getLanguageByCode } from '../models/languages.js';
@@ -79,6 +80,7 @@ router.put('/', requireAuth, (req, res) => {
   if (learning !== undefined) setUserLanguages(req.user.id, 'learning', idsFromCodes(learning));
   if (avatar !== undefined) setAvatar(req.user.id, avatar);
   if (req.body?.level !== undefined) setLevel(req.user.id, req.body.level);
+  if (req.body?.primaryNative !== undefined) setPrimaryNative(req.user.id, req.body.primaryNative);
   res.json({ profile: profile(getUserById(req.user.id)) });
 });
 

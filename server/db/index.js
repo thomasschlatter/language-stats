@@ -41,6 +41,9 @@ if (!userCols.includes('dm_last_read_id')) {
 if (!userCols.includes('level')) {
   db.exec("ALTER TABLE users ADD COLUMN level TEXT NOT NULL DEFAULT 'a1'"); // self-rated CEFR proficiency (legacy global)
 }
+if (!userCols.includes('primary_native')) {
+  db.exec('ALTER TABLE users ADD COLUMN primary_native TEXT'); // which native language drives click-to-translate
+}
 // Per-language proficiency: each learning language has its own CEFR level.
 const ulCols = db.prepare('PRAGMA table_info(user_languages)').all().map((c) => c.name);
 if (!ulCols.includes('level')) {
