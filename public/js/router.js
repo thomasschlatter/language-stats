@@ -23,12 +23,14 @@ import { renderDmThread } from './views/dmThread.js';
 import { renderSettings } from './views/settings.js';
 import { renderSearch } from './views/search.js';
 import { renderWorld } from './views/world.js';
+import { renderGames } from './views/games.js';
 import { renderDecks } from './views/decks.js';
 import { renderStudy } from './views/study.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
   { pattern: /^#\/world$/, handler: () => renderWorld(), auth: true },
+  { pattern: /^#\/games$/, handler: () => renderGames(), auth: true },
   { pattern: /^#\/search\/(.+)$/, handler: (m) => renderSearch(dec(m[1])) },
   { pattern: /^#\/settings$/, handler: () => renderSettings(), auth: true },
   { pattern: /^#\/decks$/, handler: () => renderDecks(), auth: true },
