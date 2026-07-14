@@ -107,6 +107,15 @@ if (listLanguages().length === 0) {
   await import('./db/seed.js');
 }
 
+// Load any word-frequency lists not yet in the DB (idempotent) — so existing
+// production databases pick up newly-added languages on the next restart.
+try {
+  const { ensureAllFrequencies } = await import('./db/loadFrequencies.js');
+  ensureAllFrequencies();
+} catch (e) {
+  console.warn('Frequency ensure failed:', e.message);
+}
+
 app.listen(PORT, () => {
   console.log(`Language Stats running at http://localhost:${PORT}`);
 });
