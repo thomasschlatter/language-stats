@@ -46,8 +46,35 @@ export function allDone(): boolean {
   return completedLevel() >= LEVELS.length
 }
 
+// --- Lightweight play stats: total games and a consecutive-day streak. ---
+const STATS_KEY = 'game-stats'
+const dayStr = (d: Date) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
+
+export function getStats(): { played: number; streak: number } {
+  try {
+    const s = JSON.parse(localStorage.getItem(STATS_KEY) || '{}')
+    return { played: s.played || 0, streak: s.streak || 0 }
+  } catch { return { played: 0, streak: 0 } }
+}
+
+function bumpStats() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STATS_KEY) || '{}')
+    s.played = (s.played || 0) + 1
+    const now = new Date()
+    const today = dayStr(now)
+    const yesterday = dayStr(new Date(now.getTime() - 86400000))
+    if (s.lastPlayed === today) { /* already counted a day today */ }
+    else if (s.lastPlayed === yesterday) s.streak = (s.streak || 0) + 1
+    else s.streak = 1
+    s.lastPlayed = today
+    localStorage.setItem(STATS_KEY, JSON.stringify(s))
+  } catch { /* ignore */ }
+}
+
 /** Record a finished game; advance if it satisfied the current level's task. */
 export function recordResult(r: GameResult): { advanced: boolean; level?: Level } {
+  bumpStats()
   const cur = currentLevel()
   if (cur && cur.check(r)) {
     try { localStorage.setItem(KEY, String(cur.id)) } catch { /* ignore */ }

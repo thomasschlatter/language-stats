@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { LEVELS, currentLevel, completedLevel, allDone } from '../game/progress'
+import { LEVELS, currentLevel, completedLevel, allDone, getStats } from '../game/progress'
 
 // The word-games hub: pick a game, and see your current level/task. Each game
 // reports back here (scene.start('gamemenu')) so progress stays visible.
@@ -50,6 +50,13 @@ export default class GameMenu extends Phaser.Scene {
       card.on('pointerout', () => card.setStrokeStyle(2, 0x3a4470))
       card.on('pointerdown', () => this.scene.start(g.scene))
     })
+
+    // Play stats — a little retention nudge.
+    const st = getStats()
+    if (st.played > 0) {
+      const streakTxt = st.streak > 1 ? `🔥 ${st.streak}-day streak · ` : ''
+      this.add.text(W / 2, H * 0.90, `${streakTxt}${st.played} game${st.played === 1 ? '' : 's'} played`, { fontSize: '14px', color: '#7c88ad' }).setOrigin(0.5)
+    }
 
     const exit = this.add.text(W - 16, 16, '✕ Exit', { fontSize: '18px', color: '#9fb0d8' })
       .setOrigin(1, 0).setInteractive({ useHandCursor: true })
