@@ -9,6 +9,7 @@ import { tokenizeTree } from '../render.js';
 import { voteButton } from './voteButton.js';
 import { signInPrompt } from '../auth.js';
 import { openTipEditor } from './tips.js';
+import { navigate } from '../router.js';
 
 // The unified language page: cards and tips are the same kind of thing — one
 // combined, upvote-ranked list of entries. Each links to its own page (an
@@ -21,9 +22,18 @@ export async function renderArticles(langCode) {
     return;
   }
 
+  // A compact language switcher (replaces the old languages bar). Shows a
+  // dropdown of the languages you're learning, or just the name if there's one.
+  const learning = store.languages
+    .filter((l) => store.isLearning(l.code) && l.code !== store.nativeLang)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const langControl = learning.length > 1
+    ? el('select', { class: 'lang-switch', onchange: (e) => navigate(`#/lang/${encodeURIComponent(e.target.value)}`) },
+        learning.map((l) => el('option', { value: l.code, selected: l.code === langCode ? '' : null }, l.name)))
+    : el('h1', { style: 'margin:0' }, language.name);
   view.append(
-    el('div', { class: 'section-head', style: 'justify-content:flex-end' }, [
-      // The lang bar already shows which language this is, so no title here.
+    el('div', { class: 'section-head' }, [
+      langControl,
       store.user
         ? el('button', { class: 'btn small', onclick: () => openTipEditor(language, () => renderArticles(langCode)) }, '+ Add')
         : signInPrompt('to add cards & tips'),

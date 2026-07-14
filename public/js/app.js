@@ -12,8 +12,10 @@ import { guardSingleInstance } from './singleInstance.js';
 
 // Make the persistent chrome (language bar, top-bar labels) clickable too.
 function tokenizeChrome() {
-  tokenizeTree(document.querySelector('.lang-viewport'));
-  tokenizeTree(document.getElementById('auth-area'));
+  const lv = document.querySelector('.lang-viewport');
+  if (lv) tokenizeTree(lv);
+  const auth = document.getElementById('auth-area');
+  if (auth) tokenizeTree(auth);
 }
 
 function reloadLanguages() {
@@ -103,7 +105,9 @@ function flagEmoji(code) {
 }
 
 function renderSidebar() {
-  const nav = clear(document.getElementById('language-list'));
+  const listEl = document.getElementById('language-list');
+  if (!listEl) return; // the languages bar was removed
+  const nav = clear(listEl);
   const currentCode = decodeURIComponent((window.location.hash.match(/#\/lang\/([^/]+)/) || [])[1] || '');
 
   // The carousel shows only the languages you're LEARNING (never your native

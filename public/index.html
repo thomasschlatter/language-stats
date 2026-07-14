@@ -48,30 +48,19 @@
     <header class="topbar">
       <a class="brand" href="#/" aria-label="Groupifier home"><img src="/apple-touch-icon.png" alt="Groupifier" /></a>
       <nav class="topnav">
-        <a href="#/community">Community</a>
-        <a href="#/tips">Tips</a>
-        <a class="auth-only" href="#/chat">Chat</a>
-        <a class="auth-only" href="#/world">World</a>
-        <!-- Games hidden for now; route still works -->
-        <a class="auth-only" href="#/decks">Flashcards</a>
-        <a class="auth-only" href="#/messages">Messages</a>
-        <!-- Settings moved into your profile (tap your avatar). -->
+        <a href="#/community" title="Community" aria-label="Community">👥</a>
+        <a href="#/tips" title="Tips" aria-label="Tips">💡</a>
+        <a class="auth-only" href="#/chat" title="Chat" aria-label="Chat">💬</a>
+        <a class="auth-only" href="#/world" title="World" aria-label="World">🌍</a>
+        <a class="auth-only" href="#/decks" title="Flashcards" aria-label="Flashcards">🎴</a>
+        <a class="auth-only" href="#/messages" title="Messages" aria-label="Messages">✉️</a>
+        <!-- Games hidden for now; Settings live in your profile (tap avatar). -->
       </nav>
       <form id="search-form" class="search-form">
         <input id="search-input" type="search" placeholder="Search words…" autocomplete="off" />
       </form>
       <div id="auth-area" class="auth-area"><!-- filled by auth.js --></div>
     </header>
-
-    <!-- Languages: a horizontal carousel under the header (was a left sidebar) -->
-    <div class="lang-bar" aria-label="Languages">
-      <span class="lang-bar-label">Languages</span>
-      <button id="lang-prev" class="lang-nav" type="button" aria-label="Scroll languages left" hidden>‹</button>
-      <div class="lang-viewport">
-        <nav id="language-list" class="language-list"></nav>
-      </div>
-      <button id="lang-next" class="lang-nav" type="button" aria-label="Scroll languages right" hidden>›</button>
-    </div>
 
     <div class="layout">
       <!-- Main content: rendered by the router -->

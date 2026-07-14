@@ -63,14 +63,17 @@ a:hover { text-decoration: underline; }
 .brand { font-weight: 700; font-size: 1.15rem; color: var(--text); display: flex; align-items: center; }
 .brand img { height: 30px; width: 30px; border-radius: 7px; display: block; }
 .brand:hover { text-decoration: none; color: var(--accent); }
-.topnav { display: flex; gap: 1rem; margin-left: 1.5rem; flex: 1; }
+.topnav { display: flex; gap: 1.15rem; margin-left: 1.5rem; flex: 1; align-items: center; }
 /* Sections that require an account are hidden until signed in (body.authed is
    toggled by renderAuthArea). Hidden by default so they never flash pre-auth. */
 body:not(.authed) .auth-only { display: none !important; }
-.topnav a { color: var(--muted); font-size: 0.9rem; }
-.topnav a:hover { color: var(--text); text-decoration: none; }
-.topnav a.active { color: var(--text); font-weight: 600; }
-.topnav a { position: relative; }
+/* Icon nav: emoji symbols, dimmed until active/hovered. */
+.topnav a {
+  position: relative; font-size: 1.35rem; line-height: 1; opacity: 0.6;
+  transition: opacity 0.15s ease, transform 0.15s ease; text-decoration: none;
+}
+.topnav a:hover { opacity: 1; text-decoration: none; }
+.topnav a.active { opacity: 1; transform: scale(1.15); }
 .due-badge {
   display: inline-block; margin-left: 0.3rem; background: var(--accent-2); color: #04160f;
   border-radius: 999px; font-size: 0.68rem; font-weight: 700; padding: 0.02rem 0.35rem; vertical-align: middle;
@@ -802,8 +805,9 @@ label { display: block; margin: 0.75rem 0 0.25rem; font-size: 0.85rem; color: va
     overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
     padding-bottom: 0.15rem;
   }
-  /* Bigger, easier-to-tap nav links on phones. */
-  .topnav a { font-size: 1.02rem; padding: 0.25rem 0.15rem; }
+  /* Bigger, easier-to-tap symbol nav on phones. */
+  .topnav { gap: 1.4rem; }
+  .topnav a { font-size: 1.6rem; }
   .native-picker .who { display: none; }
 }
 /* Wide content (tables, word clouds) scrolls inside itself, never the page. */
