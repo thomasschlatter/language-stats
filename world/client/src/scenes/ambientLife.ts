@@ -14,6 +14,7 @@ interface Car {
   axis: 'x' | 'y'
   cross: number // fixed lane coord on the perpendicular axis
   phase: number // per-car bob offset
+  stop: number // coord to hold at when the light is red (before the junction)
 }
 
 interface Flit {
@@ -82,19 +83,20 @@ export class AmbientLife {
       axis: 'x' | 'y'
       min: number
       max: number
+      stop: number
     }> = [
-      // down lane (x=712), a couple of cars spaced out
-      { tex: 'car_down', x: 712, y: 60, vx: 0, vy: SP, axis: 'y', min: -190, max: 1010 },
-      { tex: 'car_down', x: 712, y: 520, vx: 0, vy: SP, axis: 'y', min: -190, max: 1010 },
-      // up lane (x=656)
-      { tex: 'car_up', x: 656, y: 320, vx: 0, vy: -SP, axis: 'y', min: -190, max: 1010 },
-      { tex: 'car_up', x: 656, y: 780, vx: 0, vy: -SP, axis: 'y', min: -190, max: 1010 },
-      // right lane (y=556)
-      { tex: 'car_right', x: 120, y: 556, vx: SP, vy: 0, axis: 'x', min: -210, max: 1300 },
-      { tex: 'car_right', x: 640, y: 556, vx: SP, vy: 0, axis: 'x', min: -210, max: 1300 },
-      // left lane (y=620)
-      { tex: 'car_left', x: 420, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300 },
-      { tex: 'car_left', x: 920, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300 },
+      // down lane (x=712) — stop just above the junction (y≈495)
+      { tex: 'car_down', x: 712, y: 60, vx: 0, vy: SP, axis: 'y', min: -190, max: 1010, stop: 495 },
+      { tex: 'car_down', x: 712, y: 520, vx: 0, vy: SP, axis: 'y', min: -190, max: 1010, stop: 495 },
+      // up lane (x=656) — stop just below the junction (y≈675)
+      { tex: 'car_up', x: 656, y: 320, vx: 0, vy: -SP, axis: 'y', min: -190, max: 1010, stop: 675 },
+      { tex: 'car_up', x: 656, y: 780, vx: 0, vy: -SP, axis: 'y', min: -190, max: 1010, stop: 675 },
+      // right lane (y=556) — stop just left of the junction (x≈588)
+      { tex: 'car_right', x: 120, y: 556, vx: SP, vy: 0, axis: 'x', min: -210, max: 1300, stop: 588 },
+      { tex: 'car_right', x: 640, y: 556, vx: SP, vy: 0, axis: 'x', min: -210, max: 1300, stop: 588 },
+      // left lane (y=620) — stop just right of the junction (x≈792)
+      { tex: 'car_left', x: 420, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300, stop: 792 },
+      { tex: 'car_left', x: 920, y: 620, vx: -SP, vy: 0, axis: 'x', min: -210, max: 1300, stop: 792 },
     ]
     for (const sp of specs) {
       if (!this.scene.textures.exists(sp.tex)) continue
@@ -108,6 +110,7 @@ export class AmbientLife {
         max: sp.max,
         cross: sp.axis === 'y' ? sp.x : sp.y,
         phase: Math.random() * Math.PI * 2,
+        stop: sp.stop,
       })
     }
   }
@@ -116,12 +119,29 @@ export class AmbientLife {
     const d = dt / 1000
     this.t += d
 
+    // Traffic light: vertical road green, brief all-red, horizontal green, repeat.
+    const phase = this.t % 13
+    const vGreen = phase < 5.5
+    const hGreen = phase >= 6.5 && phase < 12
+
     for (const c of this.cars) {
-      c.s.x += c.vx * d
-      c.s.y += c.vy * d
-      const p = c.axis === 'x' ? c.s.x : c.s.y
-      if (p < c.min) c.axis === 'x' ? (c.s.x = c.max) : (c.s.y = c.max)
-      else if (p > c.max) c.axis === 'x' ? (c.s.x = c.min) : (c.s.y = c.min)
+      const green = c.axis === 'y' ? vGreen : hGreen
+      if (c.axis === 'y') {
+        const ny = c.s.y + c.vy * d
+        // stop at the line only while still approaching the junction
+        if (green) c.s.y = ny
+        else if (c.vy > 0) c.s.y = c.s.y <= c.stop ? Math.min(ny, c.stop) : ny
+        else c.s.y = c.s.y >= c.stop ? Math.max(ny, c.stop) : ny
+        if (c.s.y < c.min) c.s.y = c.max
+        else if (c.s.y > c.max) c.s.y = c.min
+      } else {
+        const nx = c.s.x + c.vx * d
+        if (green) c.s.x = nx
+        else if (c.vx > 0) c.s.x = c.s.x <= c.stop ? Math.min(nx, c.stop) : nx
+        else c.s.x = c.s.x >= c.stop ? Math.max(nx, c.stop) : nx
+        if (c.s.x < c.min) c.s.x = c.max
+        else if (c.s.x > c.max) c.s.x = c.min
+      }
       // subtle suspension bob on the perpendicular axis (the cars are
       // single-frame sprites, so this stands in for a driving animation).
       const bob = Math.sin(this.t * 9 + c.phase) * 0.8
