@@ -102,7 +102,7 @@ function renderSidebar() {
   // language — you don't learn that). The rest live behind "+ Add languages".
   const learning = store.languages
     .filter((l) => store.isLearning(l.code) && l.code !== store.nativeLang)
-    .sort(byImportance);
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   for (const lang of learning) {
     nav.append(el('div', { class: 'lang-row' }, [
@@ -114,9 +114,9 @@ function renderSidebar() {
     ]));
   }
   if (!learning.length) {
-    nav.append(el('span', { class: 'muted', style: 'font-size:0.85rem' }, 'Pick languages to learn →'));
+    nav.append(el('span', { class: 'muted', style: 'font-size:0.85rem' }, 'Add languages in Settings →'));
   }
-  nav.append(el('button', { class: 'lang-add', onclick: openLanguagePicker }, '+ Add languages'));
+  // Adding languages now lives in Settings, so no "+ Add languages" button here.
   refreshLangArrows();
 }
 

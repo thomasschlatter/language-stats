@@ -22,8 +22,8 @@ export async function renderArticles(langCode) {
   }
 
   view.append(
-    el('div', { class: 'section-head' }, [
-      el('h1', {}, language.name),
+    el('div', { class: 'section-head', style: 'justify-content:flex-end' }, [
+      // The lang bar already shows which language this is, so no title here.
       store.user
         ? el('button', { class: 'btn small', onclick: () => openTipEditor(language, () => renderArticles(langCode)) }, '+ Add')
         : signInPrompt('to add cards & tips'),
