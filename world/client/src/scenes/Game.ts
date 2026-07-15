@@ -532,9 +532,11 @@ export default class Game extends Phaser.Scene {
     const walls = this.map.createLayer('Walls', [floor], 0, 0)!
     walls.setCollisionByExclusion([-1, 0]) // every non-empty wall tile is solid
     this.worldColliders.push(walls)
-    // Spawn in the middle of the room, well clear of the walls.
-    this.spawnX = (this.map.width / 2) * 32
-    this.spawnY = (this.map.height / 2) * 32
+    // Spawn where the map says (room centre), falling back to the map centre.
+    const props = (this.map.properties as Array<{ name: string; value: number }>) || []
+    const prop = (n: string) => props.find((p) => p.name === n)?.value
+    this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
+    this.spawnY = prop('spawnY') ?? (this.map.height / 2) * 32
     this.botX = this.spawnX
     this.botY = this.spawnY + 64
   }

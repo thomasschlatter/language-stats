@@ -1,0 +1,24 @@
+{
+  "tileset": "FloorAndGround",
+  "image": "assets/map/FloorAndGround.png",
+  "firstgid": 1,
+  "note": "Tile IDs are 0-based within the tileset; map gid = firstgid + id. Cataloged visually 2026-07-15. Each color is one full tile from a 3-wide pattern group.",
+  "floors": {
+    "cream": 133,
+    "white": 257,
+    "blue-grey": 129,
+    "pink": 137,
+    "yellow": 513,
+    "wood": 641,
+    "orange-brick": 777,
+    "red-brick": 969
+  },
+  "walls": {
+    "beige-brick": 597,
+    "grey-stone": 465,
+    "grey-brick": 468,
+    "lavender-brick": 401,
+    "tan-brick": 593,
+    "maroon": 731
+  }
+}
