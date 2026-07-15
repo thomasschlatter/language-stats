@@ -20,8 +20,9 @@ const ensureSystemUser = getBotUserId;
 export function ensureOfficialDecks() {
   let files;
   try {
-    // {base}.json (frequency decks) or {base}-{tag}.json (e.g. de-menschen.json).
-    files = readdirSync(deckDir).filter((f) => /^[a-z]{2,3}(-[a-z0-9]+)?\.json$/.test(f));
+    // {base}.json (frequency decks) or {base}-{tag}[-{tag}…].json
+    // (e.g. de-menschen.json, fr-tendances-a1.json).
+    files = readdirSync(deckDir).filter((f) => /^[a-z]{2,3}(-[a-z0-9]+)*\.json$/.test(f));
   } catch {
     return;
   }
