@@ -37,6 +37,7 @@ export default class Game extends Phaser.Scene {
   myPlayer!: MyPlayer
   botPlayer!: OtherPlayer
   private playerSelector!: Phaser.GameObjects.Zone
+  private chairGroup?: Phaser.Physics.Arcade.StaticGroup
   private otherPlayers!: Phaser.Physics.Arcade.Group
   private otherPlayerMap = new Map<string, OtherPlayer>()
   computerMap = new Map<string, Computer>()
@@ -281,6 +282,16 @@ export default class Game extends Phaser.Scene {
     this.myPlayer = this.add.myPlayer(this.spawnX, this.spawnY, 'adam', this.network.mySessionId)
     this.myPlayer.setDepth(this.myPlayer.y)
     this.playerSelector = new PlayerSelector(this, 0, 0, 16, 16)
+    // Chairs: wire the selector overlap so walking near one shows "Press E to sit".
+    // Game never registered this (only Island/Lobby did), so the dialog was unreachable.
+    if (this.chairGroup)
+      this.physics.add.overlap(
+        this.playerSelector,
+        this.chairGroup,
+        this.handleItemSelectorOverlap,
+        undefined,
+        this
+      )
     this.otherPlayers = this.physics.add.group({ classType: OtherPlayer })
 
     this.botPlayer = this.add.otherPlayer(this.botX, this.botY, 'fox', 'bot', 'Foxy', 1)
@@ -600,7 +611,34 @@ export default class Game extends Phaser.Scene {
     const wallLayer = this.map.createLayer('Walls', [walls], 0, 0)!
     wallLayer.setCollisionByExclusion([-1, 0])
     this.worldColliders.push(wallLayer)
-    this.map.createLayer('Furniture', [cls], 0, 0)
+    const furniture = this.map.createLayer('Furniture', [cls], 0, 0)!
+    furniture.setDepth(0)
+    // Furniture is solid — you can't walk through desks, libraries or the chalkboard.
+    // The chair seats are the exception: they stay walkable so E-to-sit can snap the
+    // player onto the seat without the collider shoving them straight back out.
+    furniture.setCollisionByExclusion([-1, 0])
+    furniture.setCollision(cls.firstgid + 50, false) // chair top (backrest)
+    furniture.setCollision(cls.firstgid + 66, false) // chair bottom (seat/legs)
+    this.worldColliders.push(furniture)
+
+    // Hybrid chairs: no Tiled objects needed — derive a Chair item from every chair
+    // TILE the generator placed (id 50 = the seat, backrest toward us → facing the
+    // board). The Furniture layer already draws them, so these are invisible hitboxes
+    // that give the existing SkyOffice E-to-sit path something to select.
+    const CHAIR_TILE = 50
+    const chairGroup = this.physics.add.staticGroup({ classType: Chair })
+    furniture.forEachTile((t) => {
+      if (t.index - cls.firstgid !== CHAIR_TILE) return
+      const chair = chairGroup.get(t.getCenterX(), t.getCenterY()) as Chair
+      chair.itemDirection = 'up' // students face the chalkboard
+      chair.setVisible(false)
+      chair.setDepth(t.getCenterY())
+      if (chair.refreshBody) chair.refreshBody()
+    })
+    // The player selector doesn't exist until setupPlayerAndNetwork() runs, so stash
+    // the group and let that register the overlap.
+    this.chairGroup = chairGroup
+
     const props = (this.map.properties as Array<{ name: string; value: number }>) || []
     const prop = (n: string) => props.find((p) => p.name === n)?.value
     this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
