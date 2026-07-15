@@ -201,7 +201,12 @@ function pickSenseFor(languageId, front, back) {
   if (!w) return null;
   const defs = db.prepare('SELECT id, text FROM word_definitions WHERE word_id = ?').all(w.id);
   if (!defs.length) return null;
-  if (back) { const k = normGloss(back); const m = defs.find((d) => normGloss(d.text) === k); if (m) return m.id; }
+  if (back) {
+    // A back may be a compound gloss ("hour; time; o'clock") while senses are now
+    // split — match on the whole string first, then on any ';'-separated part.
+    const cands = [back, ...String(back).split(';')].map((s) => normGloss(s.trim())).filter(Boolean);
+    for (const k of cands) { const m = defs.find((d) => normGloss(d.text) === k); if (m) return m.id; }
+  }
   const top = db.prepare(
     `SELECT id FROM word_definitions WHERE word_id = ?
       ORDER BY (SELECT COUNT(*) FROM cards c WHERE c.definition_id = word_definitions.id) DESC, accepted DESC, id LIMIT 1`
