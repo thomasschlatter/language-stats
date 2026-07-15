@@ -5,10 +5,30 @@ import db from './../db/index.js';
 const ACCEPT_VOTES = 3; // user definitions become "accepted" at this many upvotes
 
 export function addDefinition({ wordId, text, source, createdBy, accepted = false }) {
-  const info = db
-    .prepare('INSERT INTO word_definitions (word_id, text, source, created_by, accepted) VALUES (?, ?, ?, ?, ?)')
-    .run(wordId, text, source ?? null, createdBy ?? null, accepted ? 1 : 0);
-  return info.lastInsertRowid;
+  // A gloss like "hour; time; o'clock" is several senses — split on ';' so each is
+  // its own node (',' usually joins synonyms within a sense, so keep those whole).
+  const parts = String(text).split(';').map((s) => s.trim()).filter(Boolean);
+  if (!parts.length) parts.push(String(text).trim());
+  const existing = new Set(
+    db.prepare('SELECT text FROM word_definitions WHERE word_id = ?').all(wordId)
+      .map((r) => r.text.toLowerCase().trim())
+  );
+  const ins = db.prepare('INSERT INTO word_definitions (word_id, text, source, created_by, accepted) VALUES (?, ?, ?, ?, ?)');
+  let firstId = null;
+  for (const p of parts) {
+    const key = p.toLowerCase().trim();
+    if (existing.has(key)) continue;
+    const info = ins.run(wordId, p, source ?? null, createdBy ?? null, accepted ? 1 : 0);
+    if (firstId === null) firstId = info.lastInsertRowid;
+    existing.add(key);
+  }
+  if (firstId === null) {
+    // Every part already existed — return the first part's existing id.
+    const r = db.prepare('SELECT id FROM word_definitions WHERE word_id = ? AND lower(trim(text)) = ? LIMIT 1')
+      .get(wordId, parts[0].toLowerCase().trim());
+    firstId = r?.id ?? null;
+  }
+  return firstId;
 }
 
 export function clearWiktionaryDefinitions(wordId) {
