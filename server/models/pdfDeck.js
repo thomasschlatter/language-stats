@@ -10,9 +10,11 @@ const topSense = db.prepare(
 );
 
 export async function extractPdfCards(buffer, languageId, limit = 200) {
-  const mod = await import('pdf-parse');
-  const pdfParse = mod.default || mod;
-  const data = await pdfParse(buffer);
+  // pdf-parse v2 exposes a class (new PDFParse({data}).getText()), not a default fn.
+  const { PDFParse } = await import('pdf-parse');
+  const parser = new PDFParse({ data: new Uint8Array(buffer) });
+  const data = await parser.getText();
+  await parser.destroy?.();
   const text = String(data?.text || '');
 
   // Count word tokens; keep the most frequent (they're the core vocabulary).
