@@ -23,7 +23,6 @@ import {
 } from "./commands/WhiteboardUpdateArrayCommand";
 import ChatMessageUpdateCommand from "./commands/ChatMessageUpdateCommand";
 import ChatBotMessageUpdateCommand from "./commands/ChatBotMessageUpdateCommand";
-import { Configuration, OpenAIApi } from "openai";
 
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -42,48 +41,29 @@ export class SkyOffice extends Room<OfficeState> {
     return `https://cdn.test.com/${id}`;
   };
 
+  // Foxy replies come from a small LOCAL model served by the app server
+  // (server-to-server call) — no external API, no API key.
   async botMessage(client: Client, content: string) {
+    const prompt = content.replace(/@[Ff]oxy/g, "").trim();
     let res = "";
-    content = content.replace(/@foxy/g, "@bot");
-    content = content.replace(/@Foxy/g, "@bot");
-
     try {
-      //await this.everything()
-      const configuration = new Configuration({
-        apiKey: process.env.REACT_APP_OPENAI_API_KEY,
+      const base = process.env.APP_SERVER_URL || "http://127.0.0.1:3000";
+      const response = await fetch(`${base}/api/foxy/reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: prompt }),
       });
-      const openai = new OpenAIApi(configuration);
-      await openai
-        .createChatCompletion({
-          model: "gpt-4",
-          messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: content.slice(1) },
-          ],
-          max_tokens: 200,
-          temperature: 0,
-        })
-        .then((response) => {
-          res =
-            response.data.choices[0].message.content ||
-            "Sorry, I don't understand";
-          this.dispatcher.dispatch(new ChatBotMessageUpdateCommand(), {
-            client,
-            content: res,
-          });
-          // broadcast to all currently connected clients
-          this.broadcast(Message.ADD_BOT_CHAT_MESSAGE, { content: res });
-          return res;
-        });
+      const data: any = await response.json();
+      res = (data && data.reply) || "Yip? I didn't quite catch that.";
     } catch (e) {
-      console.log(e);
-      const res = "Wow wow wow wow #$%&#&*#@";
-      this.dispatcher.dispatch(new ChatBotMessageUpdateCommand(), {
-        client,
-        content: res,
-      });
-      this.broadcast(Message.ADD_BOT_CHAT_MESSAGE, { content: res });
+      console.log("foxy error", e);
+      res = "Yip yip! My fox brain is napping — try me again in a moment.";
     }
+    this.dispatcher.dispatch(new ChatBotMessageUpdateCommand(), {
+      client,
+      content: res,
+    });
+    this.broadcast(Message.ADD_BOT_CHAT_MESSAGE, { content: res });
   }
 
   async onCreate(options: IRoomData) {

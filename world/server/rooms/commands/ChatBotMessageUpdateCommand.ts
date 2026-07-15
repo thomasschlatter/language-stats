@@ -26,7 +26,7 @@ export default class ChatBotMessageUpdateCommand extends Command<
     if (chatMessages.length >= 100) chatMessages.shift();
 
     const newMessage = new ChatMessage();
-    newMessage.author = "Bot";
+    newMessage.author = "Foxy";
     newMessage.content = "@" + player?.name + " " + data.content;
     chatMessages.push(newMessage);
   }
