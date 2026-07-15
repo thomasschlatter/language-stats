@@ -40,7 +40,7 @@ export async function renderWordPage(langCode, text) {
     if (!data.definitions?.length) {
       defList.append(el('p', { class: 'muted' }, 'No definition yet.'));
     } else {
-      for (const d of data.definitions) defList.append(definitionEl(d, langCode));
+      for (const d of data.definitions) defList.append(definitionEl(d));
     }
     box.append(defList);
     if (store.user) {
@@ -59,7 +59,7 @@ export async function renderWordPage(langCode, text) {
       );
       if (data.lemma.definitions?.length) {
         const lemList = el('div', { class: 'definitions lemma-defs' });
-        for (const d of data.lemma.definitions) lemList.append(definitionEl(d, lemLang));
+        for (const d of data.lemma.definitions) lemList.append(definitionEl(d));
         box.append(lemList);
       }
     }
@@ -124,8 +124,15 @@ function sourceBadge(d) {
   return null;
 }
 
+// Definitions/glosses are written in English (the sense-network's meta-language),
+// so words inside them must tokenize as English — clicking "meeting" should go to
+// the English word, not the foreign headword's language.
+function glossLang() {
+  return store.nativeLang.startsWith('en') ? store.nativeLang : 'en-US';
+}
+
 // One definition row: upvote control + text + source meta.
-function definitionEl(d, langCode) {
+function definitionEl(d) {
   const count = el('span', {}, String(d.votes || 0));
   const up = el('button', { class: `vote-btn${d.voted ? ' voted' : ''}`, title: store.user ? 'Upvote' : 'Sign in to vote' }, [el('span', { class: 'vote-arrow' }, '▲'), count]);
   up.addEventListener('click', async () => {
@@ -141,7 +148,7 @@ function definitionEl(d, langCode) {
   return el('div', { class: 'definition' }, [
     up,
     el('div', { class: 'def-body' }, [
-      el('span', { class: 'def-text', lang: langCode }, renderText(d.text, langCode)),
+      el('span', { class: 'def-text', lang: glossLang() }, renderText(d.text, glossLang())),
       el('div', { class: 'def-meta muted' }, [
         sourceBadge(d),
         // Importance = how many cards/strings link to this sense (drives ordering).
@@ -161,7 +168,7 @@ function openAddDefinition(word, langCode, defList) {
       try {
         const { definition } = await api.addDefinition(word.id, { text: input.value });
         defList.querySelector('.muted')?.remove();
-        defList.append(definitionEl(definition, langCode));
+        defList.append(definitionEl(definition));
         close();
       } catch (ex) { err.textContent = ex.message; }
     },
