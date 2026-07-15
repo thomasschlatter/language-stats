@@ -143,10 +143,20 @@ export function openTipEditor(language, onDone, tip = null) {
   ]);
 
   const heading = editing ? 'Edit tip' : `Share a ${language.name} tip`;
-  const close = openModal(el('div', { class: 'tip-editor-modal' }, [el('h2', {}, heading), form]));
+  // Full-page editor (not a modal) — room for a side-by-side preview.
+  const view = clear(document.getElementById('view'));
+  view.append(el('div', { class: 'tip-editor-page' }, [
+    el('div', { class: 'row', style: 'align-items:center; gap:0.6rem; margin-bottom:0.6rem' }, [
+      el('button', { class: 'btn small secondary', type: 'button', onclick: () => onDone() }, '← Cancel'),
+      el('h1', { style: 'margin:0; font-size:1.25rem' }, heading),
+    ]),
+    form,
+  ]));
+  const close = () => {}; // leaving is handled by onDone()/navigate after submit
 
-  // Upgrade the textarea into a markdown editor (toolbar + live preview).
-  // Falls back to the plain textarea if the library can't load.
+  // Upgrade the textarea into a markdown editor. Editor left, preview right on
+  // desktop (side-by-side); stacked toolbar preview on mobile. Falls back to the
+  // plain textarea if the library can't load.
   loadEasyMDE().then((EasyMDE) => {
     editor = new EasyMDE({
       element: body,
@@ -164,7 +174,9 @@ export function openTipEditor(language, onDone, tip = null) {
           cm.replaceSelection('\n[anki: My deck]\n- word — meaning\n- another — meaning\n');
           cm.focus();
         },
-      }, '|', 'link', 'preview', 'guide'],
+      }, '|', 'side-by-side', 'preview', 'guide'],
     });
+    // On a wide screen, open the side-by-side preview by default.
+    if (window.innerWidth >= 820) { try { editor.toggleSideBySide(); } catch { /* ignore */ } }
   }).catch(() => { /* keep the plain textarea */ });
 }

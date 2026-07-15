@@ -3,6 +3,7 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear, openModal as openModalFn } from '../dom.js';
 import { renderText } from '../render.js';
+import { renderMessageBody } from '../messageBody.js';
 import { avatarFor } from '../avatar.js';
 import { signInPrompt } from '../auth.js';
 import { navigate } from '../router.js';
@@ -147,7 +148,7 @@ export async function renderGroup(id) {
     el('a', { class: 'chat-avatar-link', href: `#/u/${encodeURIComponent(m.author)}` }, avatarFor(m.author_avatar, m.author, 32, m.author_avatar_image)),
     el('div', { class: 'chat-msg-main' }, [
       el('div', { class: 'chat-meta' }, [el('span', { class: 'chat-author' }, `@${m.author}`), el('span', { class: 'chat-lang' }, bodyLangOf(m))]),
-      el('div', { class: 'chat-body', lang: bodyLangOf(m) }, renderText(m.body, bodyLangOf(m))),
+      el('div', { class: 'chat-body', lang: bodyLangOf(m) }, renderMessageBody(m.body, bodyLangOf(m))),
     ]),
   ]);
   const atBottom = () => listEl.scrollHeight - listEl.scrollTop - listEl.clientHeight < 60;

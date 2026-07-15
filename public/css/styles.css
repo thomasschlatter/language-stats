@@ -260,9 +260,14 @@ body.in-msg .view { overflow-y: auto; }
 
 /* Language picker modal */
 .lang-picker { width: 100%; }
-.tip-editor-modal .CodeMirror { min-height: 200px; font: inherit; }
-.tip-editor-modal .editor-toolbar { border-radius: 6px 6px 0 0; }
-.tip-editor-modal .EasyMDEContainer { margin-bottom: 0.6rem; }
+.tip-editor-page { max-width: 1100px; margin: 0 auto; }
+.tip-editor-page label { display: block; margin: 0.6rem 0 0.2rem; font-size: 0.85rem; color: var(--muted); }
+.tip-editor-page .CodeMirror { min-height: 55vh; font: inherit; }
+.tip-editor-page .editor-toolbar { border-radius: 6px 6px 0 0; }
+.tip-editor-page .EasyMDEContainer { margin-bottom: 0.6rem; }
+/* Side-by-side preview fills the same tall height as the editor. */
+.tip-editor-page .CodeMirror-sided { width: 50% !important; }
+.tip-editor-page .editor-preview-side { width: 50%; min-height: 55vh; }
 .lang-picker-search {
   width: 100%; box-sizing: border-box; margin: 0.4rem 0 0;
   padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 8px;
@@ -478,6 +483,13 @@ body.in-msg .view { overflow-y: auto; }
 .foxy-sources { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.2rem; }
 .foxy-source { font-size: 0.82rem; }
 .group-card { display: block; text-decoration: none; color: inherit; margin-bottom: 0.6rem; }
+/* Shared group link rendered as a button inside a chat message. */
+.group-link-btn {
+  display: inline-flex; align-items: center; gap: 0.25rem; font: inherit; font-size: 0.85rem;
+  background: var(--surface-2); color: var(--accent); border: 1px solid var(--accent);
+  border-radius: 999px; padding: 0.1rem 0.6rem; cursor: pointer; font-weight: 600; vertical-align: middle;
+}
+.group-link-btn:hover { background: var(--accent); color: #fff; }
 /* Collapsible chat drawer */
 .chat-toggle {
   position: fixed; left: 0; top: 50%; transform: translateY(-50%);

@@ -6,6 +6,7 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { renderText } from '../render.js';
+import { renderMessageBody } from '../messageBody.js';
 import { signInPrompt } from '../auth.js';
 import { avatarFor } from '../avatar.js';
 import { openReport } from '../report.js';
@@ -74,7 +75,7 @@ export async function renderChat(langCode) {
             ? el('button', { class: 'btn link small', style: 'font-size:0.72rem', onclick: () => openReport('message', m.id) }, 'report')
             : null,
         ]),
-        el('div', { class: 'chat-body', lang: bodyLang }, renderText(m.body, bodyLang)),
+        el('div', { class: 'chat-body', lang: bodyLang }, renderMessageBody(m.body, bodyLang)),
       ]),
     ]);
   };

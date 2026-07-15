@@ -5,6 +5,7 @@ import { api } from './api.js';
 import { store } from './store.js';
 import { el, clear } from './dom.js';
 import { renderText } from './render.js';
+import { renderMessageBody } from './messageBody.js';
 import { avatarFor } from './avatar.js';
 
 let pollTimer = null;
@@ -64,7 +65,7 @@ export function initChatDrawer() {
       el('a', { class: 'chat-avatar-link', href: `#/u/${encodeURIComponent(m.author)}` }, avatarFor(m.author_avatar, m.author, 28, m.author_avatar_image)),
       el('div', { class: 'chat-msg-main' }, [
         el('div', { class: 'chat-meta' }, [el('span', { class: 'chat-author' }, `@${m.author}`), el('span', { class: 'chat-lang' }, bodyLangOf(m))]),
-        el('div', { class: 'chat-body', lang: bodyLangOf(m) }, renderText(m.body, bodyLangOf(m))),
+        el('div', { class: 'chat-body', lang: bodyLangOf(m) }, renderMessageBody(m.body, bodyLangOf(m))),
       ]),
     ]);
     const atBottom = () => list.scrollHeight - list.scrollTop - list.clientHeight < 60;
