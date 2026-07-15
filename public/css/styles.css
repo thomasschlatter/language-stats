@@ -913,7 +913,8 @@ body.in-world .view { padding: 0; }
 .dp-front { font-weight: 600; }
 .dp-back { text-align: right; }
 /* Linked sense: normal text + a small link glyph (vs greyed plain strings). */
-.dp-linked { color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; justify-content: flex-end; }
+.dp-front.dp-linked { color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
+.dp-linked { color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
 .dp-linked:hover { color: var(--accent); }
 .dp-linked .btn-ico svg { width: 12px; height: 12px; opacity: 0.55; }
 .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }

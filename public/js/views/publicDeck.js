@@ -37,9 +37,9 @@ export async function renderPublicDeck(id) {
     const table = el('div', { class: 'deck-preview-list deck-full-list' });
     for (const c of cards) {
       table.append(el('div', { class: 'deck-preview-row' }, [
-        // Front word links to its dictionary page (like clickable words in tips).
-        el('a', { class: 'dp-front', href: `#/w/${encodeURIComponent(deck.lang)}/${encodeURIComponent(c.front)}` }, c.front),
-        backCell(c, deck.lang),
+        frontCell(c, deck.lang),
+        // The meaning: plain text (the live sense when linked, else the static back).
+        el('span', { class: 'dp-back muted' }, c.sense_text || c.back || ''),
       ]));
     }
     listWrap.append(table);
@@ -48,18 +48,16 @@ export async function renderPublicDeck(id) {
   }
 }
 
-// The meaning cell: a linked dictionary sense (live, marked with a link glyph +
-// clickable to the word page) or a plain, greyed static string.
-function backCell(c, lang) {
-  if (c.definition_id) {
-    const text = c.sense_text || c.back || '';
-    return el('a', {
-      class: 'dp-back dp-linked',
-      href: `#/w/${encodeURIComponent(lang)}/${encodeURIComponent(c.front)}`,
-      title: `Linked dictionary sense · ${c.sense_votes || 0} upvote${c.sense_votes === 1 ? '' : 's'}`,
-    }, [text, iconEl('link')]);
-  }
-  return el('span', { class: 'dp-back muted' }, c.back || '');
+// The FRONT (French) word links to its dictionary page. When the card points at a
+// live dictionary sense, the link glyph lives here on the word itself — the link is
+// a property of the word, not of the English translation on the right.
+function frontCell(c, lang) {
+  const linked = !!c.definition_id;
+  return el('a', {
+    class: 'dp-front' + (linked ? ' dp-linked' : ''),
+    href: `#/w/${encodeURIComponent(lang)}/${encodeURIComponent(c.front)}`,
+    title: linked ? `Linked to a dictionary sense · ${c.sense_votes || 0} upvote${c.sense_votes === 1 ? '' : 's'}` : 'Open dictionary page',
+  }, linked ? [c.front, iconEl('link')] : c.front);
 }
 
 function voteBtn(d) {
