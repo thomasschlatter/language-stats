@@ -4,6 +4,7 @@ import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { navigate } from '../router.js';
 import { genCoverEl } from '../deckCover.js';
+import { iconEl } from '../icons.js';
 
 export async function renderPublicDeck(id) {
   const view = clear(document.getElementById('view'));
@@ -38,13 +39,27 @@ export async function renderPublicDeck(id) {
       table.append(el('div', { class: 'deck-preview-row' }, [
         // Front word links to its dictionary page (like clickable words in tips).
         el('a', { class: 'dp-front', href: `#/w/${encodeURIComponent(deck.lang)}/${encodeURIComponent(c.front)}` }, c.front),
-        el('span', { class: 'dp-back muted' }, c.back || ''),
+        backCell(c, deck.lang),
       ]));
     }
     listWrap.append(table);
   } catch (ex) {
     clear(listWrap).append(el('p', { class: 'error' }, ex.message));
   }
+}
+
+// The meaning cell: a linked dictionary sense (live, marked with a link glyph +
+// clickable to the word page) or a plain, greyed static string.
+function backCell(c, lang) {
+  if (c.definition_id) {
+    const text = c.sense_text || c.back || '';
+    return el('a', {
+      class: 'dp-back dp-linked',
+      href: `#/w/${encodeURIComponent(lang)}/${encodeURIComponent(c.front)}`,
+      title: `Linked dictionary sense · ${c.sense_votes || 0} upvote${c.sense_votes === 1 ? '' : 's'}`,
+    }, [text, iconEl('link')]);
+  }
+  return el('span', { class: 'dp-back muted' }, c.back || '');
 }
 
 function voteBtn(d) {

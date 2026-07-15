@@ -85,4 +85,13 @@ db.exec(`CREATE TABLE IF NOT EXISTS deck_votes (
 )`);
 db.exec('CREATE INDEX IF NOT EXISTS idx_decks_public ON decks(is_public, is_official)');
 
+// --- sense-network: a card can point at a dictionary sense (word_definitions).
+// When set, the card's meaning is that live, votable sense; when NULL the card
+// falls back to its own `back` string. See memory/sense-network.md.
+const cardCols = db.prepare('PRAGMA table_info(cards)').all().map((c) => c.name);
+if (!cardCols.includes('definition_id')) {
+  db.exec('ALTER TABLE cards ADD COLUMN definition_id INTEGER REFERENCES word_definitions(id) ON DELETE SET NULL');
+}
+db.exec('CREATE INDEX IF NOT EXISTS idx_cards_definition ON cards(definition_id)');
+
 export default db;

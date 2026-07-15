@@ -91,10 +91,19 @@ export function getPublicDeck(id, viewerId = null) {
 }
 
 // All cards of a shared deck (for the full deck-view page). Null if not shared.
+// When a card is linked to a dictionary sense (definition_id), we return that
+// live sense text + its vote count; otherwise the card's own `back` string.
 export function listPublicDeckCards(id) {
   const d = db.prepare('SELECT id FROM decks WHERE id = ? AND (is_official = 1 OR is_public = 1)').get(id);
   if (!d) return null;
-  return db.prepare('SELECT front, back FROM cards WHERE deck_id = ? ORDER BY id').all(id);
+  return db.prepare(
+    `SELECT c.front, c.back, c.definition_id,
+            wd.text AS sense_text,
+            (SELECT COUNT(*) FROM definition_votes v WHERE v.definition_id = wd.id) AS sense_votes
+       FROM cards c
+       LEFT JOIN word_definitions wd ON wd.id = c.definition_id
+      WHERE c.deck_id = ? ORDER BY c.id`
+  ).all(id);
 }
 
 export function voteDeck(userId, deckId) {
