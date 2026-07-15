@@ -38,14 +38,17 @@ export function initChatDrawer() {
     if (!store.user) { clear(drawer).append(el('p', { class: 'muted', style: 'padding:1rem' }, 'Sign in to chat.')); return; }
     stopPoll();
     lastId = 0;
-    langCode = localStorage.getItem('ls_chat_room')
-      || (store.languages.some((l) => l.code === store.nativeLang) ? store.nativeLang : store.languages[0]?.code);
-    const language = store.languages.find((l) => l.code === langCode);
+    // Only the user's own languages (learning + native) as rooms / writing options.
+    const mine = store.languages.filter((l) => store.isLearning(l.code) || l.code === store.nativeLang);
+    const myLangs = mine.length ? mine : store.languages;
+    langCode = (myLangs.some((l) => l.code === localStorage.getItem('ls_chat_room')) && localStorage.getItem('ls_chat_room'))
+      || (myLangs.some((l) => l.code === store.nativeLang) ? store.nativeLang : myLangs[0]?.code);
+    const language = myLangs.find((l) => l.code === langCode);
     if (!language) { clear(drawer).append(el('p', { class: 'muted', style: 'padding:1rem' }, 'No chat rooms.')); return; }
     localStorage.setItem('ls_chat_room', langCode);
 
     const roomSel = el('select', { class: 'chat-room-select' },
-      store.languages.map((l) => el('option', { value: l.code, selected: l.code === langCode ? '' : null }, l.name)));
+      myLangs.map((l) => el('option', { value: l.code, selected: l.code === langCode ? '' : null }, l.name)));
     roomSel.addEventListener('change', () => { localStorage.setItem('ls_chat_room', roomSel.value); mount(); });
 
     const list = el('div', { class: 'chat-list drawer-chat-list' });
@@ -81,7 +84,7 @@ export function initChatDrawer() {
 
     const input = el('input', { type: 'text', placeholder: 'Message…', autocomplete: 'off' });
     const writtenIn = el('select', { class: 'chat-lang-select', title: 'Language you are writing in' },
-      store.languages.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.code)));
+      myLangs.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.code)));
     const form = el('form', {
       class: 'chat-form drawer-chat-form',
       onsubmit: async (e) => {

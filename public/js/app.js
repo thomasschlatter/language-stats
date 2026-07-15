@@ -10,6 +10,7 @@ import { startRouter } from './router.js';
 import { byImportance } from './langOrder.js';
 import { guardSingleInstance } from './singleInstance.js';
 import { initChatDrawer } from './chatDrawer.js';
+import { syncBodyClasses } from './bodyClasses.js';
 
 // Make the persistent chrome (language bar, top-bar labels) clickable too.
 function tokenizeChrome() {
@@ -242,11 +243,9 @@ async function init() {
       const target = a.getAttribute('href');
       a.classList.toggle('active', h === target || (target !== '#/' && h.startsWith(target)));
     });
-    document.body.classList.toggle('in-world', h.startsWith('#/world'));
-    document.body.classList.toggle('in-community', h.startsWith('#/community'));
-    // Fixed, non-page-scrolling layouts (content scrolls internally).
-    document.body.classList.toggle('in-chat', h.startsWith('#/chat'));
-    document.body.classList.toggle('in-msg', h.startsWith('#/messages') || h.startsWith('#/dm/'));
+    // Fixed, non-page-scrolling layouts (content scrolls internally) — reconciled
+    // centrally so a stale overflow:hidden class can't get stuck.
+    syncBodyClasses(h);
   };
   syncNav();
 

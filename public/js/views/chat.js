@@ -38,10 +38,14 @@ export async function renderChat(langCode) {
   }
   localStorage.setItem('ls_chat_room', langCode);
 
+  // Only the user's own languages (learning + native) as rooms / writing options.
+  const mineChat = store.languages.filter((l) => store.isLearning(l.code) || l.code === store.nativeLang);
+  const myLangs = mineChat.length ? mineChat : store.languages;
+
   const roomSel = el('select', {
     class: 'chat-room-select',
     onchange: (e) => navigate(`#/chat/${encodeURIComponent(e.target.value)}`),
-  }, store.languages.map((l) => el('option', { value: l.code, selected: l.code === langCode ? '' : null }, l.name)));
+  }, myLangs.map((l) => el('option', { value: l.code, selected: l.code === langCode ? '' : null }, l.name)));
 
   view.append(
     el('div', { class: 'section-head' }, [
@@ -109,7 +113,7 @@ export async function renderChat(langCode) {
   if (store.user) {
     const input = el('input', { type: 'text', placeholder: 'Write a message…', autocomplete: 'off' });
     const writtenIn = el('select', { class: 'chat-lang-select', title: 'Language you are writing in' },
-      store.languages.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.code))
+      myLangs.map((l) => el('option', { value: l.code, selected: l.code === store.nativeLang ? '' : null }, l.code))
     );
     const form = el('form', {
       class: 'chat-form',

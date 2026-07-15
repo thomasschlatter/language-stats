@@ -9,6 +9,7 @@
 import { store } from './store.js';
 import { el, clear } from './dom.js';
 import { byImportance } from './langOrder.js';
+import { syncBodyClasses } from './bodyClasses.js';
 import { signInPrompt } from './auth.js';
 import { renderArticles } from './views/articles.js';
 import { renderArticle } from './views/article.js';
@@ -88,6 +89,7 @@ export function startRouter() {
 
 function render() {
   const hash = window.location.hash || '#/';
+  syncBodyClasses(hash); // reconcile fixed-layout classes on every render
 
   // Default route -> a language you're learning (never your native language),
   // preferred over the alphabetically-first catalogue entry.

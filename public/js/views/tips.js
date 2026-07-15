@@ -127,17 +127,21 @@ export function openTipEditor(language, onDone, tip = null) {
       }
     },
   }, [
-    el('label', {}, 'Title'),
-    title,
+    // Title + language pickers ABOVE the editor so the side-by-side preview
+    // (fixed positioning) can't hide them.
+    el('div', { class: 'tip-editor-top' }, [
+      el('label', {}, 'Title'), title,
+      ...(editing ? [] : [el('label', {}, 'Written for (the language this tip is about)'), writtenFor]),
+      el('label', {}, 'Written in (the language you’re writing in)'), writtenIn,
+    ]),
     el('label', {}, 'Your tip (markdown)'),
     body,
     el('div', { class: 'muted', style: 'font-size:0.78rem; margin-top:0.3rem' },
       'Use "- " for bullet lists and "# " for headings. Readers can turn any list into a flashcard deck.'),
-    ...(editing ? [] : [el('label', {}, 'Written for (the language this tip is about)'), writtenFor]),
-    el('label', {}, 'Written in (the language you’re writing in)'),
-    writtenIn,
     err,
-    el('div', { class: 'row', style: 'margin-top:1rem' }, [
+    // Sticky action bar — stays above the fixed side-by-side preview.
+    el('div', { class: 'tip-editor-actions' }, [
+      el('button', { class: 'btn small secondary', type: 'button', onclick: () => onDone() }, 'Cancel'),
       el('button', { class: 'btn', type: 'submit' }, editing ? 'Save changes' : 'Post tip'),
     ]),
   ]);
@@ -146,10 +150,7 @@ export function openTipEditor(language, onDone, tip = null) {
   // Full-page editor (not a modal) — room for a side-by-side preview.
   const view = clear(document.getElementById('view'));
   view.append(el('div', { class: 'tip-editor-page' }, [
-    el('div', { class: 'row', style: 'align-items:center; gap:0.6rem; margin-bottom:0.6rem' }, [
-      el('button', { class: 'btn small secondary', type: 'button', onclick: () => onDone() }, '← Cancel'),
-      el('h1', { style: 'margin:0; font-size:1.25rem' }, heading),
-    ]),
+    el('h1', { style: 'margin:0 0 0.6rem; font-size:1.25rem' }, heading),
     form,
   ]));
   const close = () => {}; // leaving is handled by onDone()/navigate after submit
