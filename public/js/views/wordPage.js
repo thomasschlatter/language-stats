@@ -97,7 +97,17 @@ function languageName(code) {
   return store.languages.find((l) => l.code === code)?.name || code;
 }
 
-// One definition row: upvote control + text + accepted/source meta.
+// Curated/external sources get a green source badge; user-written definitions
+// show the author's name (not green).
+const SOURCE_LABELS = { wiktionary: 'Wiktionary', wordnet: 'WordNet', concepticon: 'Concepticon', seed: 'Groupifier' };
+function sourceBadge(d) {
+  const label = SOURCE_LABELS[d.source];
+  if (label) return el('span', { class: 'src-badge' }, label);
+  if (d.author) return el('span', { class: 'src-user' }, `@${d.author}`);
+  return null;
+}
+
+// One definition row: upvote control + text + source meta.
 function definitionEl(d, langCode) {
   const count = el('span', {}, String(d.votes || 0));
   const up = el('button', { class: `vote-btn${d.voted ? ' voted' : ''}`, title: store.user ? 'Upvote' : 'Sign in to vote' }, [el('span', { class: 'vote-arrow' }, '▲'), count]);
@@ -116,10 +126,9 @@ function definitionEl(d, langCode) {
     el('div', { class: 'def-body' }, [
       el('span', { class: 'def-text', lang: langCode }, renderText(d.text, langCode)),
       el('div', { class: 'def-meta muted' }, [
-        d.accepted ? el('span', { class: 'def-accepted' }, '✓ accepted') : null,
+        sourceBadge(d),
         // Importance = how many cards/strings link to this sense (drives ordering).
         d.links ? el('span', { class: 'def-links', title: `${d.links} card${d.links === 1 ? '' : 's'} link here` }, `${d.links} link${d.links === 1 ? '' : 's'}`) : null,
-        d.source === 'wiktionary' ? el('span', {}, ' Wiktionary') : (d.author ? el('span', {}, ` @${d.author}`) : null),
       ]),
     ]),
   ]);
