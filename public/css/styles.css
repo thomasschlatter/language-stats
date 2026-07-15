@@ -830,6 +830,25 @@ body.in-world .view { padding: 0; }
    space when there are few messages, and collapses to 0 when they overflow. */
 .chat-list > :first-child, .drawer-chat-list > :first-child { margin-top: auto; }
 .drawer-chat-list { min-height: 100%; box-sizing: border-box; }
+/* Conversation practice */
+.scenario-card {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  text-align: center; cursor: pointer; padding: 1.1rem 0.75rem;
+}
+.scenario-card:hover { border-color: var(--accent); }
+.scenario-emoji { font-size: 2rem; line-height: 1; }
+.scenario-msg {
+  max-width: 80%; padding: 0.5rem 0.75rem; border-radius: 14px;
+  line-height: 1.4; word-wrap: break-word;
+}
+.scenario-assistant {
+  align-self: flex-start; background: var(--surface-2, var(--surface));
+  border: 1px solid var(--border); border-bottom-left-radius: 4px;
+}
+.scenario-user {
+  align-self: flex-end; background: var(--accent); color: #fff;
+  border-bottom-right-radius: 4px;
+}
 .study-all-bar {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
   padding: 0.6rem 1rem; margin-bottom: 0.9rem;

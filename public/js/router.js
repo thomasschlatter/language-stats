@@ -31,6 +31,7 @@ import { renderPublicDeck } from './views/publicDeck.js';
 import { renderStudy } from './views/study.js';
 import { renderGroups, renderGroup, renderGroupInvite } from './views/groups.js';
 import { renderFoxyHelp } from './views/foxyHelp.js';
+import { renderPractice } from './views/practice.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
@@ -46,6 +47,7 @@ const routes = [
   } },
   { pattern: /^#\/world$/, handler: () => renderWorld(), auth: true },
   { pattern: /^#\/games$/, handler: () => renderGames(), auth: true },
+  { pattern: /^#\/practice$/, handler: () => renderPractice(), auth: true },
   { pattern: /^#\/search\/(.+)$/, handler: (m) => renderSearch(dec(m[1])) },
   // Settings now live on your profile (/me). Send the Settings link there.
   { pattern: /^#\/settings$/, handler: () => {

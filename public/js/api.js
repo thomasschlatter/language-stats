@@ -111,8 +111,10 @@ export const api = {
   translate: (text, from, to) => request('POST', '/translate', { text, from, to }),
   aiTranslate: (text, from, to) => request('POST', '/translate/ai', { text, from, to }),
 
-  // --- Foxy help assistant ---
+  // --- Foxy help assistant + conversation practice ---
   askFoxy: (question) => request('POST', '/foxy/ask', { question }),
+  scenarios: () => request('GET', '/foxy/scenarios'),
+  scenarioTurn: (b) => request('POST', '/foxy/scenario', b),
 
   // --- groups (group chats joined via invite link) ---
   groups: () => request('GET', '/groups'),
