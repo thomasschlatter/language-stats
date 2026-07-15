@@ -59,6 +59,11 @@ export function updateTip({ id, userId, title, body, bodyLangId }) {
   return getTip(id);
 }
 
+// Delete a tip. Only its author may delete it.
+export function deleteTip({ id, userId }) {
+  return db.prepare('DELETE FROM tips WHERE id = ? AND user_id = ?').run(id, userId).changes > 0;
+}
+
 export function createTip({ languageId, bodyLangId, userId, title, body }) {
   const info = db
     .prepare(

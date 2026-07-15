@@ -39,6 +39,14 @@ export async function renderTip(id) {
       el('h1', {}, renderText(tip.title, bodyLang)),
       el('div', { class: 'row', style: 'gap:0.5rem; align-items:center' }, [
         canEdit ? el('button', { class: 'btn small secondary', onclick: () => openTipEditor(language, () => renderTip(id), tip) }, 'Edit') : null,
+        canEdit ? el('button', {
+          class: 'btn small danger',
+          onclick: async () => {
+            if (!confirm('Delete this tip? This cannot be undone.')) return;
+            try { await api.deleteTip(id); toast('Tip deleted.', 'success'); navigate(`#/lang/${encodeURIComponent(tip.language_code)}/tips`); }
+            catch (ex) { toast(ex.message || 'Could not delete.', 'error'); }
+          },
+        }, 'Delete') : null,
         voteButton(tip, api.voteTip),
       ]),
     ]),

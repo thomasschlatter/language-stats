@@ -1,7 +1,7 @@
 // /api/tips — community language-learning tips.
 import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
-import { listTips, createTip, updateTip, toggleTipVote, tipVotedIds, tipUserVoted, getTip } from '../models/tips.js';
+import { listTips, createTip, updateTip, deleteTip, toggleTipVote, tipVotedIds, tipUserVoted, getTip } from '../models/tips.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -66,6 +66,13 @@ router.put('/:id(\\d+)', requireAuth, (req, res) => {
   });
   if (!tip) return res.status(404).json({ error: 'tip not found or not yours' });
   res.json({ tip });
+});
+
+// DELETE /api/tips/:id — author-only delete.
+router.delete('/:id(\\d+)', requireAuth, (req, res) => {
+  const ok = deleteTip({ id: Number(req.params.id), userId: req.user.id });
+  if (!ok) return res.status(404).json({ error: 'tip not found or not yours' });
+  res.json({ ok: true });
 });
 
 export default router;

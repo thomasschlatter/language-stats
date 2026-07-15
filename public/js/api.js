@@ -65,6 +65,7 @@ export const api = {
   tip: (id) => request('GET', `/tips/${id}`),
   createTip: (b) => request('POST', '/tips', b),
   updateTip: (id, b) => request('PUT', `/tips/${id}`, b),
+  deleteTip: (id) => request('DELETE', `/tips/${id}`),
   voteTip: (id) => request('POST', `/tips/${id}/vote`),
 
   // --- articles (cards) ---  native filters cards to the learner's language
