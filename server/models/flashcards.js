@@ -38,7 +38,7 @@ export function deleteDeck(id, userId) {
 // as opposed to Groupifier's own curated "official" decks (freq+freedict).
 export const EXAM_SOURCES = ['goethe', 'cefrlex', 'dele', 'delf', 'dalf', 'hsk', 'jlpt', 'topik', 'telc'];
 // Course-book vocabulary (extracted from officially-free publisher files).
-export const TEXTBOOK_SOURCES = ['menschen', 'schritte', 'netzwerk', 'aspekte'];
+export const TEXTBOOK_SOURCES = ['menschen', 'schritte', 'netzwerk', 'aspekte', 'tendances'];
 // Everything that is NOT plain Groupifier "official" (freq+freedict).
 const NON_PLAIN = [...EXAM_SOURCES, ...TEXTBOOK_SOURCES];
 
