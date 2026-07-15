@@ -28,6 +28,7 @@ import { renderDecks } from './views/decks.js';
 import { renderBrowseDecks } from './views/browseDecks.js';
 import { renderPublicDeck } from './views/publicDeck.js';
 import { renderStudy } from './views/study.js';
+import { renderGroups, renderGroup, renderGroupInvite } from './views/groups.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
@@ -54,6 +55,9 @@ const routes = [
   { pattern: /^#\/decks\/public\/(\d+)$/, handler: (m) => renderPublicDeck(Number(m[1])) },
   { pattern: /^#\/study$/, handler: () => renderStudy(), auth: true }, // all decks
   { pattern: /^#\/study\/(\d+)$/, handler: (m) => renderStudy(Number(m[1])), auth: true },
+  { pattern: /^#\/groups$/, handler: () => renderGroups(), auth: true },
+  { pattern: /^#\/groups\/(\d+)$/, handler: (m) => renderGroup(Number(m[1])), auth: true },
+  { pattern: /^#\/g\/([^/]+)$/, handler: (m) => renderGroupInvite(dec(m[1])), auth: true },
   { pattern: /^#\/messages$/, handler: () => renderMessages(), auth: true },
   { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])), auth: true },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },

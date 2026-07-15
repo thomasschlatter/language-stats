@@ -1,0 +1,60 @@
+// /api/groups — user-made group chats joined via an invite link.
+import { Router } from 'express';
+import { requireAuth } from '../middleware/auth.js';
+import { getLanguageByCode } from '../models/languages.js';
+import {
+  createGroup, getGroup, listMyGroups, joinByCode, leaveGroup,
+  isMember, postGroupMessage, groupMessages,
+} from '../models/groups.js';
+
+const router = Router();
+
+// GET /api/groups -> my groups
+router.get('/', requireAuth, (req, res) => res.json({ groups: listMyGroups(req.user.id) }));
+
+// POST /api/groups { name } -> create a group (creator becomes owner + member)
+router.post('/', requireAuth, (req, res) => {
+  const name = (req.body?.name || '').trim();
+  if (!name) return res.status(400).json({ error: 'name is required' });
+  res.status(201).json({ group: createGroup(req.user.id, name.slice(0, 80)) });
+});
+
+// POST /api/groups/join { code } -> join via invite code
+router.post('/join', requireAuth, (req, res) => {
+  const code = (req.body?.code || '').trim();
+  const group = code && joinByCode(req.user.id, code);
+  if (!group) return res.status(404).json({ error: 'invalid invite link' });
+  res.json({ group });
+});
+
+// GET /api/groups/:id -> group + members (members only)
+router.get('/:id(\\d+)', requireAuth, (req, res) => {
+  const group = getGroup(Number(req.params.id), req.user.id);
+  if (!group) return res.status(404).json({ error: 'group not found' });
+  if (!group.is_member) return res.status(403).json({ error: 'join the group first' });
+  res.json({ group });
+});
+
+// POST /api/groups/:id/leave
+router.post('/:id(\\d+)/leave', requireAuth, (req, res) => {
+  res.json({ ok: leaveGroup(req.user.id, Number(req.params.id)) });
+});
+
+// GET /api/groups/:id/messages?since= -> messages (members only)
+router.get('/:id(\\d+)/messages', requireAuth, (req, res) => {
+  const id = Number(req.params.id);
+  if (!isMember(id, req.user.id)) return res.status(403).json({ error: 'not a member' });
+  res.json({ messages: groupMessages(id, Number(req.query.since) || 0) });
+});
+
+// POST /api/groups/:id/messages { body, bodyLanguageCode? } -> post a message
+router.post('/:id(\\d+)/messages', requireAuth, (req, res) => {
+  const id = Number(req.params.id);
+  if (!isMember(id, req.user.id)) return res.status(403).json({ error: 'not a member' });
+  const body = (req.body?.body || '').trim();
+  if (!body) return res.status(400).json({ error: 'empty message' });
+  const lang = req.body?.bodyLanguageCode ? getLanguageByCode(req.body.bodyLanguageCode) : null;
+  res.status(201).json({ message: postGroupMessage({ groupId: id, senderId: req.user.id, body: body.slice(0, 2000), bodyLangId: lang?.id || null }) });
+});
+
+export default router;

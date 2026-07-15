@@ -105,4 +105,29 @@ if (!cardCols.includes('definition_id')) {
 }
 db.exec('CREATE INDEX IF NOT EXISTS idx_cards_definition ON cards(definition_id)');
 
+// --- Groups: user-made group chats you join via an invite link. ---
+db.exec(`CREATE TABLE IF NOT EXISTS groups (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  invite_code TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+)`);
+db.exec(`CREATE TABLE IF NOT EXISTS group_members (
+  group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (group_id, user_id)
+)`);
+db.exec(`CREATE TABLE IF NOT EXISTS group_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body TEXT NOT NULL,
+  body_lang_id INTEGER REFERENCES languages(id) ON DELETE SET NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+)`);
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_members_user ON group_members(user_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_group_messages_group ON group_messages(group_id, id)');
+
 export default db;

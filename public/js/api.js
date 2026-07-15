@@ -110,6 +110,15 @@ export const api = {
   translate: (text, from, to) => request('POST', '/translate', { text, from, to }),
   aiTranslate: (text, from, to) => request('POST', '/translate/ai', { text, from, to }),
 
+  // --- groups (group chats joined via invite link) ---
+  groups: () => request('GET', '/groups'),
+  createGroup: (name) => request('POST', '/groups', { name }),
+  joinGroup: (code) => request('POST', '/groups/join', { code }),
+  group: (id) => request('GET', `/groups/${id}`),
+  leaveGroup: (id) => request('POST', `/groups/${id}/leave`),
+  groupMessages: (id, since = 0) => request('GET', `/groups/${id}/messages${since ? `?since=${since}` : ''}`),
+  sendGroupMessage: (id, b) => request('POST', `/groups/${id}/messages`, b),
+
   // --- multiplayer world ---
   world: () => request('GET', '/world'),
 

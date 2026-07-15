@@ -469,6 +469,8 @@ body.in-msg .view { overflow-y: auto; }
 }
 .src-user { color: var(--muted); font-weight: 600; }
 /* Study-view sense picker */
+.group-card { display: block; text-decoration: none; color: inherit; margin-bottom: 0.6rem; }
+.group-card:hover { border-color: var(--accent); }
 .sense-controls { margin: 0.4rem 0; }
 .sense-toggle { padding: 0; font-size: 0.85rem; }
 .sense-panel { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.4rem; text-align: left; }

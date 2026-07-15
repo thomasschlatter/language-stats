@@ -33,6 +33,7 @@ import translateRoutes from './routes/translate.js';
 import flashcardRoutes from './routes/flashcards.js';
 import reportRoutes from './routes/reports.js';
 import foxyRoutes from './routes/foxy.js';
+import groupRoutes from './routes/groups.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -70,6 +71,7 @@ app.use('/api/translate', translateRoutes);
 app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/foxy', foxyRoutes);
+app.use('/api/groups', groupRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 // The multiplayer World is deployed separately from this app. Local development
