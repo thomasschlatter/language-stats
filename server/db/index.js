@@ -129,5 +129,8 @@ db.exec(`CREATE TABLE IF NOT EXISTS group_messages (
 )`);
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_members_user ON group_members(user_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_group_messages_group ON group_messages(group_id, id)');
+// Open groups are discoverable + joinable without an invite; private (default) need the link.
+const groupCols = db.prepare('PRAGMA table_info(groups)').all().map((c) => c.name);
+if (!groupCols.includes('is_open')) db.exec('ALTER TABLE groups ADD COLUMN is_open INTEGER NOT NULL DEFAULT 0');
 
 export default db;

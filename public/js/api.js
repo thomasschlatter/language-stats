@@ -115,8 +115,10 @@ export const api = {
 
   // --- groups (group chats joined via invite link) ---
   groups: () => request('GET', '/groups'),
-  createGroup: (name) => request('POST', '/groups', { name }),
+  openGroups: () => request('GET', '/groups/open'),
+  createGroup: (name, open = false) => request('POST', '/groups', { name, open }),
   joinGroup: (code) => request('POST', '/groups/join', { code }),
+  joinOpenGroup: (id) => request('POST', `/groups/${id}/join`),
   group: (id) => request('GET', `/groups/${id}`),
   leaveGroup: (id) => request('POST', `/groups/${id}/leave`),
   groupMessages: (id, since = 0) => request('GET', `/groups/${id}/messages${since ? `?since=${since}` : ''}`),

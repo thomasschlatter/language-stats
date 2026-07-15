@@ -4,7 +4,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { getLanguageByCode } from '../models/languages.js';
 import {
   createGroup, getGroup, listMyGroups, joinByCode, leaveGroup,
-  isMember, postGroupMessage, groupMessages,
+  isMember, postGroupMessage, groupMessages, listOpenGroups, joinOpenGroup,
 } from '../models/groups.js';
 import { getBotUserId, mentionsFoxy } from '../models/bot.js';
 import { foxyReply } from '../models/foxyChat.js';
@@ -32,18 +32,28 @@ function triggerFoxy(groupId, body) {
 // GET /api/groups -> my groups
 router.get('/', requireAuth, (req, res) => res.json({ groups: listMyGroups(req.user.id) }));
 
-// POST /api/groups { name } -> create a group (creator becomes owner + member)
+// POST /api/groups { name, open? } -> create a group (creator becomes owner + member)
 router.post('/', requireAuth, (req, res) => {
   const name = (req.body?.name || '').trim();
   if (!name) return res.status(400).json({ error: 'name is required' });
-  res.status(201).json({ group: createGroup(req.user.id, name.slice(0, 80)) });
+  res.status(201).json({ group: createGroup(req.user.id, name.slice(0, 80), !!req.body?.open) });
 });
+
+// GET /api/groups/open -> discoverable open groups you haven't joined
+router.get('/open', requireAuth, (req, res) => res.json({ groups: listOpenGroups(req.user.id) }));
 
 // POST /api/groups/join { code } -> join via invite code
 router.post('/join', requireAuth, (req, res) => {
   const code = (req.body?.code || '').trim();
   const group = code && joinByCode(req.user.id, code);
   if (!group) return res.status(404).json({ error: 'invalid invite link' });
+  res.json({ group });
+});
+
+// POST /api/groups/:id/join -> join an OPEN group (no invite needed)
+router.post('/:id(\\d+)/join', requireAuth, (req, res) => {
+  const group = joinOpenGroup(req.user.id, Number(req.params.id));
+  if (!group) return res.status(404).json({ error: 'group not found or not open' });
   res.json({ group });
 });
 

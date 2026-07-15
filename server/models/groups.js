@@ -17,10 +17,10 @@ export function isMember(groupId, userId) {
   return !!db.prepare('SELECT 1 FROM group_members WHERE group_id = ? AND user_id = ?').get(groupId, userId);
 }
 
-export function createGroup(ownerId, name) {
+export function createGroup(ownerId, name, isOpen = false) {
   const code = newInviteCode();
   return db.transaction(() => {
-    const info = db.prepare('INSERT INTO groups (name, owner_id, invite_code) VALUES (?, ?, ?)').run(name, ownerId, code);
+    const info = db.prepare('INSERT INTO groups (name, owner_id, invite_code, is_open) VALUES (?, ?, ?, ?)').run(name, ownerId, code, isOpen ? 1 : 0);
     const groupId = info.lastInsertRowid;
     db.prepare('INSERT INTO group_members (group_id, user_id) VALUES (?, ?)').run(groupId, ownerId);
     // Seed the chat with a welcome message from the Foxy bot.
@@ -34,7 +34,7 @@ export function createGroup(ownerId, name) {
 
 export function getGroup(id, userId) {
   const g = db.prepare(
-    `SELECT g.id, g.name, g.owner_id, g.invite_code, g.created_at,
+    `SELECT g.id, g.name, g.owner_id, g.invite_code, g.is_open, g.created_at,
             (SELECT COUNT(*) FROM group_members m WHERE m.group_id = g.id) AS members
        FROM groups g WHERE g.id = ?`
   ).get(id);
@@ -64,6 +64,26 @@ export function listMyGroups(userId) {
 export function joinByCode(userId, code) {
   const g = db.prepare('SELECT id FROM groups WHERE invite_code = ?').get(code);
   if (!g) return null;
+  db.prepare('INSERT OR IGNORE INTO group_members (group_id, user_id) VALUES (?, ?)').run(g.id, userId);
+  return getGroup(g.id, userId);
+}
+
+// Open groups the user hasn't joined yet — discoverable without an invite.
+export function listOpenGroups(userId, limit = 40) {
+  return db.prepare(
+    `SELECT g.id, g.name, g.owner_id, g.created_at,
+            (SELECT COUNT(*) FROM group_members m WHERE m.group_id = g.id) AS members
+       FROM groups g
+      WHERE g.is_open = 1
+        AND NOT EXISTS (SELECT 1 FROM group_members me WHERE me.group_id = g.id AND me.user_id = ?)
+      ORDER BY members DESC, g.id DESC LIMIT ?`
+  ).all(userId, limit);
+}
+
+// Join an OPEN group by id (no invite needed). Returns null if not open.
+export function joinOpenGroup(userId, groupId) {
+  const g = db.prepare('SELECT id, is_open FROM groups WHERE id = ?').get(groupId);
+  if (!g || !g.is_open) return null;
   db.prepare('INSERT OR IGNORE INTO group_members (group_id, user_id) VALUES (?, ?)').run(g.id, userId);
   return getGroup(g.id, userId);
 }

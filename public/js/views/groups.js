@@ -44,7 +44,7 @@ export async function renderGroups() {
   try {
     const { groups } = await api.groups();
     clear(list);
-    if (!groups.length) { list.append(el('p', { class: 'muted' }, 'No groups yet. Create one!')); return; }
+    if (!groups.length) list.append(el('p', { class: 'muted' }, 'No groups yet. Create one or join an open group below.'));
     for (const g of groups) {
       list.append(el('a', { class: 'card group-card', href: `#/groups/${g.id}` }, [
         el('strong', {}, g.name),
@@ -53,18 +53,47 @@ export async function renderGroups() {
     }
   } catch (ex) { clear(list).append(el('p', { class: 'error' }, ex.message)); }
 
+  // Discover open groups
+  const discover = el('div', {});
+  view.append(discover);
+  try {
+    const { groups: open } = await api.openGroups();
+    if (open.length) {
+      discover.append(el('h2', { style: 'font-size:1.05rem; margin:1.5rem 0 0.5rem' }, 'Open groups to join'));
+      for (const g of open) {
+        const joinBtn = el('button', { class: 'btn small' }, 'Join');
+        joinBtn.addEventListener('click', async () => {
+          joinBtn.disabled = true;
+          try { const { group } = await api.joinOpenGroup(g.id); navigate(`#/groups/${group.id}`); }
+          catch { joinBtn.disabled = false; joinBtn.textContent = 'Failed'; }
+        });
+        discover.append(el('div', { class: 'card group-card', style: 'display:flex; justify-content:space-between; align-items:center' }, [
+          el('div', {}, [el('strong', {}, g.name), el('div', { class: 'muted', style: 'font-size:0.82rem' }, `${g.members} member${g.members === 1 ? '' : 's'}`)]),
+          joinBtn,
+        ]));
+      }
+    }
+  } catch { /* ignore */ }
+
   function openCreate() {
     const input = el('input', { type: 'text', placeholder: 'group name', style: 'max-width:220px' });
     input.value = '';
+    const openChk = el('input', { type: 'checkbox' });
     const err = el('div', { class: 'error' });
     const box = el('form', {
       onsubmit: async (e) => {
         e.preventDefault();
         if (!input.value.trim()) return;
-        try { const { group } = await api.createGroup(input.value.trim()); close(); navigate(`#/groups/${group.id}`); }
+        try { const { group } = await api.createGroup(input.value.trim(), openChk.checked); close(); navigate(`#/groups/${group.id}`); }
         catch (ex) { err.textContent = ex.message; }
       },
-    }, [el('h2', {}, 'New group'), input, err, el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Create')])]);
+    }, [
+      el('h2', {}, 'New group'),
+      input,
+      el('label', { class: 'row', style: 'gap:0.4rem; margin:0.6rem 0; font-size:0.9rem' }, [openChk, 'Open group — anyone can find and join (otherwise invite-only)']),
+      err,
+      el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Create')]),
+    ]);
     const close = openModalFn(box);
   }
 }
@@ -89,9 +118,16 @@ export async function renderGroup(id) {
   try { ({ group } = await api.group(id)); }
   catch (ex) { view.append(el('p', { class: 'error' }, ex.message)); return; }
 
-  view.append(el('h1', { style: 'margin:0.3rem 0 0.2rem' }, group.name));
-  view.append(el('div', { class: 'muted', style: 'font-size:0.85rem' },
-    (group.memberList || []).map((m) => `@${m.username}`).join(', ')));
+  view.append(el('div', { class: 'row', style: 'gap:0.5rem; align-items:center; margin:0.3rem 0 0.3rem' }, [
+    el('h1', { style: 'margin:0' }, group.name),
+    el('span', { class: group.is_open ? 'badge official' : 'badge user' }, group.is_open ? 'Open' : 'Private'),
+  ]));
+  view.append(el('div', { class: 'muted', style: 'font-size:0.8rem' }, `${group.members} member${group.members === 1 ? '' : 's'}`));
+  view.append(el('div', { class: 'group-members' },
+    (group.memberList || []).map((m) => el('a', { class: 'group-member', href: `#/u/${encodeURIComponent(m.username)}`, title: `@${m.username}` }, [
+      avatarFor(m.avatar, m.username, 26, m.avatar_image),
+      el('span', {}, `@${m.username}`),
+    ]))));
 
   // Invite link
   const inviteUrl = `${location.origin}/#/g/${group.invite_code}`;
