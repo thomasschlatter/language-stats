@@ -260,14 +260,13 @@ body.in-msg .view { overflow-y: auto; }
 
 /* Language picker modal */
 .lang-picker { width: 100%; }
-.tip-editor-page { max-width: 1100px; margin: 0 auto; padding-bottom: 4rem; }
+.tip-editor-page { max-width: 1100px; margin: 0 auto; padding-bottom: 1rem; }
 .tip-editor-page label { display: block; margin: 0.6rem 0 0.2rem; font-size: 0.85rem; color: var(--muted); }
 .tip-editor-top { margin-bottom: 0.6rem; }
-/* Sticky action bar stays visible above EasyMDE's fixed side-by-side preview. */
-.tip-editor-actions {
-  position: sticky; bottom: 0; z-index: 70; display: flex; gap: 0.6rem; justify-content: flex-end;
-  padding: 0.7rem 0; margin-top: 0.6rem; background: var(--bg); border-top: 1px solid var(--border);
-}
+/* Header bar: title + actions at the top (above the fixed side-by-side preview). */
+.tip-editor-bar { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+.tip-editor-bar h1 { margin: 0; font-size: 1.2rem; }
+.tip-editor-bar-actions { margin-left: auto; display: flex; gap: 0.5rem; flex-shrink: 0; }
 .tip-editor-page .CodeMirror { min-height: 55vh; font: inherit; }
 .tip-editor-page .editor-toolbar { border-radius: 6px 6px 0 0; }
 .tip-editor-page .EasyMDEContainer { margin-bottom: 0.6rem; }

@@ -127,8 +127,16 @@ export function openTipEditor(language, onDone, tip = null) {
       }
     },
   }, [
-    // Title + language pickers ABOVE the editor so the side-by-side preview
-    // (fixed positioning) can't hide them.
+    // Header bar with the actions at the TOP — above the editor and above
+    // EasyMDE's fixed side-by-side preview, so they never overlap the editor.
+    el('div', { class: 'tip-editor-bar' }, [
+      el('h1', {}, editing ? 'Edit tip' : `Share a ${language.name} tip`),
+      el('div', { class: 'tip-editor-bar-actions' }, [
+        el('button', { class: 'btn small secondary', type: 'button', onclick: () => onDone() }, 'Cancel'),
+        el('button', { class: 'btn small', type: 'submit' }, editing ? 'Save changes' : 'Post tip'),
+      ]),
+    ]),
+    // Title + language pickers ABOVE the editor.
     el('div', { class: 'tip-editor-top' }, [
       el('label', {}, 'Title'), title,
       ...(editing ? [] : [el('label', {}, 'Written for (the language this tip is about)'), writtenFor]),
@@ -139,20 +147,11 @@ export function openTipEditor(language, onDone, tip = null) {
     el('div', { class: 'muted', style: 'font-size:0.78rem; margin-top:0.3rem' },
       'Use "- " for bullet lists and "# " for headings. Readers can turn any list into a flashcard deck.'),
     err,
-    // Sticky action bar — stays above the fixed side-by-side preview.
-    el('div', { class: 'tip-editor-actions' }, [
-      el('button', { class: 'btn small secondary', type: 'button', onclick: () => onDone() }, 'Cancel'),
-      el('button', { class: 'btn', type: 'submit' }, editing ? 'Save changes' : 'Post tip'),
-    ]),
   ]);
 
-  const heading = editing ? 'Edit tip' : `Share a ${language.name} tip`;
   // Full-page editor (not a modal) — room for a side-by-side preview.
   const view = clear(document.getElementById('view'));
-  view.append(el('div', { class: 'tip-editor-page' }, [
-    el('h1', { style: 'margin:0 0 0.6rem; font-size:1.25rem' }, heading),
-    form,
-  ]));
+  view.append(el('div', { class: 'tip-editor-page' }, [form]));
   const close = () => {}; // leaving is handled by onDone()/navigate after submit
 
   // Upgrade the textarea into a markdown editor. Editor left, preview right on
