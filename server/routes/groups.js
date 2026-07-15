@@ -6,8 +6,19 @@ import {
   createGroup, getGroup, listMyGroups, joinByCode, leaveGroup,
   isMember, postGroupMessage, groupMessages,
 } from '../models/groups.js';
+import { getBotUserId, mentionsFoxy } from '../models/bot.js';
+import { foxyReply } from '../models/foxyChat.js';
 
 const router = Router();
+
+// When @foxy is mentioned, generate a reply with the local model and post it as
+// the bot. Fire-and-forget so the user's own message returns instantly; the
+// reply shows up on the next poll.
+function triggerFoxy(groupId, body) {
+  foxyReply(body)
+    .then((reply) => { try { postGroupMessage({ groupId, senderId: getBotUserId(), body: reply }); } catch { /* ignore */ } })
+    .catch(() => { /* model unavailable */ });
+}
 
 // GET /api/groups -> my groups
 router.get('/', requireAuth, (req, res) => res.json({ groups: listMyGroups(req.user.id) }));
@@ -54,7 +65,10 @@ router.post('/:id(\\d+)/messages', requireAuth, (req, res) => {
   const body = (req.body?.body || '').trim();
   if (!body) return res.status(400).json({ error: 'empty message' });
   const lang = req.body?.bodyLanguageCode ? getLanguageByCode(req.body.bodyLanguageCode) : null;
-  res.status(201).json({ message: postGroupMessage({ groupId: id, senderId: req.user.id, body: body.slice(0, 2000), bodyLangId: lang?.id || null }) });
+  const clean = body.slice(0, 2000);
+  const message = postGroupMessage({ groupId: id, senderId: req.user.id, body: clean, bodyLangId: lang?.id || null });
+  if (mentionsFoxy(clean)) triggerFoxy(id, clean);
+  res.status(201).json({ message });
 });
 
 export default router;

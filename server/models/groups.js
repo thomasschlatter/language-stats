@@ -2,6 +2,7 @@
 // owner, members, and its own message thread.
 import { randomBytes } from 'node:crypto';
 import db from '../db/index.js';
+import { getBotUserId } from './bot.js';
 
 function newInviteCode() {
   // short, url-safe, collision-checked
@@ -20,8 +21,14 @@ export function createGroup(ownerId, name) {
   const code = newInviteCode();
   return db.transaction(() => {
     const info = db.prepare('INSERT INTO groups (name, owner_id, invite_code) VALUES (?, ?, ?)').run(name, ownerId, code);
-    db.prepare('INSERT INTO group_members (group_id, user_id) VALUES (?, ?)').run(info.lastInsertRowid, ownerId);
-    return getGroup(info.lastInsertRowid, ownerId);
+    const groupId = info.lastInsertRowid;
+    db.prepare('INSERT INTO group_members (group_id, user_id) VALUES (?, ?)').run(groupId, ownerId);
+    // Seed the chat with a welcome message from the Foxy bot.
+    db.prepare('INSERT INTO group_messages (group_id, sender_id, body) VALUES (?, ?, ?)').run(
+      groupId, getBotUserId(),
+      `👋 Welcome to “${name}”! This group was just created. Share the invite link to add friends, and say @foxy anytime to chat with me.`
+    );
+    return getGroup(groupId, ownerId);
   })();
 }
 
