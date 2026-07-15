@@ -232,6 +232,22 @@ export function getCard(id, userId) {
   return db.prepare('SELECT * FROM cards WHERE id = ? AND user_id = ?').get(id, userId);
 }
 
+// Re-link one of the user's cards to a different dictionary sense (or null to
+// unlink). The sense must belong to a word matching this card's front+language.
+export function relinkCard(userId, cardId, definitionId) {
+  const card = db.prepare('SELECT id, language_id, front FROM cards WHERE id = ? AND user_id = ?').get(cardId, userId);
+  if (!card) return null;
+  if (definitionId) {
+    const ok = db.prepare(
+      `SELECT 1 FROM word_definitions wd JOIN words w ON w.id = wd.word_id
+        WHERE wd.id = ? AND w.language_id = ? AND w.text = ? COLLATE NOCASE`
+    ).get(definitionId, card.language_id, card.front);
+    if (!ok) return null;
+  }
+  db.prepare('UPDATE cards SET definition_id = ? WHERE id = ?').run(definitionId || null, cardId);
+  return { definitionId: definitionId || null };
+}
+
 // Apply a rating (1..4) and reschedule.
 export function reviewCard(id, userId, rating) {
   const card = getCard(id, userId);

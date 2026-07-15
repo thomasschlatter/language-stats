@@ -131,6 +131,7 @@ export const api = {
   deleteDeck: (id) => request('DELETE', `/flashcards/decks/${id}`),
   addCard: (deckId, b) => request('POST', `/flashcards/decks/${deckId}/cards`, b),
   appendCards: (deckId, rows) => request('POST', `/flashcards/decks/${deckId}/cards/bulk`, { rows }),
+  relinkCardSense: (cardId, definitionId) => request('PATCH', `/flashcards/cards/${cardId}/sense`, { definitionId }),
   importDeck: (b) => request('POST', '/flashcards/import', b),
   importApkg: (b) => request('POST', '/flashcards/import-apkg', b),
   generateDeck: (b) => request('POST', '/flashcards/generate', b),

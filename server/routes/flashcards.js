@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { getLanguageByCode } from '../models/languages.js';
 import {
   createDeck, getDeck, listDecks, deleteDeck,
-  addCards, dueCards, reviewCard, familiarityMap, listCards, deckHasCard, quizCards,
+  addCards, dueCards, reviewCard, familiarityMap, listCards, deckHasCard, quizCards, relinkCard,
   listPublicDecks, getPublicDeck, listPublicDeckCards, voteDeck, setDeckPublic, copyDeckForUser,
 } from '../models/flashcards.js';
 import { topWords, totalCount } from '../models/frequency.js';
@@ -129,6 +129,13 @@ router.post('/decks/:id(\\d+)/cards', requireAuth, (req, res) => {
     rows: [{ front, back }],
   });
   res.status(201).json({ added, deck });
+});
+
+// PATCH /api/flashcards/cards/:id/sense  { definitionId } -> re-link the card's sense
+router.patch('/cards/:id(\\d+)/sense', requireAuth, (req, res) => {
+  const result = relinkCard(req.user.id, Number(req.params.id), req.body?.definitionId ? Number(req.body.definitionId) : null);
+  if (!result) return res.status(404).json({ error: 'card or sense not found' });
+  res.json(result);
 });
 
 // POST /api/flashcards/decks/:id/cards/bulk  { rows: [{front, back}] } -> append many
