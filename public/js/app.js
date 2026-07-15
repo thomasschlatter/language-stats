@@ -9,6 +9,7 @@ import { loadCurrentUser, renderAuthArea, openLanguageSetup } from './auth.js';
 import { startRouter } from './router.js';
 import { byImportance } from './langOrder.js';
 import { guardSingleInstance } from './singleInstance.js';
+import { initChatDrawer } from './chatDrawer.js';
 
 // Make the persistent chrome (language bar, top-bar labels) clickable too.
 function tokenizeChrome() {
@@ -220,6 +221,7 @@ async function init() {
   setupLangCarousel();
   setupSearch();
   startRouter();
+  initChatDrawer();
   updateDueBadge();
   updateDmBadge();
   setInterval(updateDmBadge, 60000); // poll for incoming DMs
