@@ -9,22 +9,13 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import db from './index.js';
 import { createOfficialDeck, addCards } from '../models/flashcards.js';
+import { getBotUserId } from '../models/bot.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const deckDir = join(__dirname, '..', 'seed-data', 'official-decks');
 
-const SYS_EMAIL = 'official@groupifier.com';
-const SYS_USERNAME = 'Groupifier';
-
-// The system user owns every official deck. Never logs in (unusable password).
-function ensureSystemUser() {
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(SYS_EMAIL);
-  if (existing) return existing.id;
-  const info = db.prepare(
-    'INSERT INTO users (email, username, password_hash, bio) VALUES (?, ?, ?, ?)'
-  ).run(SYS_EMAIL, SYS_USERNAME, '!', 'Official Groupifier decks and word lists.');
-  return info.lastInsertRowid;
-}
+// Official decks are owned by the shared Foxy bot user.
+const ensureSystemUser = getBotUserId;
 
 export function ensureOfficialDecks() {
   let files;

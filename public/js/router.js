@@ -61,7 +61,8 @@ const routes = [
   { pattern: /^#\/g\/([^/]+)$/, handler: (m) => renderGroupInvite(dec(m[1])), auth: true },
   { pattern: /^#\/foxy$/, handler: () => renderFoxyHelp() },
   { pattern: /^#\/messages$/, handler: () => renderMessages(), auth: true },
-  { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])), auth: true },
+  // DMing the bot (Foxy / legacy Groupifier) opens the Ask Foxy assistant.
+  { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => { const u = dec(m[1]); return /^(foxy|groupifier)$/i.test(u) ? renderFoxyHelp() : renderDmThread(u); }, auth: true },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },
   { pattern: /^#\/chat$/, handler: () => renderChat(), auth: true },
   { pattern: /^#\/chat\/([^/]+)$/, handler: (m) => renderChat(dec(m[1])), auth: true },

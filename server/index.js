@@ -147,6 +147,15 @@ try {
   console.warn('Official decks ensure failed:', e.message);
 }
 
+// Ensure the shared Foxy bot user (renames the legacy "Groupifier" system user
+// to Foxy + gives it a fox avatar).
+try {
+  const { getBotUserId } = await import('./models/bot.js');
+  getBotUserId();
+} catch (e) {
+  console.warn('Bot user ensure failed:', e.message);
+}
+
 app.listen(PORT, () => {
   console.log(`Language Stats running at http://localhost:${PORT}`);
 });
