@@ -50,6 +50,8 @@ const Wrapper = styled.div`
   padding: 36px 60px;
   box-shadow: 0px 0px 5px #0000006f;
   width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
 `;
 
 const CustomRoomWrapper = styled.div`
