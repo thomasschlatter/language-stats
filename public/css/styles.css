@@ -267,6 +267,25 @@ body.in-msg .view { overflow-y: auto; }
 .tip-editor-bar { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
 .tip-editor-bar h1 { margin: 0; font-size: 1.2rem; }
 .tip-editor-bar-actions { margin-left: auto; display: flex; gap: 0.5rem; flex-shrink: 0; }
+/* Theme EasyMDE with the app's variables so it works in dark mode (its default
+   toolbar icons are hard-coded dark and disappear on a dark background). */
+.tip-editor-page .editor-toolbar { background: var(--surface); border-color: var(--border); opacity: 1; }
+.tip-editor-page .editor-toolbar button { color: var(--text) !important; border-color: transparent; }
+.tip-editor-page .editor-toolbar button:hover,
+.tip-editor-page .editor-toolbar button.active { background: var(--surface-2); border-color: var(--border); }
+.tip-editor-page .editor-toolbar i.separator { border-left-color: var(--border); border-right-color: transparent; }
+.tip-editor-page .editor-toolbar::before,
+.tip-editor-page .editor-toolbar::after { border-top-color: var(--border); }
+.tip-editor-page .CodeMirror {
+  background: var(--surface); color: var(--text); border-color: var(--border);
+}
+.tip-editor-page .CodeMirror-cursor { border-left-color: var(--text); }
+.tip-editor-page .CodeMirror-selected { background: var(--surface-2) !important; }
+.tip-editor-page .cm-comment, .tip-editor-page .cm-formatting { color: var(--muted); }
+.tip-editor-page .editor-preview, .tip-editor-page .editor-preview-side {
+  background: var(--surface); color: var(--text);
+}
+.tip-editor-page .editor-statusbar { color: var(--muted); }
 .tip-editor-page .CodeMirror { min-height: 55vh; font: inherit; }
 .tip-editor-page .editor-toolbar { border-radius: 6px 6px 0 0; }
 .tip-editor-page .EasyMDEContainer { margin-bottom: 0.6rem; }
