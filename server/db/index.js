@@ -105,6 +105,16 @@ if (!cardCols.includes('definition_id')) {
 }
 db.exec('CREATE INDEX IF NOT EXISTS idx_cards_definition ON cards(definition_id)');
 
+// --- lemma links: an inflected form (e.g. "links") points at its lemma ("link")
+// so the form's page can surface the lemma's real senses instead of a lonely or
+// obscure standalone gloss. Populated from Wiktionary/Kaikki form_of data (no
+// lemmatizer needed — the dictionary already knows the base form, incl. irregulars).
+const wordCols = db.prepare('PRAGMA table_info(words)').all().map((c) => c.name);
+if (!wordCols.includes('lemma_id')) {
+  db.exec('ALTER TABLE words ADD COLUMN lemma_id INTEGER REFERENCES words(id) ON DELETE SET NULL');
+}
+db.exec('CREATE INDEX IF NOT EXISTS idx_words_lemma ON words(lemma_id)');
+
 // --- Groups: user-made group chats you join via an invite link. ---
 db.exec(`CREATE TABLE IF NOT EXISTS groups (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

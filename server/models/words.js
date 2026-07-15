@@ -58,6 +58,27 @@ export function getEntry(languageId, text) {
     .get(languageId, text);
 }
 
+// The lemma (base form) a given word points at, if any — e.g. "links" -> "link".
+// Returns the lemma word row (id, text, language_code) or null.
+export function getLemma(wordId) {
+  return db
+    .prepare(
+      `SELECT lem.id, lem.text, l.code AS language_code, l.name AS language_name
+       FROM words w
+       JOIN words lem ON lem.id = w.lemma_id
+       JOIN languages l ON l.id = lem.language_id
+       WHERE w.id = ?`
+    )
+    .get(wordId);
+}
+
+// Point an inflected form at its lemma (both in the same language). No-op if it
+// would create a self-loop.
+export function setLemma(wordId, lemmaWordId) {
+  if (!wordId || !lemmaWordId || wordId === lemmaWordId) return;
+  db.prepare('UPDATE words SET lemma_id = ? WHERE id = ?').run(lemmaWordId, wordId);
+}
+
 // Get the word's id, creating a bare entry if it doesn't exist yet.
 export function ensureWord(languageId, text) {
   const existing = db.prepare('SELECT id FROM words WHERE language_id = ? AND text = ?').get(languageId, text);

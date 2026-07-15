@@ -47,6 +47,23 @@ export async function renderWordPage(langCode, text) {
       box.append(el('button', { class: 'btn small secondary', style: 'margin-top:0.5rem', onclick: () => openAddDefinition(data.word, langCode, defList) }, '+ Add definition'));
     }
 
+    // Lemma: this word is an inflected form of another (e.g. "links" → "link").
+    // Show the base word (clickable) and its real senses.
+    if (data.lemma) {
+      const lemLang = data.lemma.languageCode || langCode;
+      box.append(
+        el('div', { class: 'lemma-note' }, [
+          'Inflected form of ',
+          wordEl(data.lemma.text, lemLang),
+        ])
+      );
+      if (data.lemma.definitions?.length) {
+        const lemList = el('div', { class: 'definitions lemma-defs' });
+        for (const d of data.lemma.definitions) lemList.append(definitionEl(d, lemLang));
+        box.append(lemList);
+      }
+    }
+
     // Translations & links
     box.append(el('div', { class: 'links-title' }, 'Translations & links'));
     const list = el('div', { class: 'links' });

@@ -437,6 +437,9 @@ body.in-msg .view { overflow-y: auto; }
 .vote-btn { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; gap: 0.1rem; min-width: 34px; padding: 0.2rem 0.3rem; }
 .vote-btn .vote-arrow { font-size: 0.7rem; }
 .links-title { margin-top: 1.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.lemma-note { margin-top: 0.9rem; font-size: 0.95rem; color: var(--muted); }
+.lemma-note .word { font-weight: 600; }
+.lemma-defs { margin-top: 0.4rem; opacity: 0.95; }
 .links { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
 .link-row { display: flex; align-items: baseline; gap: 0.6rem; }
 .link-type {

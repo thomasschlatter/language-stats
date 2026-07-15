@@ -6,6 +6,7 @@ import {
   searchWords,
   getWordById,
   getEntry,
+  getLemma,
   ensureWord,
   markWordScraped,
   findWord,
@@ -76,6 +77,22 @@ router.get('/entry', async (req, res) => {
 
   const definitions = word ? listDefinitions(word.id, req.user?.id) : [];
   const links = word ? getLinkedWords(word.id) : [];
+
+  // If this is an inflected form (e.g. "links" -> "link"), surface the lemma and
+  // its real senses so the page isn't stuck on a lonely/obscure standalone gloss.
+  let lemma = null;
+  if (word) {
+    const lem = getLemma(word.id);
+    if (lem) {
+      lemma = {
+        text: lem.text,
+        languageCode: lem.language_code,
+        languageName: lem.language_name,
+        definitions: listDefinitions(lem.id, req.user?.id),
+      };
+    }
+  }
+
   res.json({
     languageCode: language.code,
     languageName: language.name,
@@ -83,6 +100,7 @@ router.get('/entry', async (req, res) => {
     word: word || null,
     definitions,
     links,
+    lemma,
   });
 });
 
