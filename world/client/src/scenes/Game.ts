@@ -520,18 +520,22 @@ export default class Game extends Phaser.Scene {
     this.worldColliders.push(solids)
   }
 
-  // A designed indoor Tiled map (café = the office map, lounge = the lobby map).
-  // A simple starter room: a floor fill + a 4-wall border (roomMap.json). The
-  // "Walls" tile layer collides on every non-empty tile, so you can't leave the
-  // room. Model for reliable, generated indoor levels.
+  // A generated LimeZu Room_Builder room (roomMap.json, made by gen-room2.mjs):
+  // Ground (floor fill) + Shadows (transparent floor-shadow overlay) + Walls (the
+  // 3D wall frame with a door gap). Only the Walls layer collides — every non-empty
+  // wall tile is solid, and the door gap is empty so it stays walkable. Floor and
+  // shadow layers never collide. Model for reliable, generated indoor levels.
   private buildRoom() {
     this.worldColliders = []
     this.map = this.make.tilemap({ key: 'roomMap' })
-    const floor = this.map.addTilesetImage('FloorAndGround', 'tiles_wall')!
-    this.map.createLayer('Ground', [floor], 0, 0)
-    const walls = this.map.createLayer('Walls', [floor], 0, 0)!
-    walls.setCollisionByExclusion([-1, 0]) // every non-empty wall tile is solid
-    this.worldColliders.push(walls)
+    const floors = this.map.addTilesetImage('floors', 'room_floors')!
+    const walls = this.map.addTilesetImage('walls', 'room_walls')!
+    const sky = this.map.addTilesetImage('sky', 'room_sky')!
+    this.map.createLayer('Ground', [floors, sky], 0, 0) // cream room floor on a sky-blue surround
+    this.map.createLayer('Shadows', [floors], 0, 0) // transparent overlay, non-colliding
+    const wallLayer = this.map.createLayer('Walls', [walls], 0, 0)!
+    wallLayer.setCollisionByExclusion([-1, 0]) // solid on every wall tile; door gap is empty → walkable
+    this.worldColliders.push(wallLayer)
     // Spawn where the map says (room centre), falling back to the map centre.
     const props = (this.map.properties as Array<{ name: string; value: number }>) || []
     const prop = (n: string) => props.find((p) => p.name === n)?.value

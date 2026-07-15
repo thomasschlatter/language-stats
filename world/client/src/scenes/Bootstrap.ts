@@ -33,6 +33,10 @@ export default class Bootstrap extends Phaser.Scene {
   
    OBJECTS = {
     tiles_wall: ['assets/map/FloorAndGround.png', {frameWidth: 32, frameHeight: 32}],
+    // LimeZu Room_Builder sheets for the generated indoor room (roomMap.json).
+    room_floors: ['assets/tileset/Room_Builder_Floors_32x32.png', {frameWidth: 32, frameHeight: 32}],
+    room_walls: ['assets/tileset/Room_Builder_3d_walls_32x32.png', {frameWidth: 32, frameHeight: 32}],
+    room_sky: ['assets/tileset/Room_Builder_Sky_32x32.png', {frameWidth: 32, frameHeight: 32}],
     //outside_objects: ['assets/tileset/Modern_Exteriors_Complete_Tileset.png', {frameWidth: 32, frameHeight: 32}],
     chairs: ['assets/items/chair.png', {frameWidth: 32, frameHeight: 64}],
     computers: ['assets/items/computer.png', {frameWidth: 96, frameHeight: 64}],
