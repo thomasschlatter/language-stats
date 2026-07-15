@@ -25,3 +25,4 @@ yarn-error.log*
 # GuttyKreum raw asset packs (paid) — keep local; commit only wired-in world images
 public/assets/guttykreum/
 public/assets/modern_exteriors/
+public/assets/modern_interiors/
