@@ -19,11 +19,17 @@ const BOOKS = [
   { file: 'tendances-a2.json', name: 'Tendances A2', level: 'A2', out: 'fr-tendances-a2.json' },
 ];
 
-function extractJsonArray(s) {
-  const a = s.indexOf('[');
-  const b = s.lastIndexOf(']');
-  if (a === -1 || b === -1) throw new Error('no JSON array in LLM output');
-  return JSON.parse(s.slice(a, b + 1));
+// Salvage every complete {front, back} object, even if the array is truncated
+// (the model can hit the token cap mid-array) or wrapped in prose/code fences.
+function extractCards(s) {
+  const cards = [];
+  const re = /\{\s*"front"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"back"\s*:\s*"((?:[^"\\]|\\.)*)"\s*\}/g;
+  let m;
+  while ((m = re.exec(s))) {
+    try { cards.push({ front: JSON.parse(`"${m[1]}"`), back: JSON.parse(`"${m[2]}"`) }); } catch { /* skip */ }
+  }
+  if (!cards.length) throw new Error('no cards in LLM output');
+  return cards;
 }
 
 async function curate(words, level) {
@@ -38,8 +44,9 @@ async function curate(words, level) {
     + `Return a JSON array of {"front": "<French word/expression>", "back": "<concise English translation>"}, `
     + `at most 200 entries, best/most useful first. Candidates: ${JSON.stringify(words)}`;
   const out = await llmChat({ system, messages: [{ role: 'user', content: user }], maxTokens: 8000, temperature: 0.2 });
-  return extractJsonArray(out).filter((r) => r && r.front && r.back)
-    .map((r) => ({ front: String(r.front).trim(), back: String(r.back).trim() }));
+  return extractCards(out)
+    .filter((r) => r.front && r.back)
+    .map((r) => ({ front: r.front.trim(), back: r.back.trim() }));
 }
 
 if (!llmAvailable()) { console.error('LLM not configured (ANTHROPIC_API_KEY missing).'); process.exit(1); }
