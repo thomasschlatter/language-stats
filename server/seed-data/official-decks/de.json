@@ -1,1 +1,4430 @@
-[{"level":"a1","name":"German A1 · 250 common words","source":"freq+freedict","cards":[{"front":"ich","back":"I; me"},{"front":"sie","back":"you"},{"front":"das","back":"the"},{"front":"du","back":"you; you and I"},{"front":"nicht","back":"not; not to say"},{"front":"die","back":"that; who; which"},{"front":"es","back":"E; E sharp; E flat"},{"front":"und","back":"and; and so on; and so forth"},{"front":"der","back":"the"},{"front":"wir","back":"we"},{"front":"was","back":"what"},{"front":"zu","back":"closed; shut"},{"front":"er","back":"he; he and his"},{"front":"ein","back":"a; an"},{"front":"in","back":"on"},{"front":"ja","back":"yes; a qualified yes"},{"front":"mir","back":"me"},{"front":"mit","back":"as from; as of"},{"front":"wie","back":"as"},{"front":"den","back":"who; whom"},{"front":"mich","back":"me"},{"front":"auf","back":"on"},{"front":"dass","back":"that; figure that …; considering"},{"front":"aber","back":"but"},{"front":"eine","back":"a; an"},{"front":"so","back":"in this way; in that way; that way"},{"front":"hier","back":"here; here and now; hic et nunc"},{"front":"haben","back":"hold; have; own"},{"front":"für","back":"for; fight for peace; leave for good"},{"front":"von","back":"from; from the street; information from witnesses"},{"front":"wenn","back":"if; should; if … then"},{"front":"dich","back":"thee"},{"front":"ihr","back":"yours"},{"front":"nein","back":"no"},{"front":"habe","back":"possessions; belongings"},{"front":"an","back":"at; by"},{"front":"noch","back":"more"},{"front":"nur","back":"other than"},{"front":"da","back":"when"},{"front":"sich","back":"each other; one another"},{"front":"uns","back":"ourselves"},{"front":"hast","back":"hurry"},{"front":"dem","back":"who; whom"},{"front":"gut","back":"cum laude"},{"front":"auch","back":"also; too; as well"},{"front":"schon","back":"just"},{"front":"als","back":"when; scarcely … when"},{"front":"sein","back":"existence"},{"front":"mal","back":"time; the first time; the umpteenth time"},{"front":"jetzt","back":"now"},{"front":"ihn","back":"him"},{"front":"dann","back":"then; now and then; even then"},{"front":"aus","back":"out of bounds"},{"front":"meine","back":"mine; of me"},{"front":"um","back":"round; around; round the corner"},{"front":"mein","back":"my"},{"front":"doch","back":"but"},{"front":"alles","back":"the lot"},{"front":"weiß","back":"white"},{"front":"keine","back":"no; under no circumstances"},{"front":"oder","back":"or"},{"front":"nach","back":"on"},{"front":"nichts","back":"emptiness"},{"front":"man","back":"one; you; we"},{"front":"werden","back":"development; becoming"},{"front":"geht","back":"walks"},{"front":"wo","back":"when; on which"},{"front":"etwas","back":"something; that certain something"},{"front":"oh","back":"oh; uh"},{"front":"mehr","back":"increase; surplus; growth"},{"front":"bei","back":"care of"},{"front":"also","back":"so"},{"front":"bitte","back":"plea"},{"front":"immer","back":"always"},{"front":"warum","back":"why"},{"front":"vor","back":"for"},{"front":"los","back":"lot; by lot"},{"front":"können","back":"workmanship"},{"front":"wieder","back":"again"},{"front":"sagen","back":"legends; sagas"},{"front":"machen","back":"make; put in; send in"},{"front":"danke","back":"thanks; ta"},{"front":"sehr","back":"damned"},{"front":"alle","back":"all; all-in-one; that's all"},{"front":"denn","back":"so"},{"front":"mann","back":"husband"},{"front":"tun","back":"doing; conduct; action"},{"front":"ihm","back":"him"},{"front":"zum","back":"the"},{"front":"gehen","back":"going"},{"front":"sehen","back":"eyesight; sight; vision"},{"front":"vielleicht","back":"perhaps"},{"front":"wer","back":"who"},{"front":"ihre","back":"yours"},{"front":"diese","back":"such; every such offence"},{"front":"euch","back":"yourselves"},{"front":"einer","back":"unit; unit place"},{"front":"über","back":"on"},{"front":"gibt","back":"gives"},{"front":"okay","back":"okay; OK; okey"},{"front":"wissen","back":"knowledge"},{"front":"deine","back":"yours"},{"front":"müssen","back":"want"},{"front":"soll","back":"debit"},{"front":"nie","back":"hardly ever; almost never"},{"front":"wirklich","back":"very"},{"front":"viel","back":"much; a lot; lots"},{"front":"weg","back":"alley"},{"front":"würde","back":"elevation"},{"front":"des","back":"D; D sharp; D flat"},{"front":"einfach","back":"unpretentious"},{"front":"leben","back":"life; sacrifice one's life; cling to life"},{"front":"zeit","back":"spell"},{"front":"weil","back":"as"},{"front":"kommen","back":"have an orgasm; cum"},{"front":"dein","back":"yours"},{"front":"heute","back":"today"},{"front":"kommt","back":"happens; befalls"},{"front":"wollen","back":"volition"},{"front":"damit","back":"thereby"},{"front":"ganz","back":"all of"},{"front":"weißt","back":"limewashes; whitewashes; washes"},{"front":"ok","back":"all right; okey"},{"front":"sicher","back":"certain"},{"front":"gesagt","back":"spoken"},{"front":"frau","back":"woman; the new woman; a model woman"},{"front":"nun","back":"now"},{"front":"bis","back":"until; till; 'til"},{"front":"leid","back":"woe"},{"front":"na","back":"no; naw; nah"},{"front":"macht","back":"leverage"},{"front":"dieser","back":"such; every such offence"},{"front":"zurück","back":"back; return"},{"front":"lassen","back":"let; he/she has/had let"},{"front":"meinen","back":"think"},{"front":"gott","back":"God; for heaven's sake; for Christ's sake"},{"front":"seine","back":"his"},{"front":"zwei","back":"a brace of"},{"front":"genau","back":"particular"},{"front":"waren","back":"items"},{"front":"klar","back":"egg-white; albumen"},{"front":"morgen","back":"morning; the morning after; jingle-jangle morning"},{"front":"leute","back":"dudes; doods; d00ds"},{"front":"vater","back":"father"},{"front":"schön","back":"fair"},{"front":"glaube","back":"faith; the Christian/Jewish/Muslim/Hindu faith"},{"front":"ab","back":"from; as from/of; as from 1990"},{"front":"gerade","back":"at this moment; at the moment; at this instant"},{"front":"tag","back":"tag; HTML tag"},{"front":"gesehen","back":"seen; he/she has/had seen"},{"front":"reden","back":"monologues"},{"front":"wohl","back":"well-being; weal"},{"front":"liebe","back":"love"},{"front":"sollte","back":"if; should"},{"front":"unsere","back":"our; of us"},{"front":"jemand","back":"someone; somebody"},{"front":"geld","back":"money; easy money; raise money/funds"},{"front":"durch","back":"by means of"},{"front":"ob","back":"whether; if"},{"front":"mutter","back":"mother"},{"front":"gemacht","back":"made; he/she has/had made"},{"front":"paar","back":"couple"},{"front":"mach","back":"mach number; mach"},{"front":"passiert","back":"happened; occurred; it has/had happened"},{"front":"besser","back":"Bessi"},{"front":"wieso","back":"why"},{"front":"dieses","back":"such"},{"front":"selbst","back":"personally; in person; in the flesh"},{"front":"gehört","back":"found out; learned"},{"front":"ohne","back":"un…"},{"front":"meiner","back":"mine; of me"},{"front":"helfen","back":"befriend"},{"front":"nacht","back":"night; at night; all night"},{"front":"finden","back":"think"},{"front":"gute","back":"good guy; goody; goodie"},{"front":"lange","back":"long"},{"front":"natürlich","back":"native"},{"front":"ach","back":"oh; ee"},{"front":"gar","back":"done; cooked"},{"front":"sei","back":"be"},{"front":"dort","back":"there"},{"front":"weiter","back":"broader"},{"front":"geben","back":"deal; deal out"},{"front":"seit","back":"since; since the accident"},{"front":"gleich","back":"similar"},{"front":"recht","back":"right; rights and duties; rights and obligations"},{"front":"richtig","back":"fair"},{"front":"ordnung","back":"adjustment"},{"front":"hören","back":"listen"},{"front":"sieht","back":"views"},{"front":"davon","back":"of them; of it"},{"front":"dafür","back":"for it; for this; for that"},{"front":"wegen","back":"because of; due to; owing to"},{"front":"mädchen","back":"kiddo"},{"front":"sollen","back":"shall; should"},{"front":"abend","back":"evening; eve; eventide"},{"front":"haus","back":"establishment; institution"},{"front":"viele","back":"many; a lot of; a lotta"},{"front":"drei","back":"three"},{"front":"freund","back":"friend; sb.'s best friends; sb.'s bezzies/bessies"},{"front":"unser","back":"our; of us"},{"front":"warte","back":"viewpoint; point of view; standpoint"},{"front":"menschen","back":"people; folk; folks"},{"front":"essen","back":"food; tucker; food and drink"},{"front":"angst","back":"fear; for fear of; tingle with fear"},{"front":"bleiben","back":"last; remain; remain in existence"},{"front":"zusammen","back":"together"},{"front":"welt","back":"world; the Third World; the developed world"},{"front":"unter","back":"jack; knave; jack of hearts"},{"front":"schnell","back":"fast"},{"front":"andere","back":"other"},{"front":"tot","back":"below ground"},{"front":"getan","back":"done"},{"front":"erst","back":"only just; only; barely"},{"front":"rein","back":"sheer; pure; from sheer malice"},{"front":"stimmt","back":"votes; ballots"},{"front":"nehmen","back":"take a medication"},{"front":"kinder","back":"children; bairns; children aged three"},{"front":"eines","back":"one thing"},{"front":"glauben","back":"belief"},{"front":"bringen","back":"have/hold in store"},{"front":"ganze","back":"whole; entirety; the big picture"},{"front":"genug","back":"sufficient"},{"front":"scheiße","back":"shit; crap; poop"},{"front":"brauchen","back":"want"},{"front":"gegen","back":"about"},{"front":"moment","back":"moment"},{"front":"junge","back":"boy; boyo"},{"front":"sonst","back":"otherwise; or else; failing which"},{"front":"musik","back":"music"},{"front":"arbeit","back":"work; at work; in the works"},{"front":"seid","back":"be"},{"front":"ihrer","back":"hers; their; theirs"},{"front":"fragen","back":"public affairs; affairs"},{"front":"herr","back":"taskmaster"},{"front":"dabei","back":"with it"},{"front":"familie","back":"family; the close family; keep a family"},{"front":"warten","back":"control rooms"},{"front":"niemand","back":"no one; nobody; nobody but she"},{"front":"sofort","back":"right away; straight away; outright"},{"front":"bevor","back":"before"},{"front":"jahre","back":"years; be overthe hill; at twenty"},{"front":"einmal","back":"once; once a month; once a week"},{"front":"problem","back":"problem; solve a problem; resolve a problem"},{"front":"sohn","back":"son"},{"front":"wann","back":"when; from when"},{"front":"fertig","back":"beat"},{"front":"halt","back":"stop"},{"front":"allein","back":"alone; just for me; for me alone"},{"front":"beim","back":"near the; near the stadium"}]},{"level":"a2","name":"German A2 · 250 common words","source":"freq+freedict","cards":[{"front":"bringt","back":"conveys"},{"front":"deshalb","back":"hence"},{"front":"welche","back":"what"},{"front":"bestimmt","back":"designated"},{"front":"hoch","back":"high"},{"front":"alter","back":"antiqueness"},{"front":"schau","back":"fair; trade show; show"},{"front":"ah","back":"oh; ee"},{"front":"land","back":"federal state; Land"},{"front":"zimmer","back":"room; rooms for rent; room en suite"},{"front":"wagen","back":"car; automobile; go by car"},{"front":"vier","back":"four"},{"front":"gefallen","back":"pleased"},{"front":"spaß","back":"gag; laugh; jape"},{"front":"niemals","back":"hardly ever; almost never"},{"front":"schuld","back":"guilt; culpability"},{"front":"getötet","back":"killed; he/she has/had killed"},{"front":"verlassen","back":"quitting"},{"front":"zeigen","back":"expose"},{"front":"beste","back":"best; do one's best"},{"front":"ernst","back":"seriousness"},{"front":"unserer","back":"ours"},{"front":"denen","back":"those; the ones indicated; whose"},{"front":"ort","back":"locality"},{"front":"bleibt","back":"remains"},{"front":"manchmal","back":"sometimes"},{"front":"seite","back":"spin"},{"front":"zwischen","back":"betwixt"},{"front":"eben","back":"flush"},{"front":"während","back":"as"},{"front":"spiel","back":"bearing play; free play; play"},{"front":"chance","back":"opportunity"},{"front":"freundin","back":"friend; my best friend"},{"front":"krieg","back":"war; counterinsurgency war; counter-guerilla war"},{"front":"gefällt","back":"pleases"},{"front":"erzählen","back":"narrative"},{"front":"anderes","back":"other"},{"front":"tage","back":"menstrual cycle; female cycle; female period"},{"front":"wichtig","back":"significant"},{"front":"bett","back":"bed; make one's bed; stay in bed"},{"front":"sachen","back":"things"},{"front":"schlecht","back":"evil"},{"front":"schule","back":"pod; school; group"},{"front":"entschuldigung","back":"excuse"},{"front":"wort","back":"word; in simple terms; break one's word"},{"front":"typ","back":"type"},{"front":"schlafen","back":"sleep; kip; he/she has/had slept"},{"front":"euer","back":"your"},{"front":"captain","back":"team captain; captain; skipper"},{"front":"gesicht","back":"facies; face"},{"front":"falls","back":"in case"},{"front":"neuen","back":"new members; new entrants; newcomers"},{"front":"bloß","back":"bare"},{"front":"unten","back":"down; below; as stated below"},{"front":"teil","back":"portion"},{"front":"mensch","back":"human being; human; homo sapiens"},{"front":"kleiner","back":"kiddie; kiddy"},{"front":"stellen","back":"positions of employment; positions; posts"},{"front":"oft","back":"often; frequently"},{"front":"sorge","back":"worry"},{"front":"gedacht","back":"thought; he/she has/had thought"},{"front":"trinken","back":"suckle"},{"front":"einige","back":"a few"},{"front":"dies","back":"this; this and that"},{"front":"ding","back":"contraption"},{"front":"kriegen","back":"tag"},{"front":"blut","back":"blood"},{"front":"ehrlich","back":"sincere"},{"front":"eltern","back":"parents; teenage parents; unnatural parents"},{"front":"herz","back":"heart; dearly; take heart"},{"front":"glücklich","back":"happily"},{"front":"alt","back":"alto; contralto"},{"front":"wiedersehen","back":"reunion"},{"front":"frei","back":"ad lib"},{"front":"wen","back":"who; whom"},{"front":"möglich","back":"conceivable; supposable; presumable"},{"front":"irgendwie","back":"somehow; somehow or other"},{"front":"reicht","back":"lasts out; lasts"},{"front":"fest","back":"celebration; shindig"},{"front":"besten","back":"bests"},{"front":"waffe","back":"gun; at gunpoint; use one's gun"},{"front":"kaum","back":"hardly; barely; scarcely"},{"front":"irgendwas","back":"something"},{"front":"klingt","back":"clinks"},{"front":"platz","back":"square"},{"front":"rede","back":"monologue; monolog"},{"front":"papa","back":"daddy; dad; pa"},{"front":"falsch","back":"recreant"},{"front":"sondern","back":"but"},{"front":"nummer","back":"act"},{"front":"früher","back":"earlier; anterior"},{"front":"jungen","back":"boys; boyos"},{"front":"wohin","back":"where; wherever you look"},{"front":"außer","back":"out of"},{"front":"früh","back":"early; her early writings; her early works"},{"front":"setzen","back":"settling"},{"front":"zuerst","back":"at first; first; first of all"},{"front":"wahrscheinlich","back":"probable; prob"},{"front":"dürfen","back":"may; might"},{"front":"jede","back":"anybody; anyone"},{"front":"arsch","back":"arse; ass; wazoo"},{"front":"telefon","back":"customer hotline"},{"front":"willkommen","back":"welcome"},{"front":"plan","back":"layout"},{"front":"hierher","back":"hither"},{"front":"fehler","back":"mistake; error; beginner's mistake"},{"front":"dollar","back":"dollar; Tonga Paanga; US dollar"},{"front":"zehn","back":"ten"},{"front":"pass","back":"pass"},{"front":"nächste","back":"next; the next time; until next time"},{"front":"stunde","back":"lesson"},{"front":"hände","back":"hands; link hands; clasp one's hands"},{"front":"gegeben","back":"performed"},{"front":"menge","back":"batch"},{"front":"langsam","back":"lazy"},{"front":"bereits","back":"already"},{"front":"sechs","back":"six"},{"front":"lieben","back":"love; love to distraction"},{"front":"meines","back":"mine; of me"},{"front":"büro","back":"office"},{"front":"wochen","back":"weeks; 5 whole weeks"},{"front":"ruf","back":"reputation; repute; an impeccable reputation"},{"front":"schaffen","back":"tubs"},{"front":"leider","back":"worse luck"},{"front":"scheiß","back":"crap; shit; garbage"},{"front":"hölle","back":"purgatory; purgatorial fire"},{"front":"trotzdem","back":"anyway; anyhow; just the same"},{"front":"doktor","back":"medical doctor; doctor; medic"},{"front":"tja","back":"oh well"},{"front":"voll","back":"at full blast; full bast"},{"front":"film","back":"picture"},{"front":"überall","back":"around"},{"front":"hund","back":"mine car; mine hutch; mine tub"},{"front":"geworden","back":"developed"},{"front":"direkt","back":"direct; a direct flight"},{"front":"tat","back":"crime; offence; offense"},{"front":"schiff","back":"ship; boat; abandon a ship"},{"front":"wem","back":"whom; whomsoever"},{"front":"könig","back":"king"},{"front":"danach","back":"after it; after that; then"},{"front":"funktioniert","back":"gone"},{"front":"lernen","back":"learning; computer-aided learning; computer-assisted learning"},{"front":"deswegen","back":"for that reason; for this reason; that's why"},{"front":"nennen","back":"clepe"},{"front":"hm","back":"hem"},{"front":"feuer","back":"mettle"},{"front":"laufen","back":"operation; running"},{"front":"alleine","back":"alone"},{"front":"völlig","back":"altogether"},{"front":"stelle","back":"position of employment; position; post"},{"front":"kumpel","back":"teammate; team mate; work mate"},{"front":"verlieren","back":"lose the game"},{"front":"probleme","back":"problems; run into problems"},{"front":"kaffee","back":"coffee"},{"front":"luft","back":"elbow room"},{"front":"ziehen","back":"wrench"},{"front":"verschwinden","back":"dying-out; extinction; disappearance"},{"front":"aufhören","back":"knock off; knock it off"},{"front":"suche","back":"search; hunt; in search of"},{"front":"groß","back":"ample; extensive"},{"front":"buch","back":"book; e-book; catalogue/list a book"},{"front":"krank","back":"ill; chronically ill patients"},{"front":"jedes","back":"anything"},{"front":"wert","back":"worth"},{"front":"arzt","back":"medical doctor; doctor; medic"},{"front":"froh","back":"joyous"},{"front":"versuche","back":"experiments; trials"},{"front":"straße","back":"avenue; alley"},{"front":"rufen","back":"summon"},{"front":"heiraten","back":"marrying; marriage; nuptials"},{"front":"super","back":"great; super; super-duper"},{"front":"gutes","back":"good"},{"front":"onkel","back":"uncle"},{"front":"total","back":"utter"},{"front":"gebracht","back":"televised; telecasted"},{"front":"party","back":"bash; rave"},{"front":"erklären","back":"explain"},{"front":"spielt","back":"gambles"},{"front":"wahl","back":"ballot"},{"front":"vertrauen","back":"faith"},{"front":"damals","back":"on that occasion"},{"front":"tagen","back":"be in session; be sitting"},{"front":"leicht","back":"light"},{"front":"nachdem","back":"after"},{"front":"gegangen","back":"joined"},{"front":"gefühl","back":"hunch; follow a hunch"},{"front":"kaufen","back":"buying"},{"front":"geschafft","back":"beat"},{"front":"typen","back":"types"},{"front":"interessiert","back":"bright-eyed"},{"front":"halte","back":"stopping points; stops; halt"},{"front":"hält","back":"deems"},{"front":"irgendwo","back":"somewhere; somewhere or other; someplace"},{"front":"stück","back":"chapter"},{"front":"genauso","back":"just the same; exactly the same"},{"front":"genommen","back":"taken; he/she has/had taken"},{"front":"zukunft","back":"future; mortgage one's future"},{"front":"weniger","back":"less"},{"front":"cool","back":"fierce"},{"front":"licht","back":"lighting; illumination"},{"front":"getroffen","back":"on target"},{"front":"himmel","back":"canopy"},{"front":"nachricht","back":"tidings; bring glad/good tidings"},{"front":"drüben","back":"over here; across; on both sides"},{"front":"passt","back":"is suitable"},{"front":"laut","back":"ejaculation; ejaculation of surprise"},{"front":"angerufen","back":"appealed"},{"front":"sitzen","back":"sitting"},{"front":"daß","back":"that"},{"front":"erde","back":"Earth; Earth Day"},{"front":"schlüssel","back":"code"},{"front":"rest","back":"tail"},{"front":"passieren","back":"happen; occur"},{"front":"eher","back":"rather; rather … than"},{"front":"gefragt","back":"sought; sought-after; sought-for"},{"front":"gefängnis","back":"imprisonment; incarceration; durance"},{"front":"opfer","back":"dweeb"},{"front":"körper","back":"body; bod; soma"},{"front":"solche","back":"such; suchlike; that kind of"},{"front":"mist","back":"refuse; rubbish; garbage"},{"front":"schreiben","back":"letter"},{"front":"böse","back":"evil; good and evil"},{"front":"gesprochen","back":"conversational"},{"front":"versuch","back":"experiment; trial; in-reactor experiment"},{"front":"vorstellen","back":"showcasing"},{"front":"wovon","back":"whereof"},{"front":"sobald","back":"soon; upcoming"},{"front":"herren","back":"taskmasters"},{"front":"sex","back":"sexual intercourse; intercourse; lovemaking"},{"front":"waffen","back":"armament"},{"front":"wohnung","back":"flat; apartment; owner-occupied flat"},{"front":"weh","back":"ache; aches; aches and pains"},{"front":"heißen","back":"mean; it has/had meant"},{"front":"krankenhaus","back":"hospital; hospital case; cottage hospital"},{"front":"millionen","back":"millions"},{"front":"klasse","back":"grade"},{"front":"hart","back":"draconian"},{"front":"worden","back":"was; were; has"},{"front":"sinn","back":"meaning; sense; signification"},{"front":"außerdem","back":"in addition; additionally; besides"},{"front":"verletzt","back":"broken"},{"front":"ändern","back":"modify"},{"front":"erfahren","back":"hear"},{"front":"tragen","back":"stretchers; litters"},{"front":"wenigstens","back":"at least; leastways; leastwise"},{"front":"vorsichtig","back":"safe"},{"front":"stolz","back":"ego"},{"front":"stark","back":"good at"},{"front":"fällt","back":"drops"},{"front":"besonders","back":"individual"}]},{"level":"b1","name":"German B1 · 300 common words","source":"freq+freedict","cards":[{"front":"offen","back":"open-minded; large-minded; liberal"},{"front":"schönen","back":"belles"},{"front":"monsieur","back":"monsieur"},{"front":"arme","back":"arms"},{"front":"bier","back":"beer; amber nectar; brew"},{"front":"partner","back":"partner; mate"},{"front":"klein","back":"small; the smallest problem"},{"front":"klappe","back":"clapperboard; clapboard; production board"},{"front":"süß","back":"mellow"},{"front":"herum","back":"around"},{"front":"finger","back":"finger; spring finger; trigger finger (tendosynovitis)"},{"front":"ehe","back":"marriage; same-sex marriage; gay marriage"},{"front":"rolle","back":"role; rôle"},{"front":"gleiche","back":"like"},{"front":"monat","back":"month"},{"front":"hochzeit","back":"heyday; prime; bloom"},{"front":"führt","back":"guides"},{"front":"paris","back":"Paris"},{"front":"wach","back":"awake; be wide awake; lie awake"},{"front":"wozu","back":"for what reason"},{"front":"arm","back":"arm; arm in arm; a broken arm"},{"front":"geschrieben","back":"written in"},{"front":"chef","back":"chief; boss"},{"front":"informationen","back":"information; pieces of information"},{"front":"erledigt","back":"finished; completed"},{"front":"hoffentlich","back":"I hope so; let's hope so; hopefully"},{"front":"fühlt","back":"senses"},{"front":"tanzen","back":"dancing"},{"front":"ansehen","back":"good reputation"},{"front":"zuhause","back":"home"},{"front":"wunderbar","back":"prodigious"},{"front":"reise","back":"journey"},{"front":"gewonnen","back":"obtained; prepared; produced"},{"front":"dame","back":"lady"},{"front":"irgendwann","back":"sometime; somewhen; sometime next year"},{"front":"steckt","back":"puts"},{"front":"jedenfalls","back":"anyhow; in any case; at all events"},{"front":"schreit","back":"bawls"},{"front":"rüber","back":"over here; over"},{"front":"nennt","back":"terms"},{"front":"raum","back":"room; space"},{"front":"heiß","back":"hot"},{"front":"foto","back":"picture; take a picture"},{"front":"kalt","back":"cold"},{"front":"irgendetwas","back":"something"},{"front":"weile","back":"while"},{"front":"bisher","back":"until now; till now; up until now"},{"front":"minute","back":"minute; last-minute"},{"front":"unbedingt","back":"unconditionally"},{"front":"zug","back":"strain"},{"front":"sekunden","back":"seconds"},{"front":"wofür","back":"for what"},{"front":"beweise","back":"proof"},{"front":"aller","back":"all"},{"front":"seele","back":"barrel bore; bore"},{"front":"schießen","back":"fire; direct fire; indirect fire"},{"front":"müde","back":"tame"},{"front":"dauert","back":"lasts"},{"front":"brief","back":"letter; write a letter; send a letter"},{"front":"gelernt","back":"skilled; trained; qualified"},{"front":"sucht","back":"addiction"},{"front":"bekannt","back":"known"},{"front":"weitere","back":"further details"},{"front":"unfall","back":"accident; home accident; domestic accident"},{"front":"dahin","back":"there"},{"front":"kontrolle","back":"control"},{"front":"beispiel","back":"example; worked-out example; worked example"},{"front":"dasselbe","back":"the same"},{"front":"herzen","back":"hearts; dearly; humble one's heart"},{"front":"schlagen","back":"fell; felling; cutting"},{"front":"wütend","back":"furious; spleenful"},{"front":"weise","back":"way; manner; fashion"},{"front":"damen","back":"ladies"},{"front":"darin","back":"therein; in it"},{"front":"holt","back":"gets"},{"front":"vorsicht","back":"caution; cautiousness"},{"front":"beweisen","back":"prove"},{"front":"gehabt","back":"held; had; owned"},{"front":"zumindest","back":"if nothing else"},{"front":"vermisst","back":"missed in action"},{"front":"hübsch","back":"handsome; comely"},{"front":"verbindung","back":"bedfellows"},{"front":"tief","back":"depression; low-pressure area"},{"front":"richtung","back":"line; strain; strand"},{"front":"lage","back":"layer"},{"front":"sowieso","back":"anyhow; anyway; anyways"},{"front":"kraft","back":"clout"},{"front":"normal","back":"standard"},{"front":"lauf","back":"launder; runner"},{"front":"ehre","back":"kudos"},{"front":"geschenk","back":"present; prezzy; prezzie"},{"front":"bar","back":"bar; nightclub"},{"front":"tasche","back":"recess"},{"front":"gelesen","back":"harvested; reaped"},{"front":"gekauft","back":"bought; purchased; he/she has/had bought"},{"front":"gestohlen","back":"stolen; he/she has/had stolen"},{"front":"hunger","back":"hunger; hungriness; starve to death"},{"front":"lügen","back":"lies; nothing but lies"},{"front":"beziehung","back":"relation; international scientific relations"},{"front":"verschwunden","back":"gone"},{"front":"nächstes","back":"next"},{"front":"gearbeitet","back":"worked; he/she has/had worked"},{"front":"preis","back":"award"},{"front":"witz","back":"esprit"},{"front":"meinte","back":"reckoned"},{"front":"liste","back":"laundry list"},{"front":"geist","back":"spirit; the Holy Spirit; the Holy Ghost"},{"front":"neben","back":"by; beside; next to"},{"front":"gesucht","back":"prospected"},{"front":"firma","back":"company; defunct company"},{"front":"süße","back":"lusciousness"},{"front":"rücken","back":"book spine; spine; shelf-back"},{"front":"schrecklich","back":"abominable"},{"front":"letzter","back":"ultimate"},{"front":"verliebt","back":"fallen in love"},{"front":"öffnen","back":"opening"},{"front":"redet","back":"discourses"},{"front":"boot","back":"boat; lower a boat"},{"front":"seltsam","back":"extraordinary"},{"front":"versteckt","back":"oblique"},{"front":"erwischt","back":"caught"},{"front":"verkauft","back":"purveyed"},{"front":"tante","back":"aunt"},{"front":"erwarten","back":"anticipate"},{"front":"pferd","back":"horse; cob"},{"front":"wunder","back":"wonder"},{"front":"sauer","back":"sour"},{"front":"vermutlich","back":"supposed; presumptive; putative"},{"front":"näher","back":"sewing worker"},{"front":"major","back":"Major"},{"front":"jung","back":"young; mature"},{"front":"majestät","back":"majesty; His (Her) Majesty"},{"front":"aussehen","back":"appearance"},{"front":"links","back":"links"},{"front":"welches","back":"which"},{"front":"beschützen","back":"shelter"},{"front":"geboren","back":"born; borne; he/she has/had born"},{"front":"erreichen","back":"achievement; attainment; accomplishment"},{"front":"punkt","back":"dot; dot an i"},{"front":"kirche","back":"church service; worship service; divine service"},{"front":"verraten","back":"blabbed; spilled the beans"},{"front":"selber","back":"oneself; myself/yourself/herself/himself/itself/ourselves/themselves"},{"front":"befehl","back":"order"},{"front":"fährt","back":"operates"},{"front":"zieht","back":"wrenches"},{"front":"geburtstag","back":"birthday; natal day; celebrate one's birthday"},{"front":"haut","back":"skin"},{"front":"wette","back":"bet; punt; wager"},{"front":"reich","back":"empire; Reich; Holy Roman Empire"},{"front":"sekunde","back":"second"},{"front":"geredet","back":"discoursed"},{"front":"james","back":"James; Jim; Dakota"},{"front":"madame","back":"Madame"},{"front":"eigene","back":"own; his own car"},{"front":"zeiten","back":"times"},{"front":"traurig","back":"sorrowful"},{"front":"anruf","back":"challenge"},{"front":"nachrichten","back":"news; the latest news"},{"front":"frieden","back":"peace; peace and quiet"},{"front":"karte","back":"pass"},{"front":"güte","back":"kindness"},{"front":"diesmal","back":"this time"},{"front":"persönlich","back":"personal"},{"front":"kriege","back":"wars"},{"front":"bleibe","back":"domicile"},{"front":"verändert","back":"modified"},{"front":"sonne","back":"sun"},{"front":"lieb","back":"kind"},{"front":"nämlich","back":"namely"},{"front":"letztes","back":"last"},{"front":"ruft","back":"hoots"},{"front":"professor","back":"wonk"},{"front":"gericht","back":"court"},{"front":"nase","back":"nose"},{"front":"ewig","back":"perpetual"},{"front":"singen","back":"singing"},{"front":"bank","back":"bank"},{"front":"beschäftigt","back":"absorbed; engrossed; enwrapped"},{"front":"computer","back":"computer; pen computer; penabled computer"},{"front":"toten","back":"fatalities"},{"front":"weihnachten","back":"Christmas; Xmas; Yule"},{"front":"offensichtlich","back":"perfectly clear"},{"front":"naja","back":"well"},{"front":"gefühle","back":"sentiments"},{"front":"fuß","back":"base"},{"front":"show","back":"show"},{"front":"überraschung","back":"surprise; my surprise"},{"front":"geheimnis","back":"secret; a dark secret; keep a secret"},{"front":"kontakt","back":"contact; removal of contacts; crimp snap-in contacts"},{"front":"gold","back":"gold; solid gold jewellery"},{"front":"drogen","back":"addictive substances; addictive drugs; narcotic substances"},{"front":"regierung","back":"government; administration"},{"front":"wein","back":"wine; free run wine; corked wine"},{"front":"ermordet","back":"murderred; slain"},{"front":"fotos","back":"pictures"},{"front":"entfernt","back":"taken off; removed"},{"front":"geschlafen","back":"slept; kipped; he/she has/had slept"},{"front":"manche","back":"some; some people say"},{"front":"erledigen","back":"finish"},{"front":"gegenüber","back":"vis-à-vis"},{"front":"schlaf","back":"sleep; somnus; shut-eye"},{"front":"lust","back":"zest; zestfulness"},{"front":"wunderschön","back":"wonderful"},{"front":"witzig","back":"witty"},{"front":"zerstört","back":"ruined"},{"front":"übrigens","back":"incidentally"},{"front":"heim","back":"home"},{"front":"namens","back":"named"},{"front":"zeigt","back":"evidences"},{"front":"geliebt","back":"beloved"},{"front":"gehören","back":"appertain"},{"front":"brachte","back":"conveyed"},{"front":"blick","back":"sight; at first blush; at first sight"},{"front":"besuch","back":"visit"},{"front":"bewegen","back":"moving"},{"front":"haare","back":"hair; greying hair; grizzled hair"},{"front":"antworten","back":"answers; replies; responses"},{"front":"präsident","back":"president"},{"front":"hoffnung","back":"hope; a slight hope; hug fond hopes"},{"front":"stecken","back":"stick"},{"front":"rechts","back":"right"},{"front":"interessant","back":"intriguing"},{"front":"entscheiden","back":"decide"},{"front":"miteinander","back":"with each other"},{"front":"meint","back":"reckons"},{"front":"indem","back":"by …+ing"},{"front":"wohnen","back":"living"},{"front":"möglichkeit","back":"recourse"},{"front":"kaputt","back":"whacked"},{"front":"flugzeug","back":"aeroplane; airplane; plane"},{"front":"vergangenheit","back":"past; in the past"},{"front":"anderer","back":"other"},{"front":"zweite","back":"runner-up"},{"front":"armee","back":"army; US Army; the Red Army"},{"front":"jim","back":"James; Jim; Dakota"},{"front":"tee","back":"tea; bagged tea; tea in bags"},{"front":"entweder","back":"either; either … or"},{"front":"don","back":"Don"},{"front":"aufhalten","back":"detention"},{"front":"stellt","back":"provides; makes available; provided"},{"front":"überrascht","back":"overtaken"},{"front":"sauber","back":"shiny; shining"},{"front":"mark","back":"pulp"},{"front":"schlag","back":"fell; felling; cutting"},{"front":"sheriff","back":"sheriff"},{"front":"untertitel","back":"subhead; subheading"},{"front":"setzt","back":"places"},{"front":"nervös","back":"flustered"},{"front":"gesellschaft","back":"society; change society"},{"front":"verstecken","back":"hiding"},{"front":"schuldig","back":"guilty; guilty as charged; find sb. guilty"},{"front":"hals","back":"neck; collum; cervix"},{"front":"schützen","back":"archers; bowmen"},{"front":"passen","back":"fit the bill; fill the bill"},{"front":"überleben","back":"survival"},{"front":"erhalten","back":"receipt"},{"front":"teilen","back":"partition"},{"front":"gebäude","back":"building; listed building; industrial building"},{"front":"schicksal","back":"fortune"},{"front":"zeichen","back":"sign; indication"},{"front":"richter","back":"judge; justice; Supreme Court justice"},{"front":"besorgt","back":"anxious"},{"front":"küche","back":"kitchen"},{"front":"lief","back":"walked"},{"front":"vergnügen","back":"joy"},{"front":"volk","back":"people"},{"front":"königin","back":"queen consort"},{"front":"soldaten","back":"soldiers"},{"front":"feiern","back":"celebrations; shindigs"},{"front":"situation","back":"situation; a no-win situation; inflame a situation"},{"front":"gelassen","back":"equanimous"},{"front":"allerdings","back":"indeed"},{"front":"soweit","back":"as far as; so far as; insofar as"},{"front":"gefahren","back":"threats"},{"front":"verstand","back":"common sense; horse sense; gumption"},{"front":"bord","back":"board; throw sth. overboard"},{"front":"angefangen","back":"taken to"},{"front":"lee","back":"lee; lee side"},{"front":"bob","back":"bob; bobsleigh; bobsled"},{"front":"rat","back":"advice; counsel; his wise counsel"},{"front":"worauf","back":"whereupon"},{"front":"gebeten","back":"asked; he/she has/had asked"},{"front":"kamera","back":"still camera; photocamera; camera"},{"front":"achtung","back":"regard; high regard"},{"front":"ganzes","back":"whole"},{"front":"schuhe","back":"footwear"},{"front":"glückwunsch","back":"congratulations; congrats"},{"front":"statt","back":"instead of; instead of working"},{"front":"übernehmen","back":"import data"},{"front":"gegend","back":"district"},{"front":"wald","back":"wood; woods; in deep woods"},{"front":"erkennen","back":"recognition"},{"front":"glas","back":"spectacles glass; ophthalmic lens; lens"},{"front":"verantwortlich","back":"answerable; responsible"},{"front":"stöhnt","back":"moans; groans"},{"front":"herein","back":"in"},{"front":"kleid","back":"livery"},{"front":"zerstören","back":"ruin"},{"front":"jawohl","back":"that's right"},{"front":"london","back":"London"}]},{"level":"b2","name":"German B2 · 300 common words","source":"freq+freedict","cards":[{"front":"geheiratet","back":"married; he/she has/had married"},{"front":"woanders","back":"somewhere else; elsewhere"},{"front":"kuss","back":"kiss; flutter a kiss"},{"front":"verhindern","back":"inhibit"},{"front":"erklärung","back":"statement; comment; remark"},{"front":"video","back":"video recording; video"},{"front":"rom","back":"Rom; Romni"},{"front":"klug","back":"savvy"},{"front":"kräfte","back":"vigours; vigors"},{"front":"verlangen","back":"requisition"},{"front":"außerhalb","back":"outside; out of; outwith"},{"front":"opa","back":"grandfather"},{"front":"selbstverständlich","back":"naturally; of course"},{"front":"aufstehen","back":"ambulation"},{"front":"hassen","back":"mobbing"},{"front":"gebrauchen","back":"exert"},{"front":"geglaubt","back":"thought; he/she has/had thought"},{"front":"milch","back":"milk"},{"front":"gefeuert","back":"loosed off; loosed; let off"},{"front":"erinnerungen","back":"memories; linger over memories"},{"front":"kochen","back":"boil"},{"front":"schwach","back":"waterily"},{"front":"schulden","back":"arrears"},{"front":"grenze","back":"limit"},{"front":"braut","back":"bride"},{"front":"gebraucht","back":"cast-off; hand-me-down; reach-me-down"},{"front":"peinlich","back":"disconcerting"},{"front":"klappt","back":"worked; worked out; gone smoothly"},{"front":"geheimnisse","back":"secrets"},{"front":"aufmerksamkeit","back":"attention; the media attention"},{"front":"form","back":"baking dish; cake tin; tin"},{"front":"umsonst","back":"free"},{"front":"überlebt","back":"survived"},{"front":"nirgendwo","back":"nowhere"},{"front":"meilen","back":"miles"},{"front":"einfacher","back":"more frugal"},{"front":"blöde","back":"silly; stupid; foolish"},{"front":"mond","back":"moon; gibbous moon"},{"front":"daten","back":"data; details; information"},{"front":"merken","back":"memory retention; mnemonic retention; retention in memory"},{"front":"schande","back":"dishonour; dishonor; attainder"},{"front":"fühlte","back":"sensed"},{"front":"sieg","back":"victory; a safe victory"},{"front":"satt","back":"bucketloads of; boatloads of; shiploads of"},{"front":"blödsinn","back":"monkeyshine"},{"front":"pfund","back":"pound"},{"front":"handeln","back":"trade; merchandise; merchandize"},{"front":"enden","back":"tails"},{"front":"warm","back":"cordial"},{"front":"raten","back":"rates"},{"front":"übersetzung","back":"language translation; translation; a loose translation"},{"front":"kunst","back":"art; the visual arts; the plastic arts"},{"front":"kapitän","back":"captain; cap'n; Captain"},{"front":"einsatz","back":"onset"},{"front":"schweigen","back":"silence; a pondering silence; a stunned silence"},{"front":"krankheit","back":"disease; malady; non-communicable disease"},{"front":"toller","back":"deffer"},{"front":"schatten","back":"tail"},{"front":"wachen","back":"police stations; Garda stations; police precincts"},{"front":"tatsache","back":"fact; a proven fact; an objective fact"},{"front":"stock","back":"chopping block; cutting block"},{"front":"hingehen","back":"go there"},{"front":"verboten","back":"off limits; off-limits"},{"front":"anzug","back":"batter"},{"front":"leichen","back":"dead bodies; bodies; corpses"},{"front":"beendet","back":"finalised finalized"},{"front":"freitag","back":"Friday"},{"front":"million","back":"million"},{"front":"verflucht","back":"cursed; sworn"},{"front":"dunkel","back":"darkness; dark"},{"front":"enttäuscht","back":"disappointed"},{"front":"klopfen","back":"knock"},{"front":"spuren","back":"traffic lanes; driving lanes; lanes"},{"front":"dreck","back":"muckiness; raunchiness; scruffiness"},{"front":"seiten","back":"pages"},{"front":"mühe","back":"effort; spare no efforts"},{"front":"gezogen","back":"wrenched"},{"front":"kontrollieren","back":"keep tab on; keep tabs on"},{"front":"knochen","back":"bone; os; be big-boned"},{"front":"schick","back":"chic; style"},{"front":"getrennt","back":"apart"},{"front":"programm","back":"program; programme"},{"front":"grab","back":"grave; single grave; solitary grave"},{"front":"ebenso","back":"also; too; as well"},{"front":"trage","back":"stretcher; litter"},{"front":"nachbarn","back":"neighbours; neighbors"},{"front":"bieten","back":"offer"},{"front":"bestes","back":"best"},{"front":"fuhr","back":"operated"},{"front":"verlässt","back":"exits"},{"front":"freundlich","back":"friendly; amiable; affable"},{"front":"dennoch","back":"but"},{"front":"rauchen","back":"smoking"},{"front":"dick","back":"stout"},{"front":"stuhl","back":"chair; upright chair"},{"front":"dreh","back":"shoot; shooting"},{"front":"bester","back":"best"},{"front":"vergeben","back":"farm out work"},{"front":"ausgehen","back":"assume; assume that …"},{"front":"behandeln","back":"cover"},{"front":"trotz","back":"defiance; despite his warnings"},{"front":"gast","back":"guest; be sb.'s guest"},{"front":"ändert","back":"modifies"},{"front":"passierte","back":"passed"},{"front":"toilette","back":"morning toilet; toilet"},{"front":"annehmen","back":"hypothesize; hypothesise"},{"front":"hexe","back":"witch"},{"front":"erwachsen","back":"grown out"},{"front":"pistole","back":"pistol; rotating-barrel pistol; blowback pistol"},{"front":"dreht","back":"rotates"},{"front":"aussage","back":"statement; testimony; evidence"},{"front":"genießen","back":"savour; savor"},{"front":"eifersüchtig","back":"jealous"},{"front":"derjenige","back":"that; he who"},{"front":"teuer","back":"dear"},{"front":"zähne","back":"sprockets"},{"front":"beobachtet","back":"observed"},{"front":"wählen","back":"vote"},{"front":"theater","back":"dramatics"},{"front":"regen","back":"rain; rainfall; fall of rain"},{"front":"feinde","back":"adversaries; enemies; foes"},{"front":"erlauben","back":"permit"},{"front":"zulassen","back":"allowance"},{"front":"schnappen","back":"snap"},{"front":"komplett","back":"unmitigated"},{"front":"panik","back":"flap"},{"front":"flughafen","back":"airport"},{"front":"bewusst","back":"intentionally; intendedly; deliberately"},{"front":"deutschen","back":"Huns"},{"front":"voraus","back":"ahead"},{"front":"begleiten","back":"company"},{"front":"einander","back":"each other; one another"},{"front":"erlebt","back":"experienced"},{"front":"weiterhin","back":"still"},{"front":"stärker","back":"more powerful"},{"front":"fahrer","back":"chauffeur"},{"front":"konzentrieren","back":"mass"},{"front":"streiten","back":"fight"},{"front":"star","back":"starling"},{"front":"überzeugen","back":"be convincing/compelling/impressive; win sb. over"},{"front":"alkohol","back":"ethyl alcohol; ethanol"},{"front":"übersetzt","back":"compiled"},{"front":"verrückte","back":"kook"},{"front":"begann","back":"started; commenced"},{"front":"angenommen","back":"hypothesized; hypothesised"},{"front":"weitermachen","back":"keep"},{"front":"post","back":"post; mail; by post"},{"front":"mitgenommen","back":"upset"},{"front":"botschaft","back":"message"},{"front":"ideen","back":"inspirations"},{"front":"fehlen","back":"absence"},{"front":"aufgeregt","back":"annoyed; irritated; vexed"},{"front":"selbstmord","back":"suicide; self-murder; self-inflicted death"},{"front":"zurückkommen","back":"run back"},{"front":"irgendein","back":"any; any desired"},{"front":"magie","back":"feat of magic; magic; witchcraft"},{"front":"handelt","back":"trades; merchandises; merchandizes"},{"front":"untersuchen","back":"inspect"},{"front":"flucht","back":"flight; be in flight; take flight"},{"front":"irgendeine","back":"anybody; anyone"},{"front":"gegenteil","back":"opposite"},{"front":"betrifft","back":"regarding"},{"front":"scharf","back":"abrasive"},{"front":"gehofft","back":"hoped; he/she has/had hoped"},{"front":"kennengelernt","back":"met"},{"front":"projekt","back":"project; plan; promote a project"},{"front":"trottel","back":"dumbass; dumbarse; dipwad"},{"front":"immerhin","back":"for all that; anyhow; nevertheless"},{"front":"mehrere","back":"several"},{"front":"schwimmen","back":"swim"},{"front":"zählen","back":"metering"},{"front":"innerhalb","back":"within"},{"front":"matt","back":"mate"},{"front":"blind","back":"unquestioning"},{"front":"schwestern","back":"sisters"},{"front":"code","back":"cipher"},{"front":"schlau","back":"crafty"},{"front":"absicht","back":"intent; with good intent; with malicious/evil intent"},{"front":"zuletzt","back":"in the end; finally; eventually"},{"front":"englisch","back":"English; Irish English; Hiberno-English"},{"front":"ohr","back":"power of hearing; ability to hear; hearing"},{"front":"verletzen","back":"infringe"},{"front":"song","back":"song"},{"front":"schüler","back":"disciple"},{"front":"gewinnt","back":"gains"},{"front":"älter","back":"elderly; an elderly couple"},{"front":"merkwürdig","back":"extraordinary"},{"front":"größe","back":"magnitude"},{"front":"tritt","back":"kick"},{"front":"trauen","back":"trust"},{"front":"präsidenten","back":"presidents"},{"front":"trick","back":"scam; cozenage"},{"front":"roten","back":"Reds; commies"},{"front":"überlegt","back":"levelheaded"},{"front":"sonntag","back":"Sunday"},{"front":"zwölf","back":"twelve"},{"front":"vorstellung","back":"conception; idea"},{"front":"killer","back":"hit man; hitman"},{"front":"unterstützung","back":"aid money"},{"front":"rechnung","back":"reckoning"},{"front":"dieselbe","back":"the same"},{"front":"verändern","back":"modify"},{"front":"möglicherweise","back":"potentially"},{"front":"definitiv","back":"definitely"},{"front":"locker","back":"elicitor"},{"front":"abends","back":"in the evening"},{"front":"frisch","back":"unwithered"},{"front":"kohle","back":"coal; clinkering coal"},{"front":"fing","back":"trapped; entrapped"},{"front":"hure","back":"prostitute; pro; whore"},{"front":"cousin","back":"cousin; second cousin; cousin twice removed"},{"front":"familien","back":"families; the close family"},{"front":"einsam","back":"secluded"},{"front":"lebendig","back":"fresh; lively"},{"front":"heiligen","back":"saints; hallows"},{"front":"knapp","back":"narrow"},{"front":"ebenfalls","back":"as well; too; also"},{"front":"überprüft","back":"reviewed"},{"front":"artikel","back":"article"},{"front":"gesetzt","back":"typeset; composed"},{"front":"jederzeit","back":"at any time; any time; anytime"},{"front":"kompliziert","back":"daedal"},{"front":"spüren","back":"sense"},{"front":"signal","back":"message"},{"front":"stich","back":"tapping spout; notch"},{"front":"kino","back":"cinema; movies; motion-picture theatre"},{"front":"probieren","back":"trial-and-error method; trial and error"},{"front":"wundervoll","back":"wonderful; a wonderful person"},{"front":"tanz","back":"dance"},{"front":"geöffnet","back":"undone"},{"front":"kerle","back":"dudes; doods; d00ds"},{"front":"begraben","back":"buried; intered; entombed"},{"front":"prozent","back":"percentage"},{"front":"stoppen","back":"trapping"},{"front":"hoheit","back":"elevation"},{"front":"riesen","back":"giants"},{"front":"rote","back":"pinko"},{"front":"zugang","back":"basic approach; approach"},{"front":"vorn","back":"in the front"},{"front":"aufmachen","back":"undo"},{"front":"sexy","back":"nubile"},{"front":"erlaubnis","back":"permission; grant permission; with your permission"},{"front":"story","back":"story"},{"front":"leichter","back":"lighter"},{"front":"filme","back":"pictures"},{"front":"priester","back":"sky pilot"},{"front":"packen","back":"prehension; grasping; seizing"},{"front":"dritte","back":"third party"},{"front":"inzwischen","back":"meanwhile; in the meanwhile; in the meantime"},{"front":"presse","back":"press; the fourth estate"},{"front":"sitze","back":"seats; power seats"},{"front":"geklaut","back":"lifted; filched"},{"front":"helden","back":"protagonists"},{"front":"geduld","back":"patience; learn patience"},{"front":"bühne","back":"stage; onstage; backstage"},{"front":"reparieren","back":"vamp up"},{"front":"gerechtigkeit","back":"justice; do sb. justice"},{"front":"fälle","back":"cases; in any case; just in case"},{"front":"selten","back":"seldom; rarely; seldomly"},{"front":"anrufe","back":"telephone calls; phone calls; calls"},{"front":"unterschreiben","back":"undersign"},{"front":"drücken","back":"hitting"},{"front":"lügner","back":"liar; a congenital liar; a born liar"},{"front":"endet","back":"ceases"},{"front":"medizin","back":"drug; medication; medicine"},{"front":"prozess","back":"legal proceedings; court proceedings; proceedings"},{"front":"samstag","back":"Saturday"},{"front":"amen","back":"amen"},{"front":"motor","back":"engine; motor; transverse engine"},{"front":"marie","back":"loot; dough; gelt"},{"front":"abhauen","back":"flee; escape"},{"front":"chaos","back":"chaos; a total chaos; descend into chaos"},{"front":"schönheit","back":"beauty"},{"front":"beinahe","back":"by a hair; by a whisker"},{"front":"anhalten","back":"stop"},{"front":"hof","back":"aureola; aureole"},{"front":"akzeptieren","back":"accept"},{"front":"norden","back":"north"},{"front":"ärzte","back":"medical doctors; doctors; medics"},{"front":"anziehen","back":"initial set"},{"front":"dingen","back":"hire; engage"},{"front":"umgehen","back":"be rife"},{"front":"bauch","back":"abdomen"},{"front":"ertragen","back":"bearing"},{"front":"kiste","back":"goggle box; box; tube"},{"front":"brennt","back":"bakes; fires"},{"front":"teile","back":"portions"},{"front":"deckung","back":"marking; guarding; covering"},{"front":"landen","back":"landing; landing of aircraft"},{"front":"berg","back":"mountain; be long gone; be miles away"},{"front":"straßen","back":"avenues; alleys"},{"front":"aufgenommen","back":"absorbed"},{"front":"gerufen","back":"summoned"},{"front":"untersuchung","back":"investigation; inquiry; probe"},{"front":"alarm","back":"alarm; cry wolf"},{"front":"blieb","back":"remained"},{"front":"extra","back":"added extra; extra; bonus"},{"front":"beobachten","back":"watch"},{"front":"eindruck","back":"imprint"},{"front":"babys","back":"babies"}]}]
+[
+ {
+  "level": "a1",
+  "name": "German A1 · 250 common words",
+  "source": "freq+freedict",
+  "cards": [
+   {
+    "front": "ich",
+    "back": "I"
+   },
+   {
+    "front": "sie",
+    "back": "she; they; you"
+   },
+   {
+    "front": "das",
+    "back": "the; that"
+   },
+   {
+    "front": "du",
+    "back": "you"
+   },
+   {
+    "front": "nicht",
+    "back": "not"
+   },
+   {
+    "front": "die",
+    "back": "the"
+   },
+   {
+    "front": "es",
+    "back": "it"
+   },
+   {
+    "front": "und",
+    "back": "and"
+   },
+   {
+    "front": "der",
+    "back": "the"
+   },
+   {
+    "front": "wir",
+    "back": "we"
+   },
+   {
+    "front": "was",
+    "back": "what"
+   },
+   {
+    "front": "zu",
+    "back": "to; too; closed"
+   },
+   {
+    "front": "er",
+    "back": "he"
+   },
+   {
+    "front": "ein",
+    "back": "a; an; one"
+   },
+   {
+    "front": "in",
+    "back": "in"
+   },
+   {
+    "front": "ja",
+    "back": "yes"
+   },
+   {
+    "front": "mir",
+    "back": "me; to me"
+   },
+   {
+    "front": "mit",
+    "back": "with"
+   },
+   {
+    "front": "wie",
+    "back": "how; as; like"
+   },
+   {
+    "front": "den",
+    "back": "the"
+   },
+   {
+    "front": "mich",
+    "back": "me"
+   },
+   {
+    "front": "auf",
+    "back": "on; onto"
+   },
+   {
+    "front": "dass",
+    "back": "that"
+   },
+   {
+    "front": "aber",
+    "back": "but"
+   },
+   {
+    "front": "eine",
+    "back": "a; an"
+   },
+   {
+    "front": "so",
+    "back": "so; thus"
+   },
+   {
+    "front": "hier",
+    "back": "here"
+   },
+   {
+    "front": "haben",
+    "back": "to have"
+   },
+   {
+    "front": "für",
+    "back": "for"
+   },
+   {
+    "front": "von",
+    "back": "from; of"
+   },
+   {
+    "front": "wenn",
+    "back": "if; when"
+   },
+   {
+    "front": "dich",
+    "back": "you"
+   },
+   {
+    "front": "ihr",
+    "back": "you; her; their"
+   },
+   {
+    "front": "nein",
+    "back": "no"
+   },
+   {
+    "front": "habe",
+    "back": "have"
+   },
+   {
+    "front": "an",
+    "back": "at; on; to"
+   },
+   {
+    "front": "noch",
+    "back": "still; yet"
+   },
+   {
+    "front": "nur",
+    "back": "only"
+   },
+   {
+    "front": "da",
+    "back": "there; since"
+   },
+   {
+    "front": "sich",
+    "back": "oneself; himself; herself"
+   },
+   {
+    "front": "uns",
+    "back": "us"
+   },
+   {
+    "front": "hast",
+    "back": "have"
+   },
+   {
+    "front": "dem",
+    "back": "the; to whom"
+   },
+   {
+    "front": "gut",
+    "back": "good; well"
+   },
+   {
+    "front": "auch",
+    "back": "also; too"
+   },
+   {
+    "front": "schon",
+    "back": "already"
+   },
+   {
+    "front": "als",
+    "back": "when; as; than"
+   },
+   {
+    "front": "sein",
+    "back": "to be; his"
+   },
+   {
+    "front": "mal",
+    "back": "times; once"
+   },
+   {
+    "front": "jetzt",
+    "back": "now"
+   },
+   {
+    "front": "ihn",
+    "back": "him"
+   },
+   {
+    "front": "dann",
+    "back": "then"
+   },
+   {
+    "front": "aus",
+    "back": "out; from; off"
+   },
+   {
+    "front": "meine",
+    "back": "my"
+   },
+   {
+    "front": "um",
+    "back": "around; at; in order to"
+   },
+   {
+    "front": "mein",
+    "back": "my"
+   },
+   {
+    "front": "doch",
+    "back": "but; yet; after all"
+   },
+   {
+    "front": "alles",
+    "back": "everything"
+   },
+   {
+    "front": "weiß",
+    "back": "white; know"
+   },
+   {
+    "front": "keine",
+    "back": "no; none"
+   },
+   {
+    "front": "oder",
+    "back": "or"
+   },
+   {
+    "front": "nach",
+    "back": "after; to; toward"
+   },
+   {
+    "front": "nichts",
+    "back": "nothing"
+   },
+   {
+    "front": "man",
+    "back": "one; you; people"
+   },
+   {
+    "front": "werden",
+    "back": "to become; will"
+   },
+   {
+    "front": "geht",
+    "back": "goes"
+   },
+   {
+    "front": "wo",
+    "back": "where"
+   },
+   {
+    "front": "etwas",
+    "back": "something; somewhat"
+   },
+   {
+    "front": "oh",
+    "back": "oh"
+   },
+   {
+    "front": "mehr",
+    "back": "more"
+   },
+   {
+    "front": "bei",
+    "back": "at; near; with"
+   },
+   {
+    "front": "also",
+    "back": "so; therefore"
+   },
+   {
+    "front": "bitte",
+    "back": "please"
+   },
+   {
+    "front": "immer",
+    "back": "always"
+   },
+   {
+    "front": "warum",
+    "back": "why"
+   },
+   {
+    "front": "vor",
+    "back": "before; in front of; ago"
+   },
+   {
+    "front": "los",
+    "back": "go; loose; off"
+   },
+   {
+    "front": "können",
+    "back": "to be able to; can"
+   },
+   {
+    "front": "wieder",
+    "back": "again"
+   },
+   {
+    "front": "sagen",
+    "back": "to say"
+   },
+   {
+    "front": "machen",
+    "back": "to do; to make"
+   },
+   {
+    "front": "danke",
+    "back": "thanks"
+   },
+   {
+    "front": "sehr",
+    "back": "very"
+   },
+   {
+    "front": "alle",
+    "back": "all"
+   },
+   {
+    "front": "denn",
+    "back": "because; then"
+   },
+   {
+    "front": "Mann",
+    "back": "man"
+   },
+   {
+    "front": "tun",
+    "back": "to do"
+   },
+   {
+    "front": "ihm",
+    "back": "him; to him"
+   },
+   {
+    "front": "zum",
+    "back": "to the"
+   },
+   {
+    "front": "gehen",
+    "back": "to go"
+   },
+   {
+    "front": "sehen",
+    "back": "to see"
+   },
+   {
+    "front": "vielleicht",
+    "back": "maybe; perhaps"
+   },
+   {
+    "front": "wer",
+    "back": "who"
+   },
+   {
+    "front": "ihre",
+    "back": "her; their; your"
+   },
+   {
+    "front": "diese",
+    "back": "this; these"
+   },
+   {
+    "front": "euch",
+    "back": "you"
+   },
+   {
+    "front": "einer",
+    "back": "one; a"
+   },
+   {
+    "front": "über",
+    "back": "over; about; above"
+   },
+   {
+    "front": "gibt",
+    "back": "gives"
+   },
+   {
+    "front": "okay",
+    "back": "okay"
+   },
+   {
+    "front": "wissen",
+    "back": "to know"
+   },
+   {
+    "front": "deine",
+    "back": "your"
+   },
+   {
+    "front": "müssen",
+    "back": "to have to; must"
+   },
+   {
+    "front": "soll",
+    "back": "should; shall"
+   },
+   {
+    "front": "nie",
+    "back": "never"
+   },
+   {
+    "front": "wirklich",
+    "back": "really"
+   },
+   {
+    "front": "viel",
+    "back": "much; a lot"
+   },
+   {
+    "front": "weg",
+    "back": "away; path; way"
+   },
+   {
+    "front": "würde",
+    "back": "would"
+   },
+   {
+    "front": "des",
+    "back": "of the"
+   },
+   {
+    "front": "einfach",
+    "back": "simple; simply; easy"
+   },
+   {
+    "front": "leben",
+    "back": "to live; life"
+   },
+   {
+    "front": "Zeit",
+    "back": "time"
+   },
+   {
+    "front": "weil",
+    "back": "because"
+   },
+   {
+    "front": "kommen",
+    "back": "to come"
+   },
+   {
+    "front": "dein",
+    "back": "your"
+   },
+   {
+    "front": "heute",
+    "back": "today"
+   },
+   {
+    "front": "kommt",
+    "back": "comes"
+   },
+   {
+    "front": "wollen",
+    "back": "to want"
+   },
+   {
+    "front": "damit",
+    "back": "so that; with it"
+   },
+   {
+    "front": "ganz",
+    "back": "whole; entirely; quite"
+   },
+   {
+    "front": "weißt",
+    "back": "know"
+   },
+   {
+    "front": "ok",
+    "back": "okay"
+   },
+   {
+    "front": "sicher",
+    "back": "sure; safe; certain"
+   },
+   {
+    "front": "gesagt",
+    "back": "said"
+   },
+   {
+    "front": "Frau",
+    "back": "woman; wife; Mrs."
+   },
+   {
+    "front": "nun",
+    "back": "now"
+   },
+   {
+    "front": "bis",
+    "back": "until; till"
+   },
+   {
+    "front": "leid",
+    "back": "sorrow; sorry"
+   },
+   {
+    "front": "na",
+    "back": "well"
+   },
+   {
+    "front": "macht",
+    "back": "makes; power"
+   },
+   {
+    "front": "dieser",
+    "back": "this"
+   },
+   {
+    "front": "zurück",
+    "back": "back"
+   },
+   {
+    "front": "lassen",
+    "back": "to let; to leave"
+   },
+   {
+    "front": "meinen",
+    "back": "to mean; to think"
+   },
+   {
+    "front": "Gott",
+    "back": "God"
+   },
+   {
+    "front": "seine",
+    "back": "his"
+   },
+   {
+    "front": "zwei",
+    "back": "two"
+   },
+   {
+    "front": "genau",
+    "back": "exactly; precise"
+   },
+   {
+    "front": "waren",
+    "back": "were"
+   },
+   {
+    "front": "klar",
+    "back": "clear"
+   },
+   {
+    "front": "morgen",
+    "back": "tomorrow; morning"
+   },
+   {
+    "front": "Leute",
+    "back": "people"
+   },
+   {
+    "front": "Vater",
+    "back": "father"
+   },
+   {
+    "front": "schön",
+    "back": "beautiful; nice"
+   },
+   {
+    "front": "glaube",
+    "back": "belief; faith; believe"
+   },
+   {
+    "front": "ab",
+    "back": "from; off"
+   },
+   {
+    "front": "gerade",
+    "back": "just; right now; straight"
+   },
+   {
+    "front": "Tag",
+    "back": "day"
+   },
+   {
+    "front": "gesehen",
+    "back": "seen"
+   },
+   {
+    "front": "reden",
+    "back": "to talk; to speak"
+   },
+   {
+    "front": "wohl",
+    "back": "well; probably"
+   },
+   {
+    "front": "Liebe",
+    "back": "love"
+   },
+   {
+    "front": "sollte",
+    "back": "should"
+   },
+   {
+    "front": "unsere",
+    "back": "our"
+   },
+   {
+    "front": "jemand",
+    "back": "someone"
+   },
+   {
+    "front": "Geld",
+    "back": "money"
+   },
+   {
+    "front": "durch",
+    "back": "through"
+   },
+   {
+    "front": "ob",
+    "back": "whether; if"
+   },
+   {
+    "front": "Mutter",
+    "back": "mother"
+   },
+   {
+    "front": "gemacht",
+    "back": "made; done"
+   },
+   {
+    "front": "paar",
+    "back": "pair; couple; a few"
+   },
+   {
+    "front": "mach",
+    "back": "make; do"
+   },
+   {
+    "front": "passiert",
+    "back": "happened"
+   },
+   {
+    "front": "besser",
+    "back": "better"
+   },
+   {
+    "front": "wieso",
+    "back": "why"
+   },
+   {
+    "front": "dieses",
+    "back": "this"
+   },
+   {
+    "front": "selbst",
+    "back": "oneself; even"
+   },
+   {
+    "front": "gehört",
+    "back": "belongs; heard"
+   },
+   {
+    "front": "ohne",
+    "back": "without"
+   },
+   {
+    "front": "meiner",
+    "back": "my; of mine"
+   },
+   {
+    "front": "helfen",
+    "back": "to help"
+   },
+   {
+    "front": "Nacht",
+    "back": "night"
+   },
+   {
+    "front": "finden",
+    "back": "to find; to think"
+   },
+   {
+    "front": "gute",
+    "back": "good"
+   },
+   {
+    "front": "lange",
+    "back": "long; a long time"
+   },
+   {
+    "front": "natürlich",
+    "back": "natural; of course"
+   },
+   {
+    "front": "ach",
+    "back": "oh; ah"
+   },
+   {
+    "front": "gar",
+    "back": "at all; done; cooked"
+   },
+   {
+    "front": "sei",
+    "back": "be"
+   },
+   {
+    "front": "dort",
+    "back": "there"
+   },
+   {
+    "front": "weiter",
+    "back": "further; farther; onward"
+   },
+   {
+    "front": "geben",
+    "back": "to give"
+   },
+   {
+    "front": "seit",
+    "back": "since"
+   },
+   {
+    "front": "gleich",
+    "back": "same; equal; right away"
+   },
+   {
+    "front": "recht",
+    "back": "right; law; quite"
+   },
+   {
+    "front": "richtig",
+    "back": "right; correct"
+   },
+   {
+    "front": "Ordnung",
+    "back": "order"
+   },
+   {
+    "front": "hören",
+    "back": "to hear; to listen"
+   },
+   {
+    "front": "sieht",
+    "back": "sees"
+   },
+   {
+    "front": "davon",
+    "back": "of it; from it; about it"
+   },
+   {
+    "front": "dafür",
+    "back": "for it; for that"
+   },
+   {
+    "front": "wegen",
+    "back": "because of"
+   },
+   {
+    "front": "Mädchen",
+    "back": "girl"
+   },
+   {
+    "front": "sollen",
+    "back": "should; shall"
+   },
+   {
+    "front": "Abend",
+    "back": "evening"
+   },
+   {
+    "front": "Haus",
+    "back": "house"
+   },
+   {
+    "front": "viele",
+    "back": "many"
+   },
+   {
+    "front": "drei",
+    "back": "three"
+   },
+   {
+    "front": "Freund",
+    "back": "friend; boyfriend"
+   },
+   {
+    "front": "unser",
+    "back": "our"
+   },
+   {
+    "front": "warte",
+    "back": "wait"
+   },
+   {
+    "front": "Menschen",
+    "back": "people; humans"
+   },
+   {
+    "front": "essen",
+    "back": "to eat; food"
+   },
+   {
+    "front": "Angst",
+    "back": "fear; anxiety"
+   },
+   {
+    "front": "bleiben",
+    "back": "to stay; to remain"
+   },
+   {
+    "front": "zusammen",
+    "back": "together"
+   },
+   {
+    "front": "Welt",
+    "back": "world"
+   },
+   {
+    "front": "unter",
+    "back": "under; among; below"
+   },
+   {
+    "front": "schnell",
+    "back": "fast; quick"
+   },
+   {
+    "front": "andere",
+    "back": "other"
+   },
+   {
+    "front": "tot",
+    "back": "dead"
+   },
+   {
+    "front": "getan",
+    "back": "done"
+   },
+   {
+    "front": "erst",
+    "back": "first; only; not until"
+   },
+   {
+    "front": "rein",
+    "back": "pure; clean; in"
+   },
+   {
+    "front": "stimmt",
+    "back": "is correct; that's right"
+   },
+   {
+    "front": "nehmen",
+    "back": "to take"
+   },
+   {
+    "front": "Kinder",
+    "back": "children"
+   },
+   {
+    "front": "eines",
+    "back": "one; of a"
+   },
+   {
+    "front": "glauben",
+    "back": "to believe"
+   },
+   {
+    "front": "bringen",
+    "back": "to bring"
+   },
+   {
+    "front": "ganze",
+    "back": "whole"
+   },
+   {
+    "front": "genug",
+    "back": "enough"
+   },
+   {
+    "front": "Scheiße",
+    "back": "shit"
+   },
+   {
+    "front": "brauchen",
+    "back": "to need"
+   },
+   {
+    "front": "gegen",
+    "back": "against; toward; around"
+   },
+   {
+    "front": "Moment",
+    "back": "moment"
+   },
+   {
+    "front": "Junge",
+    "back": "boy; young"
+   },
+   {
+    "front": "sonst",
+    "back": "otherwise; else"
+   },
+   {
+    "front": "Musik",
+    "back": "music"
+   },
+   {
+    "front": "Arbeit",
+    "back": "work"
+   },
+   {
+    "front": "seid",
+    "back": "are"
+   },
+   {
+    "front": "ihrer",
+    "back": "her; their"
+   },
+   {
+    "front": "fragen",
+    "back": "to ask; questions"
+   },
+   {
+    "front": "Herr",
+    "back": "gentleman; Mr.; lord"
+   },
+   {
+    "front": "dabei",
+    "back": "thereby; present; at the same time"
+   },
+   {
+    "front": "Familie",
+    "back": "family"
+   },
+   {
+    "front": "warten",
+    "back": "to wait"
+   },
+   {
+    "front": "niemand",
+    "back": "no one; nobody"
+   },
+   {
+    "front": "sofort",
+    "back": "immediately; at once"
+   },
+   {
+    "front": "bevor",
+    "back": "before"
+   },
+   {
+    "front": "Jahre",
+    "back": "years"
+   },
+   {
+    "front": "einmal",
+    "back": "once"
+   },
+   {
+    "front": "Problem",
+    "back": "problem"
+   },
+   {
+    "front": "Sohn",
+    "back": "son"
+   },
+   {
+    "front": "wann",
+    "back": "when"
+   },
+   {
+    "front": "fertig",
+    "back": "finished; ready; done"
+   },
+   {
+    "front": "halt",
+    "back": "stop; hold"
+   },
+   {
+    "front": "allein",
+    "back": "alone"
+   },
+   {
+    "front": "beim",
+    "back": "at the; by the"
+   }
+  ]
+ },
+ {
+  "level": "a2",
+  "name": "German A2 · 250 common words",
+  "source": "freq+freedict",
+  "cards": [
+   {
+    "front": "bringt",
+    "back": "brings"
+   },
+   {
+    "front": "deshalb",
+    "back": "therefore"
+   },
+   {
+    "front": "welche",
+    "back": "which; some"
+   },
+   {
+    "front": "bestimmt",
+    "back": "certain; definitely"
+   },
+   {
+    "front": "hoch",
+    "back": "high"
+   },
+   {
+    "front": "Alter",
+    "back": "age"
+   },
+   {
+    "front": "schau",
+    "back": "look"
+   },
+   {
+    "front": "ah",
+    "back": "ah"
+   },
+   {
+    "front": "Land",
+    "back": "country; land; state"
+   },
+   {
+    "front": "Zimmer",
+    "back": "room"
+   },
+   {
+    "front": "Wagen",
+    "back": "car; to dare"
+   },
+   {
+    "front": "vier",
+    "back": "four"
+   },
+   {
+    "front": "gefallen",
+    "back": "to please; liked"
+   },
+   {
+    "front": "Spaß",
+    "back": "fun"
+   },
+   {
+    "front": "niemals",
+    "back": "never"
+   },
+   {
+    "front": "Schuld",
+    "back": "guilt; fault; blame"
+   },
+   {
+    "front": "getötet",
+    "back": "killed"
+   },
+   {
+    "front": "verlassen",
+    "back": "to leave; to abandon"
+   },
+   {
+    "front": "zeigen",
+    "back": "to show"
+   },
+   {
+    "front": "beste",
+    "back": "best"
+   },
+   {
+    "front": "ernst",
+    "back": "serious; seriousness"
+   },
+   {
+    "front": "unserer",
+    "back": "our; of ours"
+   },
+   {
+    "front": "denen",
+    "back": "those; whom"
+   },
+   {
+    "front": "Ort",
+    "back": "place; location"
+   },
+   {
+    "front": "bleibt",
+    "back": "stays; remains"
+   },
+   {
+    "front": "manchmal",
+    "back": "sometimes"
+   },
+   {
+    "front": "Seite",
+    "back": "side; page"
+   },
+   {
+    "front": "zwischen",
+    "back": "between"
+   },
+   {
+    "front": "eben",
+    "back": "just; even; flat"
+   },
+   {
+    "front": "während",
+    "back": "during; while"
+   },
+   {
+    "front": "Spiel",
+    "back": "game; play"
+   },
+   {
+    "front": "Chance",
+    "back": "chance; opportunity"
+   },
+   {
+    "front": "Freundin",
+    "back": "girlfriend; friend"
+   },
+   {
+    "front": "Krieg",
+    "back": "war"
+   },
+   {
+    "front": "gefällt",
+    "back": "pleases; likes"
+   },
+   {
+    "front": "erzählen",
+    "back": "to tell; to narrate"
+   },
+   {
+    "front": "anderes",
+    "back": "other; something else"
+   },
+   {
+    "front": "Tage",
+    "back": "days"
+   },
+   {
+    "front": "wichtig",
+    "back": "important"
+   },
+   {
+    "front": "Bett",
+    "back": "bed"
+   },
+   {
+    "front": "Sachen",
+    "back": "things; stuff"
+   },
+   {
+    "front": "schlecht",
+    "back": "bad"
+   },
+   {
+    "front": "Schule",
+    "back": "school"
+   },
+   {
+    "front": "Entschuldigung",
+    "back": "apology; excuse me; sorry"
+   },
+   {
+    "front": "Wort",
+    "back": "word"
+   },
+   {
+    "front": "Typ",
+    "back": "type; guy"
+   },
+   {
+    "front": "schlafen",
+    "back": "to sleep"
+   },
+   {
+    "front": "euer",
+    "back": "your"
+   },
+   {
+    "front": "Captain",
+    "back": "captain"
+   },
+   {
+    "front": "Gesicht",
+    "back": "face"
+   },
+   {
+    "front": "falls",
+    "back": "in case; if"
+   },
+   {
+    "front": "neuen",
+    "back": "new"
+   },
+   {
+    "front": "bloß",
+    "back": "merely; just; bare"
+   },
+   {
+    "front": "unten",
+    "back": "below; down; downstairs"
+   },
+   {
+    "front": "Teil",
+    "back": "part"
+   },
+   {
+    "front": "Mensch",
+    "back": "human; person"
+   },
+   {
+    "front": "kleiner",
+    "back": "smaller; little one"
+   },
+   {
+    "front": "stellen",
+    "back": "to place; to put"
+   },
+   {
+    "front": "oft",
+    "back": "often"
+   },
+   {
+    "front": "Sorge",
+    "back": "worry; concern"
+   },
+   {
+    "front": "gedacht",
+    "back": "thought"
+   },
+   {
+    "front": "trinken",
+    "back": "to drink"
+   },
+   {
+    "front": "einige",
+    "back": "some; a few"
+   },
+   {
+    "front": "dies",
+    "back": "this"
+   },
+   {
+    "front": "Ding",
+    "back": "thing"
+   },
+   {
+    "front": "kriegen",
+    "back": "to get"
+   },
+   {
+    "front": "Blut",
+    "back": "blood"
+   },
+   {
+    "front": "ehrlich",
+    "back": "honest"
+   },
+   {
+    "front": "Eltern",
+    "back": "parents"
+   },
+   {
+    "front": "Herz",
+    "back": "heart"
+   },
+   {
+    "front": "glücklich",
+    "back": "happy"
+   },
+   {
+    "front": "alt",
+    "back": "old"
+   },
+   {
+    "front": "Wiedersehen",
+    "back": "reunion; goodbye"
+   },
+   {
+    "front": "frei",
+    "back": "free"
+   },
+   {
+    "front": "wen",
+    "back": "whom"
+   },
+   {
+    "front": "möglich",
+    "back": "possible"
+   },
+   {
+    "front": "irgendwie",
+    "back": "somehow"
+   },
+   {
+    "front": "reicht",
+    "back": "is enough; suffices"
+   },
+   {
+    "front": "fest",
+    "back": "firm; solid; festival"
+   },
+   {
+    "front": "besten",
+    "back": "best"
+   },
+   {
+    "front": "Waffe",
+    "back": "weapon; gun"
+   },
+   {
+    "front": "kaum",
+    "back": "hardly; barely"
+   },
+   {
+    "front": "irgendwas",
+    "back": "something; anything"
+   },
+   {
+    "front": "klingt",
+    "back": "sounds"
+   },
+   {
+    "front": "Platz",
+    "back": "place; square; seat"
+   },
+   {
+    "front": "Rede",
+    "back": "speech"
+   },
+   {
+    "front": "Papa",
+    "back": "dad; daddy"
+   },
+   {
+    "front": "falsch",
+    "back": "wrong; false"
+   },
+   {
+    "front": "sondern",
+    "back": "but; but rather"
+   },
+   {
+    "front": "Nummer",
+    "back": "number"
+   },
+   {
+    "front": "früher",
+    "back": "earlier; formerly; used to"
+   },
+   {
+    "front": "Jungen",
+    "back": "boys"
+   },
+   {
+    "front": "wohin",
+    "back": "where; where to"
+   },
+   {
+    "front": "außer",
+    "back": "except; besides; out of"
+   },
+   {
+    "front": "früh",
+    "back": "early"
+   },
+   {
+    "front": "setzen",
+    "back": "to set; to put; to sit"
+   },
+   {
+    "front": "zuerst",
+    "back": "first; at first"
+   },
+   {
+    "front": "wahrscheinlich",
+    "back": "probably; likely"
+   },
+   {
+    "front": "dürfen",
+    "back": "to be allowed to; may"
+   },
+   {
+    "front": "jede",
+    "back": "every; each"
+   },
+   {
+    "front": "Arsch",
+    "back": "ass; arse"
+   },
+   {
+    "front": "Telefon",
+    "back": "telephone; phone"
+   },
+   {
+    "front": "willkommen",
+    "back": "welcome"
+   },
+   {
+    "front": "Plan",
+    "back": "plan"
+   },
+   {
+    "front": "hierher",
+    "back": "here; over here"
+   },
+   {
+    "front": "Fehler",
+    "back": "mistake; error"
+   },
+   {
+    "front": "Dollar",
+    "back": "dollar"
+   },
+   {
+    "front": "zehn",
+    "back": "ten"
+   },
+   {
+    "front": "Pass",
+    "back": "passport; pass"
+   },
+   {
+    "front": "nächste",
+    "back": "next"
+   },
+   {
+    "front": "Stunde",
+    "back": "hour; lesson"
+   },
+   {
+    "front": "Hände",
+    "back": "hands"
+   },
+   {
+    "front": "gegeben",
+    "back": "given"
+   },
+   {
+    "front": "Menge",
+    "back": "amount; crowd; lot"
+   },
+   {
+    "front": "langsam",
+    "back": "slow; slowly"
+   },
+   {
+    "front": "bereits",
+    "back": "already"
+   },
+   {
+    "front": "sechs",
+    "back": "six"
+   },
+   {
+    "front": "lieben",
+    "back": "to love"
+   },
+   {
+    "front": "meines",
+    "back": "my; of mine"
+   },
+   {
+    "front": "Büro",
+    "back": "office"
+   },
+   {
+    "front": "Wochen",
+    "back": "weeks"
+   },
+   {
+    "front": "Ruf",
+    "back": "call; reputation"
+   },
+   {
+    "front": "schaffen",
+    "back": "to manage; to create"
+   },
+   {
+    "front": "leider",
+    "back": "unfortunately"
+   },
+   {
+    "front": "scheiß",
+    "back": "damn; crap"
+   },
+   {
+    "front": "Hölle",
+    "back": "hell"
+   },
+   {
+    "front": "trotzdem",
+    "back": "nevertheless; anyway"
+   },
+   {
+    "front": "Doktor",
+    "back": "doctor"
+   },
+   {
+    "front": "tja",
+    "back": "well"
+   },
+   {
+    "front": "voll",
+    "back": "full"
+   },
+   {
+    "front": "Film",
+    "back": "film; movie"
+   },
+   {
+    "front": "überall",
+    "back": "everywhere"
+   },
+   {
+    "front": "Hund",
+    "back": "dog"
+   },
+   {
+    "front": "geworden",
+    "back": "become"
+   },
+   {
+    "front": "direkt",
+    "back": "direct; directly"
+   },
+   {
+    "front": "Tat",
+    "back": "deed; act"
+   },
+   {
+    "front": "Schiff",
+    "back": "ship; boat"
+   },
+   {
+    "front": "wem",
+    "back": "whom; to whom"
+   },
+   {
+    "front": "König",
+    "back": "king"
+   },
+   {
+    "front": "danach",
+    "back": "afterward; after that"
+   },
+   {
+    "front": "funktioniert",
+    "back": "works; functions"
+   },
+   {
+    "front": "lernen",
+    "back": "to learn"
+   },
+   {
+    "front": "deswegen",
+    "back": "therefore; that's why"
+   },
+   {
+    "front": "nennen",
+    "back": "to call; to name"
+   },
+   {
+    "front": "hm",
+    "back": "hmm"
+   },
+   {
+    "front": "Feuer",
+    "back": "fire"
+   },
+   {
+    "front": "laufen",
+    "back": "to run; to walk"
+   },
+   {
+    "front": "alleine",
+    "back": "alone"
+   },
+   {
+    "front": "völlig",
+    "back": "completely; totally"
+   },
+   {
+    "front": "Stelle",
+    "back": "place; position; job"
+   },
+   {
+    "front": "Kumpel",
+    "back": "buddy; pal; mate"
+   },
+   {
+    "front": "verlieren",
+    "back": "to lose"
+   },
+   {
+    "front": "Probleme",
+    "back": "problems"
+   },
+   {
+    "front": "Kaffee",
+    "back": "coffee"
+   },
+   {
+    "front": "Luft",
+    "back": "air"
+   },
+   {
+    "front": "ziehen",
+    "back": "to pull; to draw"
+   },
+   {
+    "front": "verschwinden",
+    "back": "to disappear; to vanish"
+   },
+   {
+    "front": "aufhören",
+    "back": "to stop; to quit"
+   },
+   {
+    "front": "Suche",
+    "back": "search; to look for"
+   },
+   {
+    "front": "groß",
+    "back": "big; large; tall"
+   },
+   {
+    "front": "Buch",
+    "back": "book"
+   },
+   {
+    "front": "krank",
+    "back": "sick; ill"
+   },
+   {
+    "front": "jedes",
+    "back": "every; each"
+   },
+   {
+    "front": "wert",
+    "back": "worth; value"
+   },
+   {
+    "front": "Arzt",
+    "back": "doctor"
+   },
+   {
+    "front": "froh",
+    "back": "glad; happy"
+   },
+   {
+    "front": "versuche",
+    "back": "attempts; I try"
+   },
+   {
+    "front": "Straße",
+    "back": "street; road"
+   },
+   {
+    "front": "rufen",
+    "back": "to call"
+   },
+   {
+    "front": "heiraten",
+    "back": "to marry"
+   },
+   {
+    "front": "super",
+    "back": "great; super"
+   },
+   {
+    "front": "gutes",
+    "back": "good"
+   },
+   {
+    "front": "Onkel",
+    "back": "uncle"
+   },
+   {
+    "front": "total",
+    "back": "total; totally"
+   },
+   {
+    "front": "gebracht",
+    "back": "brought"
+   },
+   {
+    "front": "Party",
+    "back": "party"
+   },
+   {
+    "front": "erklären",
+    "back": "to explain"
+   },
+   {
+    "front": "spielt",
+    "back": "plays"
+   },
+   {
+    "front": "Wahl",
+    "back": "choice; election"
+   },
+   {
+    "front": "Vertrauen",
+    "back": "trust"
+   },
+   {
+    "front": "damals",
+    "back": "back then; at that time"
+   },
+   {
+    "front": "tagen",
+    "back": "to meet; to convene"
+   },
+   {
+    "front": "leicht",
+    "back": "easy; light"
+   },
+   {
+    "front": "nachdem",
+    "back": "after"
+   },
+   {
+    "front": "gegangen",
+    "back": "gone"
+   },
+   {
+    "front": "Gefühl",
+    "back": "feeling"
+   },
+   {
+    "front": "kaufen",
+    "back": "to buy"
+   },
+   {
+    "front": "geschafft",
+    "back": "managed; done"
+   },
+   {
+    "front": "Typen",
+    "back": "guys; types"
+   },
+   {
+    "front": "interessiert",
+    "back": "interested"
+   },
+   {
+    "front": "halte",
+    "back": "hold; stop"
+   },
+   {
+    "front": "hält",
+    "back": "holds; stops"
+   },
+   {
+    "front": "irgendwo",
+    "back": "somewhere"
+   },
+   {
+    "front": "Stück",
+    "back": "piece"
+   },
+   {
+    "front": "genauso",
+    "back": "just the same; exactly the same"
+   },
+   {
+    "front": "genommen",
+    "back": "taken"
+   },
+   {
+    "front": "Zukunft",
+    "back": "future"
+   },
+   {
+    "front": "weniger",
+    "back": "less; fewer"
+   },
+   {
+    "front": "cool",
+    "back": "cool"
+   },
+   {
+    "front": "Licht",
+    "back": "light"
+   },
+   {
+    "front": "getroffen",
+    "back": "met; hit"
+   },
+   {
+    "front": "Himmel",
+    "back": "sky; heaven"
+   },
+   {
+    "front": "Nachricht",
+    "back": "message; news"
+   },
+   {
+    "front": "drüben",
+    "back": "over there"
+   },
+   {
+    "front": "passt",
+    "back": "fits; suits"
+   },
+   {
+    "front": "laut",
+    "back": "loud; according to"
+   },
+   {
+    "front": "angerufen",
+    "back": "called; phoned"
+   },
+   {
+    "front": "sitzen",
+    "back": "to sit"
+   },
+   {
+    "front": "daß",
+    "back": "that"
+   },
+   {
+    "front": "Erde",
+    "back": "earth; ground; soil"
+   },
+   {
+    "front": "Schlüssel",
+    "back": "key"
+   },
+   {
+    "front": "Rest",
+    "back": "rest; remainder"
+   },
+   {
+    "front": "passieren",
+    "back": "to happen"
+   },
+   {
+    "front": "eher",
+    "back": "rather; sooner; earlier"
+   },
+   {
+    "front": "gefragt",
+    "back": "asked"
+   },
+   {
+    "front": "Gefängnis",
+    "back": "prison; jail"
+   },
+   {
+    "front": "Opfer",
+    "back": "victim; sacrifice"
+   },
+   {
+    "front": "Körper",
+    "back": "body"
+   },
+   {
+    "front": "solche",
+    "back": "such"
+   },
+   {
+    "front": "Mist",
+    "back": "crap; nonsense; manure"
+   },
+   {
+    "front": "schreiben",
+    "back": "to write"
+   },
+   {
+    "front": "böse",
+    "back": "evil; angry; bad"
+   },
+   {
+    "front": "gesprochen",
+    "back": "spoken"
+   },
+   {
+    "front": "Versuch",
+    "back": "attempt; try"
+   },
+   {
+    "front": "vorstellen",
+    "back": "to introduce; to imagine"
+   },
+   {
+    "front": "wovon",
+    "back": "of what; from what"
+   },
+   {
+    "front": "sobald",
+    "back": "as soon as"
+   },
+   {
+    "front": "Herren",
+    "back": "gentlemen; lords"
+   },
+   {
+    "front": "Sex",
+    "back": "sex"
+   },
+   {
+    "front": "Waffen",
+    "back": "weapons"
+   },
+   {
+    "front": "Wohnung",
+    "back": "apartment; flat"
+   },
+   {
+    "front": "weh",
+    "back": "sore; ache"
+   },
+   {
+    "front": "heißen",
+    "back": "to be called; to mean"
+   },
+   {
+    "front": "Krankenhaus",
+    "back": "hospital"
+   },
+   {
+    "front": "Millionen",
+    "back": "millions"
+   },
+   {
+    "front": "Klasse",
+    "back": "class; grade; great"
+   },
+   {
+    "front": "hart",
+    "back": "hard; tough"
+   },
+   {
+    "front": "worden",
+    "back": "been"
+   },
+   {
+    "front": "Sinn",
+    "back": "sense; meaning"
+   },
+   {
+    "front": "außerdem",
+    "back": "besides; moreover"
+   },
+   {
+    "front": "verletzt",
+    "back": "injured; hurt"
+   },
+   {
+    "front": "ändern",
+    "back": "to change"
+   },
+   {
+    "front": "erfahren",
+    "back": "to learn; to find out; experienced"
+   },
+   {
+    "front": "tragen",
+    "back": "to carry; to wear"
+   },
+   {
+    "front": "wenigstens",
+    "back": "at least"
+   },
+   {
+    "front": "vorsichtig",
+    "back": "careful; cautious"
+   },
+   {
+    "front": "stolz",
+    "back": "proud; pride"
+   },
+   {
+    "front": "stark",
+    "back": "strong"
+   },
+   {
+    "front": "fällt",
+    "back": "falls"
+   },
+   {
+    "front": "besonders",
+    "back": "especially; particularly"
+   }
+  ]
+ },
+ {
+  "level": "b1",
+  "name": "German B1 · 300 common words",
+  "source": "freq+freedict",
+  "cards": [
+   {
+    "front": "offen",
+    "back": "open"
+   },
+   {
+    "front": "schönen",
+    "back": "beautiful; nice"
+   },
+   {
+    "front": "Monsieur",
+    "back": "monsieur; sir"
+   },
+   {
+    "front": "arme",
+    "back": "arms; poor"
+   },
+   {
+    "front": "Bier",
+    "back": "beer"
+   },
+   {
+    "front": "Partner",
+    "back": "partner"
+   },
+   {
+    "front": "klein",
+    "back": "small; little"
+   },
+   {
+    "front": "Klappe",
+    "back": "flap; clapperboard; mouth"
+   },
+   {
+    "front": "süß",
+    "back": "sweet; cute"
+   },
+   {
+    "front": "herum",
+    "back": "around"
+   },
+   {
+    "front": "Finger",
+    "back": "finger"
+   },
+   {
+    "front": "Ehe",
+    "back": "marriage; before"
+   },
+   {
+    "front": "Rolle",
+    "back": "role; roll"
+   },
+   {
+    "front": "gleiche",
+    "back": "same"
+   },
+   {
+    "front": "Monat",
+    "back": "month"
+   },
+   {
+    "front": "Hochzeit",
+    "back": "wedding"
+   },
+   {
+    "front": "führt",
+    "back": "leads"
+   },
+   {
+    "front": "Paris",
+    "back": "Paris"
+   },
+   {
+    "front": "wach",
+    "back": "awake"
+   },
+   {
+    "front": "wozu",
+    "back": "what for; why"
+   },
+   {
+    "front": "arm",
+    "back": "arm; poor"
+   },
+   {
+    "front": "geschrieben",
+    "back": "written"
+   },
+   {
+    "front": "Chef",
+    "back": "boss; chief"
+   },
+   {
+    "front": "Informationen",
+    "back": "information"
+   },
+   {
+    "front": "erledigt",
+    "back": "done; finished"
+   },
+   {
+    "front": "hoffentlich",
+    "back": "hopefully"
+   },
+   {
+    "front": "fühlt",
+    "back": "feels"
+   },
+   {
+    "front": "tanzen",
+    "back": "to dance"
+   },
+   {
+    "front": "ansehen",
+    "back": "to look at; reputation"
+   },
+   {
+    "front": "zuhause",
+    "back": "home; at home"
+   },
+   {
+    "front": "wunderbar",
+    "back": "wonderful"
+   },
+   {
+    "front": "Reise",
+    "back": "journey; trip"
+   },
+   {
+    "front": "gewonnen",
+    "back": "won"
+   },
+   {
+    "front": "Dame",
+    "back": "lady"
+   },
+   {
+    "front": "irgendwann",
+    "back": "sometime; someday"
+   },
+   {
+    "front": "steckt",
+    "back": "is stuck; puts"
+   },
+   {
+    "front": "jedenfalls",
+    "back": "in any case; anyway"
+   },
+   {
+    "front": "schreit",
+    "back": "screams; shouts"
+   },
+   {
+    "front": "rüber",
+    "back": "over; across"
+   },
+   {
+    "front": "nennt",
+    "back": "calls; names"
+   },
+   {
+    "front": "Raum",
+    "back": "room; space"
+   },
+   {
+    "front": "heiß",
+    "back": "hot"
+   },
+   {
+    "front": "Foto",
+    "back": "photo; picture"
+   },
+   {
+    "front": "kalt",
+    "back": "cold"
+   },
+   {
+    "front": "irgendetwas",
+    "back": "something; anything"
+   },
+   {
+    "front": "Weile",
+    "back": "while"
+   },
+   {
+    "front": "bisher",
+    "back": "so far; until now"
+   },
+   {
+    "front": "Minute",
+    "back": "minute"
+   },
+   {
+    "front": "unbedingt",
+    "back": "absolutely; definitely"
+   },
+   {
+    "front": "Zug",
+    "back": "train; pull; move"
+   },
+   {
+    "front": "Sekunden",
+    "back": "seconds"
+   },
+   {
+    "front": "wofür",
+    "back": "what for; for what"
+   },
+   {
+    "front": "Beweise",
+    "back": "evidence; proof"
+   },
+   {
+    "front": "aller",
+    "back": "of all"
+   },
+   {
+    "front": "Seele",
+    "back": "soul"
+   },
+   {
+    "front": "schießen",
+    "back": "to shoot"
+   },
+   {
+    "front": "müde",
+    "back": "tired"
+   },
+   {
+    "front": "dauert",
+    "back": "lasts; takes"
+   },
+   {
+    "front": "Brief",
+    "back": "letter"
+   },
+   {
+    "front": "gelernt",
+    "back": "learned"
+   },
+   {
+    "front": "sucht",
+    "back": "searches; addiction"
+   },
+   {
+    "front": "bekannt",
+    "back": "known; familiar"
+   },
+   {
+    "front": "weitere",
+    "back": "further; additional"
+   },
+   {
+    "front": "Unfall",
+    "back": "accident"
+   },
+   {
+    "front": "dahin",
+    "back": "there; to that point"
+   },
+   {
+    "front": "Kontrolle",
+    "back": "control; check"
+   },
+   {
+    "front": "Beispiel",
+    "back": "example"
+   },
+   {
+    "front": "dasselbe",
+    "back": "the same"
+   },
+   {
+    "front": "Herzen",
+    "back": "hearts"
+   },
+   {
+    "front": "schlagen",
+    "back": "to hit; to beat"
+   },
+   {
+    "front": "wütend",
+    "back": "furious; angry"
+   },
+   {
+    "front": "Weise",
+    "back": "way; manner; wise"
+   },
+   {
+    "front": "Damen",
+    "back": "ladies"
+   },
+   {
+    "front": "darin",
+    "back": "in it; therein"
+   },
+   {
+    "front": "holt",
+    "back": "fetches; gets"
+   },
+   {
+    "front": "Vorsicht",
+    "back": "caution; careful"
+   },
+   {
+    "front": "beweisen",
+    "back": "to prove"
+   },
+   {
+    "front": "gehabt",
+    "back": "had"
+   },
+   {
+    "front": "zumindest",
+    "back": "at least"
+   },
+   {
+    "front": "vermisst",
+    "back": "missing; missed"
+   },
+   {
+    "front": "hübsch",
+    "back": "pretty; handsome"
+   },
+   {
+    "front": "Verbindung",
+    "back": "connection"
+   },
+   {
+    "front": "tief",
+    "back": "deep"
+   },
+   {
+    "front": "Richtung",
+    "back": "direction"
+   },
+   {
+    "front": "Lage",
+    "back": "situation; position; location"
+   },
+   {
+    "front": "sowieso",
+    "back": "anyway"
+   },
+   {
+    "front": "Kraft",
+    "back": "strength; power; force"
+   },
+   {
+    "front": "normal",
+    "back": "normal"
+   },
+   {
+    "front": "Lauf",
+    "back": "run; course; barrel"
+   },
+   {
+    "front": "Ehre",
+    "back": "honor"
+   },
+   {
+    "front": "Geschenk",
+    "back": "gift; present"
+   },
+   {
+    "front": "Bar",
+    "back": "bar; cash"
+   },
+   {
+    "front": "Tasche",
+    "back": "bag; pocket"
+   },
+   {
+    "front": "gelesen",
+    "back": "read"
+   },
+   {
+    "front": "gekauft",
+    "back": "bought"
+   },
+   {
+    "front": "gestohlen",
+    "back": "stolen"
+   },
+   {
+    "front": "Hunger",
+    "back": "hunger"
+   },
+   {
+    "front": "lügen",
+    "back": "lies; to lie"
+   },
+   {
+    "front": "Beziehung",
+    "back": "relationship; relation"
+   },
+   {
+    "front": "verschwunden",
+    "back": "disappeared; gone"
+   },
+   {
+    "front": "nächstes",
+    "back": "next"
+   },
+   {
+    "front": "gearbeitet",
+    "back": "worked"
+   },
+   {
+    "front": "Preis",
+    "back": "price; prize; award"
+   },
+   {
+    "front": "Witz",
+    "back": "joke"
+   },
+   {
+    "front": "meinte",
+    "back": "meant; thought"
+   },
+   {
+    "front": "Liste",
+    "back": "list"
+   },
+   {
+    "front": "Geist",
+    "back": "spirit; mind; ghost"
+   },
+   {
+    "front": "neben",
+    "back": "next to; beside"
+   },
+   {
+    "front": "gesucht",
+    "back": "searched; wanted"
+   },
+   {
+    "front": "Firma",
+    "back": "company; firm"
+   },
+   {
+    "front": "Süße",
+    "back": "sweetness; sweetie"
+   },
+   {
+    "front": "Rücken",
+    "back": "back"
+   },
+   {
+    "front": "schrecklich",
+    "back": "terrible; awful"
+   },
+   {
+    "front": "letzter",
+    "back": "last"
+   },
+   {
+    "front": "verliebt",
+    "back": "in love"
+   },
+   {
+    "front": "öffnen",
+    "back": "to open"
+   },
+   {
+    "front": "redet",
+    "back": "talks; speaks"
+   },
+   {
+    "front": "Boot",
+    "back": "boat"
+   },
+   {
+    "front": "seltsam",
+    "back": "strange; odd"
+   },
+   {
+    "front": "versteckt",
+    "back": "hidden"
+   },
+   {
+    "front": "erwischt",
+    "back": "caught"
+   },
+   {
+    "front": "verkauft",
+    "back": "sold"
+   },
+   {
+    "front": "Tante",
+    "back": "aunt"
+   },
+   {
+    "front": "erwarten",
+    "back": "to expect"
+   },
+   {
+    "front": "Pferd",
+    "back": "horse"
+   },
+   {
+    "front": "Wunder",
+    "back": "miracle; wonder"
+   },
+   {
+    "front": "sauer",
+    "back": "sour; angry"
+   },
+   {
+    "front": "vermutlich",
+    "back": "presumably; probably"
+   },
+   {
+    "front": "näher",
+    "back": "closer; nearer"
+   },
+   {
+    "front": "Major",
+    "back": "major"
+   },
+   {
+    "front": "jung",
+    "back": "young"
+   },
+   {
+    "front": "Majestät",
+    "back": "majesty"
+   },
+   {
+    "front": "aussehen",
+    "back": "appearance; to look"
+   },
+   {
+    "front": "links",
+    "back": "left; on the left"
+   },
+   {
+    "front": "welches",
+    "back": "which"
+   },
+   {
+    "front": "beschützen",
+    "back": "to protect"
+   },
+   {
+    "front": "geboren",
+    "back": "born"
+   },
+   {
+    "front": "erreichen",
+    "back": "to reach; to achieve"
+   },
+   {
+    "front": "Punkt",
+    "back": "point; dot; period"
+   },
+   {
+    "front": "Kirche",
+    "back": "church"
+   },
+   {
+    "front": "verraten",
+    "back": "to betray; to reveal"
+   },
+   {
+    "front": "selber",
+    "back": "oneself; myself"
+   },
+   {
+    "front": "Befehl",
+    "back": "order; command"
+   },
+   {
+    "front": "fährt",
+    "back": "drives; goes"
+   },
+   {
+    "front": "zieht",
+    "back": "pulls"
+   },
+   {
+    "front": "Geburtstag",
+    "back": "birthday"
+   },
+   {
+    "front": "Haut",
+    "back": "skin"
+   },
+   {
+    "front": "Wette",
+    "back": "bet"
+   },
+   {
+    "front": "reich",
+    "back": "empire; rich"
+   },
+   {
+    "front": "Sekunde",
+    "back": "second"
+   },
+   {
+    "front": "geredet",
+    "back": "talked; spoken"
+   },
+   {
+    "front": "James",
+    "back": "James"
+   },
+   {
+    "front": "Madame",
+    "back": "madame; ma'am"
+   },
+   {
+    "front": "eigene",
+    "back": "own"
+   },
+   {
+    "front": "Zeiten",
+    "back": "times"
+   },
+   {
+    "front": "traurig",
+    "back": "sad"
+   },
+   {
+    "front": "Anruf",
+    "back": "phone call"
+   },
+   {
+    "front": "Nachrichten",
+    "back": "news; messages"
+   },
+   {
+    "front": "Frieden",
+    "back": "peace"
+   },
+   {
+    "front": "Karte",
+    "back": "card; map; ticket"
+   },
+   {
+    "front": "Güte",
+    "back": "kindness; goodness"
+   },
+   {
+    "front": "diesmal",
+    "back": "this time"
+   },
+   {
+    "front": "persönlich",
+    "back": "personal; personally"
+   },
+   {
+    "front": "Kriege",
+    "back": "wars"
+   },
+   {
+    "front": "bleibe",
+    "back": "stay; remain"
+   },
+   {
+    "front": "verändert",
+    "back": "changed"
+   },
+   {
+    "front": "Sonne",
+    "back": "sun"
+   },
+   {
+    "front": "lieb",
+    "back": "dear; kind"
+   },
+   {
+    "front": "nämlich",
+    "back": "namely; that is"
+   },
+   {
+    "front": "letztes",
+    "back": "last"
+   },
+   {
+    "front": "ruft",
+    "back": "calls"
+   },
+   {
+    "front": "Professor",
+    "back": "professor"
+   },
+   {
+    "front": "Gericht",
+    "back": "court; dish"
+   },
+   {
+    "front": "Nase",
+    "back": "nose"
+   },
+   {
+    "front": "ewig",
+    "back": "eternal; forever"
+   },
+   {
+    "front": "singen",
+    "back": "to sing"
+   },
+   {
+    "front": "Bank",
+    "back": "bank; bench"
+   },
+   {
+    "front": "beschäftigt",
+    "back": "busy; occupied"
+   },
+   {
+    "front": "Computer",
+    "back": "computer"
+   },
+   {
+    "front": "Toten",
+    "back": "the dead"
+   },
+   {
+    "front": "Weihnachten",
+    "back": "Christmas"
+   },
+   {
+    "front": "offensichtlich",
+    "back": "obviously; apparently"
+   },
+   {
+    "front": "naja",
+    "back": "well"
+   },
+   {
+    "front": "Gefühle",
+    "back": "feelings"
+   },
+   {
+    "front": "Fuß",
+    "back": "foot"
+   },
+   {
+    "front": "Show",
+    "back": "show"
+   },
+   {
+    "front": "Überraschung",
+    "back": "surprise"
+   },
+   {
+    "front": "Geheimnis",
+    "back": "secret"
+   },
+   {
+    "front": "Kontakt",
+    "back": "contact"
+   },
+   {
+    "front": "Gold",
+    "back": "gold"
+   },
+   {
+    "front": "Drogen",
+    "back": "drugs"
+   },
+   {
+    "front": "Regierung",
+    "back": "government"
+   },
+   {
+    "front": "Wein",
+    "back": "wine"
+   },
+   {
+    "front": "ermordet",
+    "back": "murdered"
+   },
+   {
+    "front": "Fotos",
+    "back": "photos; pictures"
+   },
+   {
+    "front": "entfernt",
+    "back": "removed; distant"
+   },
+   {
+    "front": "geschlafen",
+    "back": "slept"
+   },
+   {
+    "front": "manche",
+    "back": "some"
+   },
+   {
+    "front": "erledigen",
+    "back": "to take care of; to deal with"
+   },
+   {
+    "front": "gegenüber",
+    "back": "opposite; across from; toward"
+   },
+   {
+    "front": "Schlaf",
+    "back": "sleep"
+   },
+   {
+    "front": "Lust",
+    "back": "desire; pleasure"
+   },
+   {
+    "front": "wunderschön",
+    "back": "beautiful; gorgeous"
+   },
+   {
+    "front": "witzig",
+    "back": "funny"
+   },
+   {
+    "front": "zerstört",
+    "back": "destroyed"
+   },
+   {
+    "front": "übrigens",
+    "back": "by the way"
+   },
+   {
+    "front": "heim",
+    "back": "home"
+   },
+   {
+    "front": "namens",
+    "back": "named; by the name of"
+   },
+   {
+    "front": "zeigt",
+    "back": "shows"
+   },
+   {
+    "front": "geliebt",
+    "back": "loved"
+   },
+   {
+    "front": "gehören",
+    "back": "to belong"
+   },
+   {
+    "front": "brachte",
+    "back": "brought"
+   },
+   {
+    "front": "Blick",
+    "back": "look; view; glance"
+   },
+   {
+    "front": "Besuch",
+    "back": "visit"
+   },
+   {
+    "front": "bewegen",
+    "back": "to move"
+   },
+   {
+    "front": "Haare",
+    "back": "hair"
+   },
+   {
+    "front": "antworten",
+    "back": "answers; to answer"
+   },
+   {
+    "front": "Präsident",
+    "back": "president"
+   },
+   {
+    "front": "Hoffnung",
+    "back": "hope"
+   },
+   {
+    "front": "stecken",
+    "back": "to stick; to put"
+   },
+   {
+    "front": "rechts",
+    "back": "right; on the right"
+   },
+   {
+    "front": "interessant",
+    "back": "interesting"
+   },
+   {
+    "front": "entscheiden",
+    "back": "to decide"
+   },
+   {
+    "front": "miteinander",
+    "back": "with each other; together"
+   },
+   {
+    "front": "meint",
+    "back": "means; thinks"
+   },
+   {
+    "front": "indem",
+    "back": "by; in that"
+   },
+   {
+    "front": "wohnen",
+    "back": "to live; to reside"
+   },
+   {
+    "front": "Möglichkeit",
+    "back": "possibility; opportunity"
+   },
+   {
+    "front": "kaputt",
+    "back": "broken"
+   },
+   {
+    "front": "Flugzeug",
+    "back": "airplane; plane"
+   },
+   {
+    "front": "Vergangenheit",
+    "back": "past"
+   },
+   {
+    "front": "anderer",
+    "back": "other"
+   },
+   {
+    "front": "zweite",
+    "back": "second"
+   },
+   {
+    "front": "Armee",
+    "back": "army"
+   },
+   {
+    "front": "Jim",
+    "back": "Jim"
+   },
+   {
+    "front": "Tee",
+    "back": "tea"
+   },
+   {
+    "front": "entweder",
+    "back": "either"
+   },
+   {
+    "front": "Don",
+    "back": "Don"
+   },
+   {
+    "front": "aufhalten",
+    "back": "to stop; to hold up"
+   },
+   {
+    "front": "stellt",
+    "back": "places; puts"
+   },
+   {
+    "front": "überrascht",
+    "back": "surprised"
+   },
+   {
+    "front": "sauber",
+    "back": "clean"
+   },
+   {
+    "front": "Mark",
+    "back": "mark; marrow"
+   },
+   {
+    "front": "Schlag",
+    "back": "hit; blow; strike"
+   },
+   {
+    "front": "Sheriff",
+    "back": "sheriff"
+   },
+   {
+    "front": "Untertitel",
+    "back": "subtitle"
+   },
+   {
+    "front": "setzt",
+    "back": "sets; puts"
+   },
+   {
+    "front": "nervös",
+    "back": "nervous"
+   },
+   {
+    "front": "Gesellschaft",
+    "back": "society; company"
+   },
+   {
+    "front": "verstecken",
+    "back": "to hide"
+   },
+   {
+    "front": "schuldig",
+    "back": "guilty"
+   },
+   {
+    "front": "Hals",
+    "back": "neck; throat"
+   },
+   {
+    "front": "schützen",
+    "back": "to protect"
+   },
+   {
+    "front": "passen",
+    "back": "to fit; to suit"
+   },
+   {
+    "front": "überleben",
+    "back": "to survive"
+   },
+   {
+    "front": "erhalten",
+    "back": "to receive; to preserve"
+   },
+   {
+    "front": "teilen",
+    "back": "to share; to divide"
+   },
+   {
+    "front": "Gebäude",
+    "back": "building"
+   },
+   {
+    "front": "Schicksal",
+    "back": "fate; destiny"
+   },
+   {
+    "front": "Zeichen",
+    "back": "sign; symbol"
+   },
+   {
+    "front": "Richter",
+    "back": "judge"
+   },
+   {
+    "front": "besorgt",
+    "back": "worried; concerned"
+   },
+   {
+    "front": "Küche",
+    "back": "kitchen"
+   },
+   {
+    "front": "lief",
+    "back": "ran; walked"
+   },
+   {
+    "front": "Vergnügen",
+    "back": "pleasure; enjoyment"
+   },
+   {
+    "front": "Volk",
+    "back": "people; nation"
+   },
+   {
+    "front": "Königin",
+    "back": "queen"
+   },
+   {
+    "front": "Soldaten",
+    "back": "soldiers"
+   },
+   {
+    "front": "feiern",
+    "back": "to celebrate"
+   },
+   {
+    "front": "Situation",
+    "back": "situation"
+   },
+   {
+    "front": "gelassen",
+    "back": "calm; composed"
+   },
+   {
+    "front": "allerdings",
+    "back": "however; though; indeed"
+   },
+   {
+    "front": "soweit",
+    "back": "as far as; so far"
+   },
+   {
+    "front": "gefahren",
+    "back": "dangers; drove"
+   },
+   {
+    "front": "Verstand",
+    "back": "mind; reason; sense"
+   },
+   {
+    "front": "Bord",
+    "back": "board"
+   },
+   {
+    "front": "angefangen",
+    "back": "started; begun"
+   },
+   {
+    "front": "Lee",
+    "back": "lee"
+   },
+   {
+    "front": "Bob",
+    "back": "Bob"
+   },
+   {
+    "front": "Rat",
+    "back": "advice; council"
+   },
+   {
+    "front": "worauf",
+    "back": "whereupon; what for"
+   },
+   {
+    "front": "gebeten",
+    "back": "asked"
+   },
+   {
+    "front": "Kamera",
+    "back": "camera"
+   },
+   {
+    "front": "Achtung",
+    "back": "attention; respect"
+   },
+   {
+    "front": "ganzes",
+    "back": "whole"
+   },
+   {
+    "front": "Schuhe",
+    "back": "shoes"
+   },
+   {
+    "front": "Glückwunsch",
+    "back": "congratulations"
+   },
+   {
+    "front": "statt",
+    "back": "instead of"
+   },
+   {
+    "front": "übernehmen",
+    "back": "to take over"
+   },
+   {
+    "front": "Gegend",
+    "back": "area; region"
+   },
+   {
+    "front": "Wald",
+    "back": "forest; woods"
+   },
+   {
+    "front": "erkennen",
+    "back": "to recognize"
+   },
+   {
+    "front": "Glas",
+    "back": "glass"
+   },
+   {
+    "front": "verantwortlich",
+    "back": "responsible"
+   },
+   {
+    "front": "stöhnt",
+    "back": "moans; groans"
+   },
+   {
+    "front": "herein",
+    "back": "in; come in"
+   },
+   {
+    "front": "Kleid",
+    "back": "dress"
+   },
+   {
+    "front": "zerstören",
+    "back": "to destroy"
+   },
+   {
+    "front": "jawohl",
+    "back": "yes; certainly"
+   },
+   {
+    "front": "London",
+    "back": "London"
+   }
+  ]
+ },
+ {
+  "level": "b2",
+  "name": "German B2 · 300 common words",
+  "source": "freq+freedict",
+  "cards": [
+   {
+    "front": "geheiratet",
+    "back": "married"
+   },
+   {
+    "front": "woanders",
+    "back": "somewhere else; elsewhere"
+   },
+   {
+    "front": "Kuss",
+    "back": "kiss"
+   },
+   {
+    "front": "verhindern",
+    "back": "to prevent"
+   },
+   {
+    "front": "Erklärung",
+    "back": "explanation; statement"
+   },
+   {
+    "front": "Video",
+    "back": "video"
+   },
+   {
+    "front": "Rom",
+    "back": "Rome"
+   },
+   {
+    "front": "klug",
+    "back": "clever; smart"
+   },
+   {
+    "front": "Kräfte",
+    "back": "forces; powers"
+   },
+   {
+    "front": "verlangen",
+    "back": "to demand; desire"
+   },
+   {
+    "front": "außerhalb",
+    "back": "outside; beyond"
+   },
+   {
+    "front": "Opa",
+    "back": "grandpa"
+   },
+   {
+    "front": "selbstverständlich",
+    "back": "of course; naturally"
+   },
+   {
+    "front": "aufstehen",
+    "back": "to get up; to stand up"
+   },
+   {
+    "front": "hassen",
+    "back": "to hate"
+   },
+   {
+    "front": "gebrauchen",
+    "back": "to use"
+   },
+   {
+    "front": "geglaubt",
+    "back": "believed"
+   },
+   {
+    "front": "Milch",
+    "back": "milk"
+   },
+   {
+    "front": "gefeuert",
+    "back": "fired"
+   },
+   {
+    "front": "Erinnerungen",
+    "back": "memories"
+   },
+   {
+    "front": "kochen",
+    "back": "to cook; to boil"
+   },
+   {
+    "front": "schwach",
+    "back": "weak"
+   },
+   {
+    "front": "Schulden",
+    "back": "debts"
+   },
+   {
+    "front": "Grenze",
+    "back": "border; limit; boundary"
+   },
+   {
+    "front": "Braut",
+    "back": "bride"
+   },
+   {
+    "front": "gebraucht",
+    "back": "used"
+   },
+   {
+    "front": "peinlich",
+    "back": "embarrassing"
+   },
+   {
+    "front": "klappt",
+    "back": "works out"
+   },
+   {
+    "front": "Geheimnisse",
+    "back": "secrets"
+   },
+   {
+    "front": "Aufmerksamkeit",
+    "back": "attention"
+   },
+   {
+    "front": "Form",
+    "back": "form; shape"
+   },
+   {
+    "front": "umsonst",
+    "back": "free; in vain"
+   },
+   {
+    "front": "überlebt",
+    "back": "survived"
+   },
+   {
+    "front": "nirgendwo",
+    "back": "nowhere"
+   },
+   {
+    "front": "Meilen",
+    "back": "miles"
+   },
+   {
+    "front": "einfacher",
+    "back": "easier"
+   },
+   {
+    "front": "blöde",
+    "back": "stupid; silly"
+   },
+   {
+    "front": "Mond",
+    "back": "moon"
+   },
+   {
+    "front": "Daten",
+    "back": "data"
+   },
+   {
+    "front": "merken",
+    "back": "to notice; to remember"
+   },
+   {
+    "front": "Schande",
+    "back": "shame; disgrace"
+   },
+   {
+    "front": "fühlte",
+    "back": "felt"
+   },
+   {
+    "front": "Sieg",
+    "back": "victory"
+   },
+   {
+    "front": "satt",
+    "back": "full; fed up"
+   },
+   {
+    "front": "Blödsinn",
+    "back": "nonsense"
+   },
+   {
+    "front": "Pfund",
+    "back": "pound"
+   },
+   {
+    "front": "handeln",
+    "back": "to act; to trade"
+   },
+   {
+    "front": "enden",
+    "back": "to end"
+   },
+   {
+    "front": "warm",
+    "back": "warm"
+   },
+   {
+    "front": "raten",
+    "back": "to guess; to advise"
+   },
+   {
+    "front": "Übersetzung",
+    "back": "translation"
+   },
+   {
+    "front": "Kunst",
+    "back": "art"
+   },
+   {
+    "front": "Kapitän",
+    "back": "captain"
+   },
+   {
+    "front": "Einsatz",
+    "back": "deployment; use; effort"
+   },
+   {
+    "front": "schweigen",
+    "back": "silence; to be silent"
+   },
+   {
+    "front": "Krankheit",
+    "back": "illness; disease"
+   },
+   {
+    "front": "toller",
+    "back": "greater; cooler"
+   },
+   {
+    "front": "Schatten",
+    "back": "shadow; shade"
+   },
+   {
+    "front": "wachen",
+    "back": "guards; to watch"
+   },
+   {
+    "front": "Tatsache",
+    "back": "fact"
+   },
+   {
+    "front": "Stock",
+    "back": "floor; stick; story"
+   },
+   {
+    "front": "hingehen",
+    "back": "to go there"
+   },
+   {
+    "front": "verboten",
+    "back": "forbidden; prohibited"
+   },
+   {
+    "front": "Anzug",
+    "back": "suit"
+   },
+   {
+    "front": "Leichen",
+    "back": "corpses; bodies"
+   },
+   {
+    "front": "beendet",
+    "back": "finished; ended"
+   },
+   {
+    "front": "Freitag",
+    "back": "Friday"
+   },
+   {
+    "front": "Million",
+    "back": "million"
+   },
+   {
+    "front": "verflucht",
+    "back": "cursed; damned"
+   },
+   {
+    "front": "dunkel",
+    "back": "dark"
+   },
+   {
+    "front": "enttäuscht",
+    "back": "disappointed"
+   },
+   {
+    "front": "klopfen",
+    "back": "to knock"
+   },
+   {
+    "front": "Spuren",
+    "back": "traces; tracks"
+   },
+   {
+    "front": "Dreck",
+    "back": "dirt; filth"
+   },
+   {
+    "front": "Seiten",
+    "back": "pages; sides"
+   },
+   {
+    "front": "Mühe",
+    "back": "effort; trouble"
+   },
+   {
+    "front": "gezogen",
+    "back": "pulled"
+   },
+   {
+    "front": "kontrollieren",
+    "back": "to control; to check"
+   },
+   {
+    "front": "Knochen",
+    "back": "bone"
+   },
+   {
+    "front": "schick",
+    "back": "chic; stylish"
+   },
+   {
+    "front": "getrennt",
+    "back": "separated; apart"
+   },
+   {
+    "front": "Programm",
+    "back": "program"
+   },
+   {
+    "front": "Grab",
+    "back": "grave"
+   },
+   {
+    "front": "ebenso",
+    "back": "likewise; also"
+   },
+   {
+    "front": "trage",
+    "back": "stretcher; I carry"
+   },
+   {
+    "front": "Nachbarn",
+    "back": "neighbors"
+   },
+   {
+    "front": "bieten",
+    "back": "to offer"
+   },
+   {
+    "front": "bestes",
+    "back": "best"
+   },
+   {
+    "front": "fuhr",
+    "back": "drove"
+   },
+   {
+    "front": "verlässt",
+    "back": "leaves"
+   },
+   {
+    "front": "freundlich",
+    "back": "friendly; kind"
+   },
+   {
+    "front": "dennoch",
+    "back": "nevertheless; yet"
+   },
+   {
+    "front": "rauchen",
+    "back": "to smoke"
+   },
+   {
+    "front": "dick",
+    "back": "thick; fat"
+   },
+   {
+    "front": "Stuhl",
+    "back": "chair"
+   },
+   {
+    "front": "dreh",
+    "back": "turn; spin; shoot"
+   },
+   {
+    "front": "bester",
+    "back": "best"
+   },
+   {
+    "front": "vergeben",
+    "back": "to forgive"
+   },
+   {
+    "front": "ausgehen",
+    "back": "to go out; to assume"
+   },
+   {
+    "front": "behandeln",
+    "back": "to treat"
+   },
+   {
+    "front": "trotz",
+    "back": "despite; in spite of"
+   },
+   {
+    "front": "Gast",
+    "back": "guest"
+   },
+   {
+    "front": "ändert",
+    "back": "changes"
+   },
+   {
+    "front": "passierte",
+    "back": "happened"
+   },
+   {
+    "front": "Toilette",
+    "back": "toilet; bathroom"
+   },
+   {
+    "front": "annehmen",
+    "back": "to accept; to assume"
+   },
+   {
+    "front": "Hexe",
+    "back": "witch"
+   },
+   {
+    "front": "erwachsen",
+    "back": "grown-up; adult"
+   },
+   {
+    "front": "Pistole",
+    "back": "pistol; gun"
+   },
+   {
+    "front": "dreht",
+    "back": "turns"
+   },
+   {
+    "front": "Aussage",
+    "back": "statement; testimony"
+   },
+   {
+    "front": "genießen",
+    "back": "to enjoy"
+   },
+   {
+    "front": "eifersüchtig",
+    "back": "jealous"
+   },
+   {
+    "front": "derjenige",
+    "back": "the one"
+   },
+   {
+    "front": "teuer",
+    "back": "expensive; dear"
+   },
+   {
+    "front": "Zähne",
+    "back": "teeth"
+   },
+   {
+    "front": "beobachtet",
+    "back": "observed; watched"
+   },
+   {
+    "front": "wählen",
+    "back": "to choose; to vote; to dial"
+   },
+   {
+    "front": "Theater",
+    "back": "theater"
+   },
+   {
+    "front": "Regen",
+    "back": "rain"
+   },
+   {
+    "front": "Feinde",
+    "back": "enemies"
+   },
+   {
+    "front": "erlauben",
+    "back": "to allow; to permit"
+   },
+   {
+    "front": "zulassen",
+    "back": "to allow; to admit"
+   },
+   {
+    "front": "schnappen",
+    "back": "to grab; to snatch"
+   },
+   {
+    "front": "komplett",
+    "back": "complete; completely"
+   },
+   {
+    "front": "Panik",
+    "back": "panic"
+   },
+   {
+    "front": "Flughafen",
+    "back": "airport"
+   },
+   {
+    "front": "bewusst",
+    "back": "conscious; deliberate"
+   },
+   {
+    "front": "Deutschen",
+    "back": "Germans; German"
+   },
+   {
+    "front": "voraus",
+    "back": "ahead; in advance"
+   },
+   {
+    "front": "begleiten",
+    "back": "to accompany"
+   },
+   {
+    "front": "einander",
+    "back": "each other; one another"
+   },
+   {
+    "front": "erlebt",
+    "back": "experienced"
+   },
+   {
+    "front": "weiterhin",
+    "back": "still; furthermore"
+   },
+   {
+    "front": "stärker",
+    "back": "stronger"
+   },
+   {
+    "front": "Fahrer",
+    "back": "driver"
+   },
+   {
+    "front": "konzentrieren",
+    "back": "to concentrate"
+   },
+   {
+    "front": "streiten",
+    "back": "to argue; to quarrel"
+   },
+   {
+    "front": "Star",
+    "back": "star"
+   },
+   {
+    "front": "überzeugen",
+    "back": "to convince"
+   },
+   {
+    "front": "Alkohol",
+    "back": "alcohol"
+   },
+   {
+    "front": "übersetzt",
+    "back": "translated"
+   },
+   {
+    "front": "Verrückte",
+    "back": "crazy person; lunatic"
+   },
+   {
+    "front": "begann",
+    "back": "began; started"
+   },
+   {
+    "front": "angenommen",
+    "back": "assumed; accepted"
+   },
+   {
+    "front": "weitermachen",
+    "back": "to carry on; to continue"
+   },
+   {
+    "front": "Post",
+    "back": "mail; post office"
+   },
+   {
+    "front": "mitgenommen",
+    "back": "taken along; worn out"
+   },
+   {
+    "front": "Botschaft",
+    "back": "message; embassy"
+   },
+   {
+    "front": "Ideen",
+    "back": "ideas"
+   },
+   {
+    "front": "fehlen",
+    "back": "to be missing; to lack"
+   },
+   {
+    "front": "aufgeregt",
+    "back": "excited; upset"
+   },
+   {
+    "front": "Selbstmord",
+    "back": "suicide"
+   },
+   {
+    "front": "zurückkommen",
+    "back": "to come back; to return"
+   },
+   {
+    "front": "irgendein",
+    "back": "any; some"
+   },
+   {
+    "front": "Magie",
+    "back": "magic"
+   },
+   {
+    "front": "handelt",
+    "back": "acts; trades"
+   },
+   {
+    "front": "untersuchen",
+    "back": "to examine; to investigate"
+   },
+   {
+    "front": "Flucht",
+    "back": "escape; flight"
+   },
+   {
+    "front": "irgendeine",
+    "back": "any; some"
+   },
+   {
+    "front": "Gegenteil",
+    "back": "opposite"
+   },
+   {
+    "front": "betrifft",
+    "back": "concerns; regards"
+   },
+   {
+    "front": "scharf",
+    "back": "sharp; spicy"
+   },
+   {
+    "front": "gehofft",
+    "back": "hoped"
+   },
+   {
+    "front": "kennengelernt",
+    "back": "met; got to know"
+   },
+   {
+    "front": "Projekt",
+    "back": "project"
+   },
+   {
+    "front": "Trottel",
+    "back": "idiot; fool"
+   },
+   {
+    "front": "immerhin",
+    "back": "after all; at least"
+   },
+   {
+    "front": "mehrere",
+    "back": "several"
+   },
+   {
+    "front": "schwimmen",
+    "back": "to swim"
+   },
+   {
+    "front": "zählen",
+    "back": "to count"
+   },
+   {
+    "front": "innerhalb",
+    "back": "within; inside"
+   },
+   {
+    "front": "matt",
+    "back": "matte; weak; checkmate"
+   },
+   {
+    "front": "blind",
+    "back": "blind"
+   },
+   {
+    "front": "Schwestern",
+    "back": "sisters"
+   },
+   {
+    "front": "Code",
+    "back": "code"
+   },
+   {
+    "front": "schlau",
+    "back": "clever; smart"
+   },
+   {
+    "front": "Absicht",
+    "back": "intention"
+   },
+   {
+    "front": "zuletzt",
+    "back": "last; lastly; finally"
+   },
+   {
+    "front": "Englisch",
+    "back": "English"
+   },
+   {
+    "front": "Ohr",
+    "back": "ear"
+   },
+   {
+    "front": "verletzen",
+    "back": "to hurt; to injure"
+   },
+   {
+    "front": "Song",
+    "back": "song"
+   },
+   {
+    "front": "Schüler",
+    "back": "student; pupil"
+   },
+   {
+    "front": "gewinnt",
+    "back": "wins"
+   },
+   {
+    "front": "älter",
+    "back": "older"
+   },
+   {
+    "front": "merkwürdig",
+    "back": "strange; odd"
+   },
+   {
+    "front": "Größe",
+    "back": "size; height; greatness"
+   },
+   {
+    "front": "tritt",
+    "back": "kicks; steps"
+   },
+   {
+    "front": "trauen",
+    "back": "to trust; to dare"
+   },
+   {
+    "front": "Präsidenten",
+    "back": "presidents"
+   },
+   {
+    "front": "Trick",
+    "back": "trick"
+   },
+   {
+    "front": "roten",
+    "back": "red"
+   },
+   {
+    "front": "überlegt",
+    "back": "considered; deliberate"
+   },
+   {
+    "front": "Sonntag",
+    "back": "Sunday"
+   },
+   {
+    "front": "zwölf",
+    "back": "twelve"
+   },
+   {
+    "front": "Vorstellung",
+    "back": "idea; performance; introduction"
+   },
+   {
+    "front": "Killer",
+    "back": "killer"
+   },
+   {
+    "front": "Unterstützung",
+    "back": "support"
+   },
+   {
+    "front": "Rechnung",
+    "back": "bill; invoice; calculation"
+   },
+   {
+    "front": "dieselbe",
+    "back": "the same"
+   },
+   {
+    "front": "verändern",
+    "back": "to change"
+   },
+   {
+    "front": "möglicherweise",
+    "back": "possibly"
+   },
+   {
+    "front": "definitiv",
+    "back": "definitely"
+   },
+   {
+    "front": "locker",
+    "back": "loose; relaxed"
+   },
+   {
+    "front": "abends",
+    "back": "in the evening"
+   },
+   {
+    "front": "frisch",
+    "back": "fresh"
+   },
+   {
+    "front": "Kohle",
+    "back": "coal; cash"
+   },
+   {
+    "front": "fing",
+    "back": "caught"
+   },
+   {
+    "front": "Hure",
+    "back": "whore; prostitute"
+   },
+   {
+    "front": "Cousin",
+    "back": "cousin"
+   },
+   {
+    "front": "Familien",
+    "back": "families"
+   },
+   {
+    "front": "einsam",
+    "back": "lonely"
+   },
+   {
+    "front": "lebendig",
+    "back": "alive; lively"
+   },
+   {
+    "front": "Heiligen",
+    "back": "saints"
+   },
+   {
+    "front": "knapp",
+    "back": "tight; scarce; barely"
+   },
+   {
+    "front": "ebenfalls",
+    "back": "likewise; also"
+   },
+   {
+    "front": "überprüft",
+    "back": "checked; verified"
+   },
+   {
+    "front": "Artikel",
+    "back": "article"
+   },
+   {
+    "front": "gesetzt",
+    "back": "set; placed"
+   },
+   {
+    "front": "jederzeit",
+    "back": "at any time; anytime"
+   },
+   {
+    "front": "kompliziert",
+    "back": "complicated"
+   },
+   {
+    "front": "spüren",
+    "back": "to feel; to sense"
+   },
+   {
+    "front": "Signal",
+    "back": "signal"
+   },
+   {
+    "front": "Stich",
+    "back": "stab; sting; stitch"
+   },
+   {
+    "front": "Kino",
+    "back": "cinema; movies"
+   },
+   {
+    "front": "probieren",
+    "back": "to try"
+   },
+   {
+    "front": "wundervoll",
+    "back": "wonderful"
+   },
+   {
+    "front": "Tanz",
+    "back": "dance"
+   },
+   {
+    "front": "geöffnet",
+    "back": "opened; open"
+   },
+   {
+    "front": "Kerle",
+    "back": "guys; fellows"
+   },
+   {
+    "front": "begraben",
+    "back": "buried; to bury"
+   },
+   {
+    "front": "Prozent",
+    "back": "percent"
+   },
+   {
+    "front": "stoppen",
+    "back": "to stop"
+   },
+   {
+    "front": "Hoheit",
+    "back": "highness"
+   },
+   {
+    "front": "Riesen",
+    "back": "giants"
+   },
+   {
+    "front": "rote",
+    "back": "red"
+   },
+   {
+    "front": "Zugang",
+    "back": "access"
+   },
+   {
+    "front": "vorn",
+    "back": "in front; at the front"
+   },
+   {
+    "front": "aufmachen",
+    "back": "to open"
+   },
+   {
+    "front": "sexy",
+    "back": "sexy"
+   },
+   {
+    "front": "Erlaubnis",
+    "back": "permission"
+   },
+   {
+    "front": "Story",
+    "back": "story"
+   },
+   {
+    "front": "leichter",
+    "back": "lighter; easier"
+   },
+   {
+    "front": "Filme",
+    "back": "films; movies"
+   },
+   {
+    "front": "Priester",
+    "back": "priest"
+   },
+   {
+    "front": "packen",
+    "back": "to grab; to pack"
+   },
+   {
+    "front": "dritte",
+    "back": "third"
+   },
+   {
+    "front": "inzwischen",
+    "back": "meanwhile; by now"
+   },
+   {
+    "front": "Presse",
+    "back": "press"
+   },
+   {
+    "front": "sitze",
+    "back": "seats; I sit"
+   },
+   {
+    "front": "geklaut",
+    "back": "stolen; swiped"
+   },
+   {
+    "front": "Helden",
+    "back": "heroes"
+   },
+   {
+    "front": "Geduld",
+    "back": "patience"
+   },
+   {
+    "front": "Bühne",
+    "back": "stage"
+   },
+   {
+    "front": "reparieren",
+    "back": "to repair; to fix"
+   },
+   {
+    "front": "Gerechtigkeit",
+    "back": "justice"
+   },
+   {
+    "front": "Fälle",
+    "back": "cases"
+   },
+   {
+    "front": "selten",
+    "back": "rare; rarely; seldom"
+   },
+   {
+    "front": "Anrufe",
+    "back": "phone calls"
+   },
+   {
+    "front": "unterschreiben",
+    "back": "to sign"
+   },
+   {
+    "front": "drücken",
+    "back": "to press; to push"
+   },
+   {
+    "front": "Lügner",
+    "back": "liar"
+   },
+   {
+    "front": "endet",
+    "back": "ends"
+   },
+   {
+    "front": "Medizin",
+    "back": "medicine"
+   },
+   {
+    "front": "Prozess",
+    "back": "process; trial"
+   },
+   {
+    "front": "Samstag",
+    "back": "Saturday"
+   },
+   {
+    "front": "amen",
+    "back": "amen"
+   },
+   {
+    "front": "Motor",
+    "back": "engine; motor"
+   },
+   {
+    "front": "Marie",
+    "back": "money"
+   },
+   {
+    "front": "abhauen",
+    "back": "to run away; to clear off"
+   },
+   {
+    "front": "Chaos",
+    "back": "chaos"
+   },
+   {
+    "front": "Schönheit",
+    "back": "beauty"
+   },
+   {
+    "front": "beinahe",
+    "back": "almost; nearly"
+   },
+   {
+    "front": "anhalten",
+    "back": "to stop"
+   },
+   {
+    "front": "Hof",
+    "back": "yard; courtyard; farm"
+   },
+   {
+    "front": "akzeptieren",
+    "back": "to accept"
+   },
+   {
+    "front": "Norden",
+    "back": "north"
+   },
+   {
+    "front": "Ärzte",
+    "back": "doctors"
+   },
+   {
+    "front": "anziehen",
+    "back": "to put on; to dress; to attract"
+   },
+   {
+    "front": "Dingen",
+    "back": "things"
+   },
+   {
+    "front": "umgehen",
+    "back": "to deal with; to handle"
+   },
+   {
+    "front": "Bauch",
+    "back": "belly; stomach"
+   },
+   {
+    "front": "ertragen",
+    "back": "to endure; to bear"
+   },
+   {
+    "front": "Kiste",
+    "back": "box; crate"
+   },
+   {
+    "front": "brennt",
+    "back": "burns"
+   },
+   {
+    "front": "Teile",
+    "back": "parts"
+   },
+   {
+    "front": "Deckung",
+    "back": "cover; guard"
+   },
+   {
+    "front": "landen",
+    "back": "to land"
+   },
+   {
+    "front": "Berg",
+    "back": "mountain"
+   },
+   {
+    "front": "Straßen",
+    "back": "streets; roads"
+   },
+   {
+    "front": "aufgenommen",
+    "back": "recorded; admitted; taken in"
+   },
+   {
+    "front": "gerufen",
+    "back": "called"
+   },
+   {
+    "front": "Untersuchung",
+    "back": "investigation; examination"
+   },
+   {
+    "front": "Alarm",
+    "back": "alarm"
+   },
+   {
+    "front": "blieb",
+    "back": "stayed; remained"
+   },
+   {
+    "front": "extra",
+    "back": "extra"
+   },
+   {
+    "front": "beobachten",
+    "back": "to watch; to observe"
+   },
+   {
+    "front": "Eindruck",
+    "back": "impression"
+   },
+   {
+    "front": "Babys",
+    "back": "babies"
+   }
+  ]
+ }
+]

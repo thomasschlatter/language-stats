@@ -36,7 +36,8 @@ export async function renderPublicDeck(id) {
     const table = el('div', { class: 'deck-preview-list deck-full-list' });
     for (const c of cards) {
       table.append(el('div', { class: 'deck-preview-row' }, [
-        el('span', { class: 'dp-front' }, c.front),
+        // Front word links to its dictionary page (like clickable words in tips).
+        el('a', { class: 'dp-front', href: `#/w/${encodeURIComponent(deck.lang)}/${encodeURIComponent(c.front)}` }, c.front),
         el('span', { class: 'dp-back muted' }, c.back || ''),
       ]));
     }
