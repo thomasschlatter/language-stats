@@ -142,6 +142,30 @@ export function copyDeckForUser(userId, deckId) {
   })();
 }
 
+// Give a user a starter deck of the most common words when they pick a language.
+// Copies the top N cards (with their sense links) from the official A1 frequency
+// deck. No-op if the user already has a deck for the language, or none exists.
+export function ensureStarterDeck(userId, languageId, limit = 100) {
+  const has = db.prepare('SELECT 1 FROM decks WHERE user_id = ? AND language_id = ? LIMIT 1').get(userId, languageId);
+  if (has) return null;
+  const official = db.prepare(
+    "SELECT id FROM decks WHERE is_official = 1 AND language_id = ? AND level = 'a1' ORDER BY (source = 'freq+freedict') DESC, id LIMIT 1"
+  ).get(languageId);
+  if (!official) return null;
+  const cards = db.prepare('SELECT word_lc, front, back, definition_id FROM cards WHERE deck_id = ? ORDER BY id LIMIT ?').all(official.id, limit);
+  if (!cards.length) return null;
+  return db.transaction(() => {
+    const info = db.prepare("INSERT INTO decks (user_id, language_id, name, source) VALUES (?, ?, ?, 'starter')")
+      .run(userId, languageId, `Starter · ${cards.length} common words`);
+    const newId = info.lastInsertRowid;
+    const ins = db.prepare(
+      "INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, definition_id, due_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))"
+    );
+    for (const c of cards) ins.run(newId, userId, languageId, c.word_lc, c.front, c.back, c.definition_id);
+    return newId;
+  })();
+}
+
 // Create an OFFICIAL deck owned by the system user (for seeded starter decks).
 export function createOfficialDeck({ systemUserId, languageId, name, level = null, source = 'official', coverUrl = null }) {
   const info = db.prepare(

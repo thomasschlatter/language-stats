@@ -2,6 +2,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import db from '../db/index.js';
+import { ensureStarterDeck } from './flashcards.js';
 
 export function createUser({ email, username, password }) {
   const password_hash = bcrypt.hashSync(password, 10);
@@ -141,6 +142,7 @@ export function setLanguageLevel(userId, languageId, level) {
 export function setUserLanguages(userId, role, languageIds) {
   const prev = db.prepare('SELECT language_id, level FROM user_languages WHERE user_id = ? AND role = ?').all(userId, role);
   const levelOf = new Map(prev.map((r) => [r.language_id, r.level || 'a1']));
+  const prevIds = new Set(prev.map((r) => r.language_id));
   const del = db.prepare('DELETE FROM user_languages WHERE user_id = ? AND role = ?');
   const ins = db.prepare('INSERT OR IGNORE INTO user_languages (user_id, language_id, role, level) VALUES (?, ?, ?, ?)');
   const tx = db.transaction(() => {
@@ -148,6 +150,12 @@ export function setUserLanguages(userId, role, languageIds) {
     for (const lid of languageIds) ins.run(userId, lid, role, levelOf.get(lid) || 'a1');
   });
   tx();
+  // On newly-added learning languages, seed a starter deck of common words.
+  if (role === 'learning') {
+    for (const lid of languageIds) {
+      if (!prevIds.has(lid)) { try { ensureStarterDeck(userId, lid); } catch { /* non-critical */ } }
+    }
+  }
 }
 
 export function getUserLanguages(userId) {
