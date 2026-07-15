@@ -54,6 +54,17 @@ if (!ulCols.includes('level')) {
 // UNIQUE index tolerates many NULLs but keeps LINE ids one-per-account.
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_line_user_id ON users(line_user_id)');
 
+// --- languages: Glottolog/ISO metadata + official-status tier. `tier` keeps the
+// long tail off the surface (only official/regional shown by default). ---
+const langCols = db.prepare('PRAGMA table_info(languages)').all().map((c) => c.name);
+for (const [col, def] of [
+  ['glottocode', 'TEXT'], ['iso639_3', 'TEXT'], ['family', 'TEXT'],
+  ['macroarea', 'TEXT'], ['tier', 'TEXT'],
+]) {
+  if (!langCols.includes(col)) db.exec(`ALTER TABLE languages ADD COLUMN ${col} ${def}`);
+}
+db.exec('CREATE INDEX IF NOT EXISTS idx_languages_tier ON languages(tier)');
+
 // --- shared/official decks: browse + upvote (like tips/articles) ---
 const deckCols = db.prepare('PRAGMA table_info(decks)').all().map((c) => c.name);
 if (!deckCols.includes('is_official')) {

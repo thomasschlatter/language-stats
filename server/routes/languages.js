@@ -6,8 +6,8 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 
 // GET /api/languages
-router.get('/', (_req, res) => {
-  res.json({ languages: listLanguages() });
+router.get('/', (req, res) => {
+  res.json({ languages: listLanguages({ scope: req.query.scope, search: req.query.search ? String(req.query.search) : null }) });
 });
 
 // GET /api/languages/:code

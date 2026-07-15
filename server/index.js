@@ -118,6 +118,15 @@ if (listLanguages().length === 0) {
   await import('./db/seed.js');
 }
 
+// Ensure the full language catalogue (Glottolog/ISO + official tier) exists
+// (idempotent). Runs before content loaders so new base languages are available.
+try {
+  const { ensureAllLanguages } = await import('./db/ensureLanguages.js');
+  ensureAllLanguages();
+} catch (e) {
+  console.warn('Language catalogue ensure failed:', e.message);
+}
+
 // Load any word-frequency lists not yet in the DB (idempotent) — so existing
 // production databases pick up newly-added languages on the next restart.
 try {

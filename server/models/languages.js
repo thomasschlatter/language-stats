@@ -2,10 +2,27 @@
 // country, e.g. de-DE, de-CH, en-US — which is what makes dialects possible.
 import db from '../db/index.js';
 
-const COLS = 'id, code, lang, country, name, created_by';
+const COLS = 'id, code, lang, country, name, created_by, tier, glottocode, iso639_3';
 
-export function listLanguages() {
-  return db.prepare(`SELECT ${COLS} FROM languages ORDER BY name`).all();
+// Default returns the SURFACE set (official/regional/de-facto languages + any
+// language actually in use — learned/native, or with decks/articles), so the
+// 7k+ long tail stays hidden. scope='all' or a search digs into the full catalogue.
+export function listLanguages({ scope = 'surface', search = null } = {}) {
+  if (search) {
+    return db.prepare(
+      `SELECT ${COLS} FROM languages WHERE name LIKE ? OR code LIKE ? OR iso639_3 = ?
+       ORDER BY (tier = 'official') DESC, (tier = 'regional') DESC, length(name), name LIMIT 80`
+    ).all(`%${search}%`, `${search}%`, String(search).toLowerCase());
+  }
+  if (scope === 'all') return db.prepare(`SELECT ${COLS} FROM languages ORDER BY name`).all();
+  return db.prepare(
+    `SELECT ${COLS} FROM languages
+      WHERE tier IN ('official', 'regional', 'defacto') OR tier IS NULL
+         OR EXISTS (SELECT 1 FROM user_languages ul WHERE ul.language_id = languages.id)
+         OR EXISTS (SELECT 1 FROM decks d WHERE d.language_id = languages.id)
+         OR EXISTS (SELECT 1 FROM articles a WHERE a.language_id = languages.id)
+      ORDER BY name`
+  ).all();
 }
 
 export function getLanguageByCode(code) {
