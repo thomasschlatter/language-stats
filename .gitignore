@@ -9,6 +9,9 @@ data/*.db-*
 .cache/
 **/.cache/
 
+# local-only deck cover previews (licensed/publisher art — never commit)
+server/private-covers/
+
 # world (STRANDED companion) build output
 world/client/dist/
 world/**/*.tsbuildinfo

@@ -709,7 +709,27 @@ body.in-world .view { padding: 0; }
   background: var(--surface); border: 1px solid var(--accent);
   border-radius: 10px; font-size: 0.92rem;
 }
-.deck-cover-link { display: block; }
+.deck-cover-link { display: block; width: max-content; }
+/* Generated, rights-clean deck "title page" (our own art). */
+.gen-cover {
+  width: 60px; aspect-ratio: 3 / 4; border-radius: 4px; overflow: hidden;
+  background: linear-gradient(155deg, hsl(var(--h) 55% 45%), hsl(var(--h) 62% 27%));
+  color: #fff; padding: 5px; display: flex; flex-direction: column;
+  margin-bottom: 0.45rem; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+}
+.gen-cover-level {
+  align-self: flex-start; background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px; padding: 0 3px; font-weight: 700; font-size: 6px; letter-spacing: 0.04em;
+}
+.gen-cover-title {
+  margin-top: auto; font-weight: 700; font-size: 8px; line-height: 1.15;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.gen-cover-foot { font-size: 6px; opacity: 0.85; margin-top: 2px; }
+.gen-cover-lg { width: 132px; padding: 11px; }
+.gen-cover-lg .gen-cover-level { font-size: 12px; border-radius: 4px; padding: 1px 6px; }
+.gen-cover-lg .gen-cover-title { font-size: 18px; }
+.gen-cover-lg .gen-cover-foot { font-size: 12px; }
 .deck-cover { width: 64px; height: auto; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 0.4rem; display: block; }
 .deck-cover-lg { width: 120px; margin-bottom: 0.8rem; }
 .deck-title-link {

@@ -3,6 +3,7 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear } from '../dom.js';
 import { navigate } from '../router.js';
+import { genCoverEl } from '../deckCover.js';
 
 export async function renderPublicDeck(id) {
   const view = clear(document.getElementById('view'));
@@ -15,7 +16,9 @@ export async function renderPublicDeck(id) {
   try {
     const [{ deck }, { cards }] = await Promise.all([api.publicDeck(id), api.publicDeckCards(id)]);
     clear(head).append(
-      deck.cover_url ? el('img', { class: 'deck-cover deck-cover-lg', src: deck.cover_url, alt: '' }) : null,
+      deck.cover_url
+        ? el('img', { class: 'deck-cover deck-cover-lg', src: deck.cover_url, alt: '' })
+        : genCoverEl(deck, { large: true }),
       el('h1', { style: 'margin-bottom:0.2rem' }, deck.name),
       el('div', { class: 'muted', style: 'font-size:0.9rem' }, [
         deck.is_official ? el('span', { class: 'badge official' }, 'Official') : el('span', { class: 'badge user' }, `@${deck.author || 'user'}`),

@@ -89,6 +89,15 @@ app.use('/uploads', express.static(uploadsDir, { maxAge: '1h' }));
 // A missing upload should 404, not fall through to the SPA HTML.
 app.use('/uploads', (_req, res) => res.status(404).end());
 
+// Deck cover images. Served ONLY when SHOW_DECK_COVERS=1 (off by default), from a
+// gitignored folder that is never committed — so licensed/publisher covers can be
+// previewed locally without ever being published to prod or the public repo.
+if (process.env.SHOW_DECK_COVERS === '1') {
+  const coversDir = join(__dirname, 'private-covers');
+  app.use('/covers', express.static(coversDir, { maxAge: '1h' }));
+  app.use('/covers', (_req, res) => res.status(404).end());
+}
+
 // --- Frontend --------------------------------------------------------------
 const publicDir = join(__dirname, '..', 'public');
 app.use(express.static(publicDir));
