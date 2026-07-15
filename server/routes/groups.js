@@ -8,6 +8,15 @@ import {
 } from '../models/groups.js';
 import { getBotUserId, mentionsFoxy } from '../models/bot.js';
 import { foxyReply } from '../models/foxyChat.js';
+import { detectLanguageCode } from '../models/langDetect.js';
+import { getUserLanguages } from '../models/users.js';
+
+// Auto-detect the writing language (constrained to the user's languages), else
+// fall back to whatever the client selected.
+function resolveLang(userId, body, selectedCode) {
+  const codes = getUserLanguages(userId).map((l) => l.code);
+  return detectLanguageCode(body, codes) || selectedCode || null;
+}
 
 const router = Router();
 
@@ -64,8 +73,9 @@ router.post('/:id(\\d+)/messages', requireAuth, (req, res) => {
   if (!isMember(id, req.user.id)) return res.status(403).json({ error: 'not a member' });
   const body = (req.body?.body || '').trim();
   if (!body) return res.status(400).json({ error: 'empty message' });
-  const lang = req.body?.bodyLanguageCode ? getLanguageByCode(req.body.bodyLanguageCode) : null;
   const clean = body.slice(0, 2000);
+  const langCode = resolveLang(req.user.id, clean, req.body?.bodyLanguageCode);
+  const lang = langCode ? getLanguageByCode(langCode) : null;
   const message = postGroupMessage({ groupId: id, senderId: req.user.id, body: clean, bodyLangId: lang?.id || null });
   if (mentionsFoxy(clean)) triggerFoxy(id, clean);
   res.status(201).json({ message });

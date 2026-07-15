@@ -4,6 +4,7 @@ import { getUserByUsername, getUserLanguages } from '../models/users.js';
 import { getLanguageByCode } from '../models/languages.js';
 import { sendDM, thread, conversations, getMessage, addCorrection, unreadDmCount, markDmsRead } from '../models/dm.js';
 import { blockedBetween } from '../models/moderation.js';
+import { detectLanguageCode } from '../models/langDetect.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -64,12 +65,14 @@ router.post('/:username', requireAuth, (req, res) => {
   if (blockedBetween(req.user.id, other.id)) return res.status(403).json({ error: 'you cannot message this user' });
   const { body, bodyLanguageCode } = req.body ?? {};
   if (!body || !body.trim()) return res.status(400).json({ error: 'body is required' });
-  const bodyLang = bodyLanguageCode ? getLanguageByCode(bodyLanguageCode) : null;
+  const clean = body.trim().slice(0, 2000);
+  const detected = detectLanguageCode(clean, getUserLanguages(req.user.id).map((l) => l.code));
+  const bodyLang = getLanguageByCode(detected || bodyLanguageCode || '');
   const message = sendDM({
     senderId: req.user.id,
     recipientId: other.id,
     bodyLangId: bodyLang?.id,
-    body: body.trim().slice(0, 2000),
+    body: clean,
   });
   res.status(201).json({ message });
 });
