@@ -564,7 +564,12 @@ export default class Game extends Phaser.Scene {
     const wallpaper = this.map.addTilesetImage('wallpaper', 'room_wallpaper')!
     this.map.createLayer('Ground', [floors, sky], 0, 0)
     this.map.createLayer('Shadows', [floors], 0, 0) // transparent overlay, non-colliding
-    this.map.createLayer('Wallpaper', [wallpaper], 0, 0) // upper-wall face, non-colliding
+    // The wallpaper IS wall (the upper-wall face and the separator's cap), so it must
+    // collide too — otherwise you walk into the wallpaper rows that the thin border
+    // top-edge doesn't cover.
+    const wpLayer = this.map.createLayer('Wallpaper', [wallpaper], 0, 0)!
+    wpLayer.setCollisionByExclusion([-1, 0])
+    this.worldColliders.push(wpLayer)
     const wallLayer = this.map.createLayer('Walls', [borders], 0, 0)!
     wallLayer.setCollisionByExclusion([-1, 0]) // solid walls; door + separator doorway are empty → walkable
     this.worldColliders.push(wallLayer)
