@@ -167,17 +167,37 @@ export function deckHasCard(deckId, wordLc) {
   return !!db.prepare('SELECT 1 FROM cards WHERE deck_id = ? AND word_lc = ? LIMIT 1').get(deckId, wordLc);
 }
 
+// Smart linking: pick the dictionary sense a new card should point at. Prefer a
+// sense whose text matches the card's back gloss; else the word's top sense
+// (most links / accepted). Returns a definition id or null.
+const normGloss = (s) => String(s || '').toLowerCase().split(/[;,/]+/).map((x) => x.trim().replace(/\.$/, '')).filter(Boolean).sort().join('|');
+function pickSenseFor(languageId, front, back) {
+  const w = db.prepare('SELECT id FROM words WHERE language_id = ? AND text = ?').get(languageId, front)
+    || db.prepare('SELECT id FROM words WHERE language_id = ? AND text = ? COLLATE NOCASE').get(languageId, front);
+  if (!w) return null;
+  const defs = db.prepare('SELECT id, text FROM word_definitions WHERE word_id = ?').all(w.id);
+  if (!defs.length) return null;
+  if (back) { const k = normGloss(back); const m = defs.find((d) => normGloss(d.text) === k); if (m) return m.id; }
+  const top = db.prepare(
+    `SELECT id FROM word_definitions WHERE word_id = ?
+      ORDER BY (SELECT COUNT(*) FROM cards c WHERE c.definition_id = word_definitions.id) DESC, accepted DESC, id LIMIT 1`
+  ).get(w.id);
+  return top ? top.id : null;
+}
+
 export function addCards({ deckId, userId, languageId, rows }) {
   const stmt = db.prepare(
-    `INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, due_at)
-     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`
+    `INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, definition_id, due_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`
   );
   const tx = db.transaction((list) => {
     let n = 0;
     for (const r of list) {
       const front = (r.front || '').trim();
       if (!front) continue;
-      stmt.run(deckId, userId, languageId, front.toLowerCase(), front, (r.back || '').trim() || null);
+      const back = (r.back || '').trim() || null;
+      const defId = pickSenseFor(languageId, front, back); // auto-link into the sense graph
+      stmt.run(deckId, userId, languageId, front.toLowerCase(), front, back, defId);
       n += 1;
     }
     return n;

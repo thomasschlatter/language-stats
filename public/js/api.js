@@ -130,6 +130,7 @@ export const api = {
   createDeck: (b) => request('POST', '/flashcards/decks', b),
   deleteDeck: (id) => request('DELETE', `/flashcards/decks/${id}`),
   addCard: (deckId, b) => request('POST', `/flashcards/decks/${deckId}/cards`, b),
+  appendCards: (deckId, rows) => request('POST', `/flashcards/decks/${deckId}/cards/bulk`, { rows }),
   importDeck: (b) => request('POST', '/flashcards/import', b),
   importApkg: (b) => request('POST', '/flashcards/import-apkg', b),
   generateDeck: (b) => request('POST', '/flashcards/generate', b),

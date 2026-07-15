@@ -131,6 +131,17 @@ router.post('/decks/:id(\\d+)/cards', requireAuth, (req, res) => {
   res.status(201).json({ added, deck });
 });
 
+// POST /api/flashcards/decks/:id/cards/bulk  { rows: [{front, back}] } -> append many
+router.post('/decks/:id(\\d+)/cards/bulk', requireAuth, (req, res) => {
+  const deck = getDeck(Number(req.params.id), req.user.id);
+  if (!deck) return res.status(404).json({ error: 'deck not found' });
+  const rows = Array.isArray(req.body?.rows) ? req.body.rows : [];
+  const clean = rows.map((r) => ({ front: (r.front || '').trim(), back: (r.back || '').trim() })).filter((r) => r.front);
+  if (!clean.length) return res.status(400).json({ error: 'no cards to add' });
+  const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: deck.language_id, rows: clean });
+  res.status(201).json({ ok: true, added });
+});
+
 // POST /api/flashcards/import  { languageCode, name, text, source? }
 router.post('/import', requireAuth, (req, res) => {
   const { languageCode, name, text, source } = req.body ?? {};

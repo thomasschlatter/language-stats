@@ -23,6 +23,7 @@ export function parseArticle(src, defaultLang) {
   const blocks = [];
   let para = [];
   let list = null;
+  let pendingAnki = null; // name for the next list, when an [anki] marker precedes it
 
   const flushPara = () => {
     if (para.length) {
@@ -54,6 +55,14 @@ export function parseArticle(src, defaultLang) {
       blocks.push(el('div', { class: 'gender-nouns-mount' }));
       continue;
     }
+    // [anki] or [anki: Deck name] — the list that follows becomes a flashcard
+    // list with its own add-to-deck / add-to-list button.
+    const ankiM = line.match(/^\[anki(?::\s*(.*))?\]$/i);
+    if (ankiM) {
+      flushPara(); flushList();
+      pendingAnki = (ankiM[1] || '').trim();
+      continue;
+    }
     if (line.startsWith('# ')) {
       flushPara(); flushList();
       blocks.push(el('h2', { class: 'article-h' }, inline(line.slice(2))));
@@ -66,7 +75,10 @@ export function parseArticle(src, defaultLang) {
       // start a fresh list if none open or the bullet type changed
       if (!list || list.tagName.toLowerCase() !== tag) {
         flushList();
-        list = el(tag, { class: ordered ? 'article-ol' : 'article-ul' });
+        const attrs = { class: ordered ? 'article-ol' : 'article-ul' };
+        if (pendingAnki !== null) { attrs.class += ' anki-list'; attrs['data-deck-name'] = pendingAnki; }
+        list = el(tag, attrs);
+        pendingAnki = null; // applies to this list only
       }
       const itemText = ordered ? ordered[1] : line.slice(2);
       list.append(el('li', {}, inline(itemText)));

@@ -8,7 +8,7 @@ import { store } from '../store.js';
 import { el, clear, openModal } from '../dom.js';
 import { renderText, tokenizeTree } from '../render.js';
 import { parseArticle } from '../articleMarkup.js';
-import { attachDeckButtons } from './listToDeck.js';
+import { attachDeckButtons, attachAnkiButtons } from './listToDeck.js';
 import { voteButton } from './voteButton.js';
 import { navigate } from '../router.js';
 
@@ -48,6 +48,7 @@ export async function renderTip(id) {
 
   tokenizeTree(container);
   attachDeckButtons(container, tip.language_code, tip.title);
+  attachAnkiButtons(container, tip.language_code, tip.title);
 }
 
 // Create (tip omitted) or edit (tip given) a tip. Markdown-aware.
@@ -154,7 +155,16 @@ export function openTipEditor(language, onDone, tip = null) {
       autofocus: false,
       autoDownloadFontAwesome: true,
       placeholder: 'Share your trick for learning…',
-      toolbar: ['bold', 'italic', 'heading', '|', 'unordered-list', 'ordered-list', 'quote', '|', 'link', 'preview', 'guide'],
+      toolbar: ['bold', 'italic', 'heading', '|', 'unordered-list', 'ordered-list', 'quote', '|', {
+        name: 'anki',
+        title: 'Anki list — becomes an add-to-deck flashcard list',
+        className: 'fa fa-clone',
+        action: (ed) => {
+          const cm = ed.codemirror;
+          cm.replaceSelection('\n[anki: My deck]\n- word — meaning\n- another — meaning\n');
+          cm.focus();
+        },
+      }, '|', 'link', 'preview', 'guide'],
     });
   }).catch(() => { /* keep the plain textarea */ });
 }

@@ -495,6 +495,13 @@ body.in-msg .view { overflow-y: auto; }
   flex-wrap: wrap;
 }
 .list-deck-btn { white-space: nowrap; }
+/* Anki lists: visually flagged as flashcard lists + a richer add bar. */
+.anki-list { border-left: 3px solid var(--accent); padding-left: 0.8rem; }
+.anki-bar { margin-top: 0.3rem; }
+.anki-add-to {
+  font: inherit; font-size: 0.85rem; padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text);
+}
 .list-deck-status { font-size: 0.85rem; color: var(--muted); }
 .list-deck-status.ok { color: var(--accent-2); }
 .list-deck-status.err { color: var(--danger); }
