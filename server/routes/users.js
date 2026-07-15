@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { getUserByUsername, profile } from '../models/users.js';
 import { toggleFollow, isFollowing, followerCount, followingCount } from '../models/follows.js';
 import { toggleBlock, isBlocked } from '../models/moderation.js';
+import { sendDM } from '../models/dm.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -35,6 +36,10 @@ router.post('/:username/follow', requireAuth, (req, res) => {
   if (!user) return res.status(404).json({ error: 'user not found' });
   if (user.id === req.user.id) return res.status(400).json({ error: 'cannot follow yourself' });
   const result = toggleFollow(req.user.id, user.id);
+  // On a new follow, drop a friendly DM so the followed user sees it in their chat.
+  if (result.following) {
+    try { sendDM({ senderId: req.user.id, recipientId: user.id, body: 'just followed you 👋' }); } catch { /* non-critical */ }
+  }
   res.json({ ...result, followers: followerCount(user.id) });
 });
 

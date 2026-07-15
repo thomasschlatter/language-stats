@@ -3,7 +3,7 @@
 // with a clearly-marked selected state. Returns { el, get } where get() yields
 // the selected language codes.
 
-import { el } from './dom.js';
+import { el, clear } from './dom.js';
 import { store } from './store.js';
 import { byImportance } from './langOrder.js';
 import { api } from './api.js';
@@ -58,8 +58,10 @@ export function nativeLanguagesSetting(prof, reRender) {
 
 export function languageMultiPicker(selectedCodes = []) {
   const sel = new Set(selectedCodes);
-  const langs = [...store.languages].sort(byImportance);
-  const list = el('div', { class: 'lang-picker-list' }, langs.map((l) => {
+  const extra = new Map(); // searched deep languages not in the surface set
+  const list = el('div', { class: 'lang-picker-list' });
+
+  const itemFor = (l) => {
     const item = el('button', {
       type: 'button',
       class: 'lang-picker-item' + (sel.has(l.code) ? ' selected' : ''),
@@ -67,8 +69,36 @@ export function languageMultiPicker(selectedCodes = []) {
         if (sel.has(l.code)) { sel.delete(l.code); item.classList.remove('selected'); }
         else { sel.add(l.code); item.classList.add('selected'); }
       },
-    }, [el('span', {}, l.name), el('span', { class: 'check' }, '✓')]);
+    }, [
+      el('span', {}, l.tier && l.tier !== 'official' && l.tier !== 'regional' && l.tier !== null
+        ? `${l.name} · ${l.tier}` : l.name),
+      el('span', { class: 'check' }, '✓'),
+    ]);
     return item;
-  }));
-  return { el: list, get: () => [...sel] };
+  };
+
+  const surface = () => {
+    const base = [...store.languages];
+    for (const l of extra.values()) if (!base.some((b) => b.code === l.code)) base.push(l);
+    return base.sort(byImportance);
+  };
+  const render = (langs) => { clear(list); for (const l of (langs || surface())) list.append(itemFor(l)); };
+
+  const search = el('input', { type: 'search', class: 'lang-picker-search', placeholder: 'search all 7,800+ languages…' });
+  let t;
+  search.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(async () => {
+      const q = search.value.trim();
+      if (!q) { render(); return; }
+      try {
+        const { languages } = await api.languages({ search: q });
+        for (const l of languages) extra.set(l.code, l);
+        render(languages);
+      } catch { /* ignore */ }
+    }, 250);
+  });
+
+  render();
+  return { el: el('div', {}, [search, list]), get: () => [...sel] };
 }

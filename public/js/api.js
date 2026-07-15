@@ -38,7 +38,10 @@ export const api = {
   deleteAccount: () => request('DELETE', '/auth/account'),
 
   // --- languages ---
-  languages: () => request('GET', '/languages'),
+  languages: (params = {}) => {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v)).toString();
+    return request('GET', `/languages${qs ? `?${qs}` : ''}`);
+  },
   createLanguage: (b) => request('POST', '/languages', b),
   deleteLanguage: (code) => request('DELETE', `/languages/${encodeURIComponent(code)}`),
 

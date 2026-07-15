@@ -41,6 +41,16 @@ const enWords = db.prepare("SELECT w.id, w.text FROM words w JOIN languages l ON
 const defsFor = db.prepare('SELECT text FROM word_definitions WHERE word_id = ?');
 const insDef = db.prepare("INSERT INTO word_definitions (word_id, text, source, accepted) VALUES (?, ?, 'concepticon', 0)");
 
+// CONCEPTICON_REFRESH=1 → clean re-import: drop existing concepticon senses that
+// nothing links to, so an updated release replaces stale defs (and removes ones
+// no longer in the source) without touching senses a card actually points at.
+if (process.env.CONCEPTICON_REFRESH === '1') {
+  const del = db.prepare(
+    "DELETE FROM word_definitions WHERE source = 'concepticon' AND id NOT IN (SELECT definition_id FROM cards WHERE definition_id IS NOT NULL)"
+  ).run();
+  console.log(`Refresh: cleared ${del.changes} unreferenced concepticon senses.`);
+}
+
 let words = 0; let senses = 0;
 db.transaction(() => {
   for (const w of enWords) {
