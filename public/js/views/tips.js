@@ -82,6 +82,17 @@ export function openTipEditor(language, onDone, tip = null) {
   body.value = tip?.body || '';
   let editor = null;
   const getBody = () => (editor ? editor.value() : body.value);
+
+  // Draft auto-save so a user can continue later. EasyMDE autosaves the body
+  // under this uniqueId; we save the title alongside and restore it here.
+  const draftId = editing ? `edit-${tip.id}` : `new-${language.code}`;
+  const TITLE_KEY = `gf_tipdraft_title_${draftId}`;
+  if (!editing && !title.value) title.value = localStorage.getItem(TITLE_KEY) || '';
+  title.addEventListener('input', () => localStorage.setItem(TITLE_KEY, title.value));
+  const clearDraft = () => {
+    try { editor?.clearAutosavedValue(); } catch { /* ignore */ }
+    localStorage.removeItem(TITLE_KEY);
+  };
   // "Written for" = the language the tip is ABOUT (defaults to the current
   // page's language). Only offered on create — updating which language a tip
   // belongs to isn't supported.
@@ -108,6 +119,7 @@ export function openTipEditor(language, onDone, tip = null) {
             body: getBody(),
             bodyLanguageCode: writtenIn.value,
           });
+          clearDraft();
           close();
           onDone();
         } else {
@@ -117,6 +129,7 @@ export function openTipEditor(language, onDone, tip = null) {
             title: title.value,
             body: getBody(),
           });
+          clearDraft();
           close();
           // If the tip is about another language, jump to that language's tips.
           if (writtenFor.value !== language.code) navigate(`#/lang/${writtenFor.value}/tips`);
@@ -154,9 +167,10 @@ export function openTipEditor(language, onDone, tip = null) {
   view.append(el('div', { class: 'tip-editor-page' }, [form]));
   const close = () => {}; // leaving is handled by onDone()/navigate after submit
 
-  // Upgrade the textarea into a markdown editor. Editor left, preview right on
-  // desktop (side-by-side); stacked toolbar preview on mobile. Falls back to the
-  // plain textarea if the library can't load.
+  // Upgrade the textarea into a contained markdown editor. We do NOT auto-enable
+  // side-by-side (EasyMDE's side-by-side is fullscreen and hides the page) — the
+  // toolbar has Preview + Side-by-side buttons the user can toggle. autosave lets
+  // a user close and continue the draft later. Falls back to the plain textarea.
   loadEasyMDE().then((EasyMDE) => {
     editor = new EasyMDE({
       element: body,
@@ -165,6 +179,7 @@ export function openTipEditor(language, onDone, tip = null) {
       autofocus: false,
       autoDownloadFontAwesome: true,
       placeholder: 'Share your trick for learning…',
+      autosave: { enabled: true, uniqueId: `gf_tip_${draftId}`, delay: 1000 },
       toolbar: ['bold', 'italic', 'heading', '|', 'unordered-list', 'ordered-list', 'quote', '|', {
         name: 'anki',
         title: 'Anki list — becomes an add-to-deck flashcard list',
@@ -176,7 +191,5 @@ export function openTipEditor(language, onDone, tip = null) {
         },
       }, '|', 'side-by-side', 'preview', 'guide'],
     });
-    // On a wide screen, open the side-by-side preview by default.
-    if (window.innerWidth >= 820) { try { editor.toggleSideBySide(); } catch { /* ignore */ } }
   }).catch(() => { /* keep the plain textarea */ });
 }
