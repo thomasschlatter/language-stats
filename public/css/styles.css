@@ -472,6 +472,20 @@ body.in-msg .view { overflow-y: auto; }
 .article-card:hover { border-color: var(--accent); text-decoration: none; transform: translateY(-2px); }
 .article-card h3 { margin: 0.5rem 0 0.35rem; }
 
+/* Per-language rows, each a horizontal carousel of cards (best on the left). */
+.lang-row { margin: 0 0 1.6rem; }
+.lang-row-head { display: flex; align-items: baseline; gap: 0.6rem; margin: 0 0 0.6rem; }
+.lang-row-title { font-size: 1.15rem; font-weight: 600; color: var(--text); }
+.lang-row-title:hover { color: var(--accent); text-decoration: none; }
+.lang-carousel {
+  display: flex; gap: 0.9rem; overflow-x: auto; overflow-y: hidden;
+  padding-bottom: 0.5rem; scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+.carousel-card {
+  flex: 0 0 auto; width: 240px; box-sizing: border-box; scroll-snap-align: start;
+}
+
 /* "Add a card/tip" tile — first in the grid, same height as the cards. */
 .add-card {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
