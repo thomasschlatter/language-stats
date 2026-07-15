@@ -30,8 +30,17 @@ export async function renderMessages() {
   }
   clear(list);
 
+  // Pinned: Ask Foxy (the help assistant), always available.
+  list.append(el('a', { class: 'card convo', href: '#/dm/Foxy' }, [
+    el('div', { class: 'convo-top' }, [
+      el('span', { class: 'foxy-pin-avatar' }, '🦊'),
+      el('strong', {}, 'Ask Foxy'),
+    ]),
+    el('div', { class: 'muted convo-preview' }, 'Questions about Groupifier? Ask me anything.'),
+  ]));
+
   if (!conversations.length) {
-    list.append(el('p', { class: 'muted' }, 'No conversations yet. Find someone in the Community and say hi.'));
+    list.append(el('p', { class: 'muted' }, 'No other conversations yet — find someone in the Community and say hi.'));
     return;
   }
   for (const c of conversations) {
