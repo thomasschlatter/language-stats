@@ -17,6 +17,21 @@ import { WORLDS, WorldInfo } from "../../../types/Rooms";
 import phaserGame from "../PhaserGame";
 import Bootstrap from "../scenes/Bootstrap";
 import CookiePopup from "./CookiePopup";
+import store from "../stores";
+import { setRoomLanguage } from "../stores/RoomStore";
+
+// "de-DE" -> "German" (built-in, no lookup table). Falls back to the raw code.
+function languageDisplayName(code?: string): string {
+  if (!code) return "";
+  try {
+    const base = code.split("-")[0];
+    const DN = (Intl as any).DisplayNames;
+    if (!DN) return code;
+    return new DN([navigator.language || "en"], { type: "language" }).of(base) || code;
+  } catch {
+    return code;
+  }
+}
 
 const Backdrop = styled.div`
   position: absolute;
@@ -194,6 +209,7 @@ export default function RoomSelectionDialog() {
     } catch {
       /* fall back to the shared bucket */
     }
+    store.dispatch(setRoomLanguage(languageDisplayName(language)));
     const bootstrap = phaserGame.scene.keys.bootstrap as Bootstrap;
     bootstrap.network
       .joinWorld(world.id, world.map, language)

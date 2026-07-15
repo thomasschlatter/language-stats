@@ -10,6 +10,7 @@ import WhiteboardDialog from "./components/WhiteboardDialog";
 import VideoConnectionDialog from "./components/VideoConnectionDialog";
 import Chat from "./components/Chat";
 import HelperButtonGroup from "./components/HelperButtonGroup";
+import LanguageBanner from "./components/LanguageBanner";
 import MobileVirtualJoystick from "./components/MobileVirtualJoystick";
 import CharacterCreation from "./components/CharacterCreation";
 import TeamTask from "./components/TeamTask";
@@ -77,6 +78,8 @@ function App() {
     <>
       <Backdrop>
         {ui}
+        {/* Language this world session groups by — a pill at the top. */}
+        {loggedIn && !practiceMode && <LanguageBanner />}
         {/* Render HelperButtonGroup if no dialogs are opened. */}
         {!computerDialogOpen && !whiteboardDialogOpen && !practiceMode && <HelperButtonGroup />}
       </Backdrop>

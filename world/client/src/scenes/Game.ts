@@ -110,10 +110,16 @@ export default class Game extends Phaser.Scene {
 
   disableKeys() {
     this.input.keyboard.enabled = false
+    // While a text box (chat) or modal is open, drop the key captures — otherwise
+    // Phaser's DOM keyboard manager keeps calling preventDefault on SPACE (and the
+    // movement keys), which swallows the space bar so it never reaches the chat
+    // input. Captures are restored in enableKeys() when play resumes.
+    this.input.keyboard.clearCaptures()
   }
 
   enableKeys() {
     this.input.keyboard.enabled = true
+    this.input.keyboard.addCapture('UP,DOWN,LEFT,RIGHT,W,A,S,D,SPACE')
   }
 
   create(data: { network: Network }) {
@@ -168,6 +174,46 @@ export default class Game extends Phaser.Scene {
       this.ambient.addFlyingRaven(120, w)
     } else if (worldMap === 'meadow' || worldMap === 'village' || worldMap === 'island')
       this.ambient.addButterflies(this.spawnX, this.spawnY, 6)
+
+    this.startBackgroundMusic()
+  }
+
+  private bgm?: Phaser.Sound.BaseSound
+
+  /** Loop a quiet background track. The file is optional — drop the DISCO song at
+   *  world/client/public/assets/audio/bgm.mp3 and it starts playing (looped, low
+   *  volume). Muting persists in localStorage; a missing file is a silent no-op. */
+  private startBackgroundMusic() {
+    if (localStorage.getItem('gf_music_muted') === '1') return
+    const play = () => {
+      if (this.bgm || !this.cache.audio.exists('bgm')) return
+      this.bgm = this.sound.add('bgm', { loop: true, volume: 0.12 })
+      // Autoplay may be blocked until the first interaction; retry once on input.
+      const tryPlay = () => { if (this.bgm && !this.bgm.isPlaying) this.bgm.play() }
+      tryPlay()
+      this.input.once('pointerdown', tryPlay)
+      this.input.keyboard.once('keydown', tryPlay)
+    }
+    if (this.cache.audio.exists('bgm')) { play(); return }
+    // Load it on demand; if the asset isn't there, just skip quietly.
+    this.load.audio('bgm', 'assets/audio/bgm.mp3')
+    this.load.once('complete', play)
+    this.load.once('loaderror', () => {}) // no song shipped yet — stay silent
+    this.load.start()
+  }
+
+  /** Toggle the background music on/off (persisted). Returns the new muted state. */
+  toggleMusic(): boolean {
+    const muted = localStorage.getItem('gf_music_muted') === '1'
+    if (muted) {
+      localStorage.removeItem('gf_music_muted')
+      this.startBackgroundMusic()
+    } else {
+      localStorage.setItem('gf_music_muted', '1')
+      this.bgm?.stop()
+      this.bgm = undefined
+    }
+    return !muted
   }
 
   /** Called from the React AnimTester panel — plays a test_ anim on a big sprite

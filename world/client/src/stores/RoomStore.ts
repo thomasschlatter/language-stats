@@ -22,6 +22,7 @@ export const roomSlice = createSlice({
     roomId: "",
     roomName: "",
     roomDescription: "",
+    roomLanguage: "",
     availableRooms: new Array<RoomAvailable>(),
     teamScore: 0,
     teamGoal: 30,
@@ -44,6 +45,11 @@ export const roomSlice = createSlice({
     },
     setPracticeMode: (state, action: PayloadAction<boolean>) => {
       state.practiceMode = action.payload;
+    },
+    // The learning language this world session is grouped by (display name),
+    // shown as a banner at the top of the world.
+    setRoomLanguage: (state, action: PayloadAction<string>) => {
+      state.roomLanguage = action.payload;
     },
     setJoinedRoomData: (
       state,
@@ -84,6 +90,7 @@ export const {
   setLobbyJoined,
   setRoomJoined,
   setPracticeMode,
+  setRoomLanguage,
   setTeamTask,
   setPracticeJoystick,
   setJoinedRoomData,
