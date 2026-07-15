@@ -469,6 +469,14 @@ body.in-msg .view { overflow-y: auto; }
 }
 .src-user { color: var(--muted); font-weight: 600; }
 /* Study-view sense picker */
+.foxy-help-list { display: flex; flex-direction: column; gap: 0.8rem; margin: 1rem 0; }
+.foxy-msg { max-width: 90%; }
+.foxy-msg.foxy-you { align-self: flex-end; text-align: right; }
+.foxy-who { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 0.15rem; }
+.foxy-body { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 0.75rem; display: inline-block; text-align: left; }
+.foxy-you .foxy-body { background: var(--accent); color: #fff; border-color: var(--accent); }
+.foxy-sources { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.foxy-source { font-size: 0.82rem; }
 .group-card { display: block; text-decoration: none; color: inherit; margin-bottom: 0.6rem; }
 .group-card:hover { border-color: var(--accent); }
 .sense-controls { margin: 0.4rem 0; }

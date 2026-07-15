@@ -50,4 +50,21 @@ export async function foxyReply(message) {
   return foxify(text, seed);
 }
 
+// Foxy answering a HELP question, grounded on retrieved app facts (RAG). Uses
+// only the given context; the caller also returns the source links separately.
+export async function foxyAssist(question, context) {
+  const q = String(question || '').replace(/@[Ff]oxy/g, '').slice(0, 300).trim();
+  if (!q) return "Yip! Ask me anything about Groupifier — decks, tips, groups, the World…";
+  const gen = await getGen();
+  const ctx = String(context || '').slice(0, 600);
+  const prompt = `You are Foxy, the friendly Groupifier helper fox. Using ONLY these facts: "${ctx}" `
+    + `answer the question in one or two short, friendly sentences. If the facts do not cover it, say you are not sure. `
+    + `Question: ${q}`;
+  const out = await gen(prompt, { max_new_tokens: 90, temperature: 0.5, do_sample: true, repetition_penalty: 1.3 });
+  const text = (Array.isArray(out) ? out[0] : out)?.generated_text || '';
+  let seed = 0;
+  for (let i = 0; i < q.length; i++) seed = (seed * 31 + q.charCodeAt(i)) | 0;
+  return foxify(text, seed);
+}
+
 export function isFoxyReady() { return !!genPromise; }

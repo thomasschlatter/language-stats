@@ -2,10 +2,21 @@
 // (Colyseus) server so replies come from the local model here, not an external API.
 import { Router } from 'express';
 import { foxyReply, isFoxyReady } from '../models/foxyChat.js';
+import { askFoxy } from '../models/assistant.js';
 
 const router = Router();
 
 router.get('/ready', (_req, res) => res.json({ ready: isFoxyReady() }));
+
+// POST /api/foxy/ask { question } — grounded help answer + source links (no user data)
+router.post('/ask', async (req, res) => {
+  try {
+    res.json(await askFoxy(req.body?.question || ''));
+  } catch (e) {
+    console.warn('Foxy ask failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
 
 router.post('/reply', async (req, res) => {
   try {

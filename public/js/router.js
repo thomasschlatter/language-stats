@@ -29,6 +29,7 @@ import { renderBrowseDecks } from './views/browseDecks.js';
 import { renderPublicDeck } from './views/publicDeck.js';
 import { renderStudy } from './views/study.js';
 import { renderGroups, renderGroup, renderGroupInvite } from './views/groups.js';
+import { renderFoxyHelp } from './views/foxyHelp.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
@@ -58,6 +59,7 @@ const routes = [
   { pattern: /^#\/groups$/, handler: () => renderGroups(), auth: true },
   { pattern: /^#\/groups\/(\d+)$/, handler: (m) => renderGroup(Number(m[1])), auth: true },
   { pattern: /^#\/g\/([^/]+)$/, handler: (m) => renderGroupInvite(dec(m[1])), auth: true },
+  { pattern: /^#\/foxy$/, handler: () => renderFoxyHelp() },
   { pattern: /^#\/messages$/, handler: () => renderMessages(), auth: true },
   { pattern: /^#\/dm\/([^/]+)$/, handler: (m) => renderDmThread(dec(m[1])), auth: true },
   { pattern: /^#\/u\/([^/]+)$/, handler: (m) => renderUserProfile(dec(m[1])) },
