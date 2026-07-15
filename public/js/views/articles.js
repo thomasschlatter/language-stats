@@ -24,11 +24,12 @@ export async function renderArticles(langCode) {
     return a.name.localeCompare(b.name);
   });
   if (!langs.length) {
-    const one = store.languages.find((l) => l.code === langCode);
+    const one = langCode && store.languages.find((l) => l.code === langCode);
     langs = one ? [one] : [];
   }
   if (!langs.length) {
-    view.append(el('p', { class: 'muted' }, 'Unknown language.'));
+    view.append(el('h1', {}, 'Cards & tips'));
+    view.append(el('p', { class: 'muted' }, 'Add a language you’re learning to see its cards and tips here.'));
     return;
   }
 
@@ -43,9 +44,9 @@ export async function renderArticles(langCode) {
   for (const language of langs) {
     const carousel = el('div', { class: 'lang-carousel' }, el('span', { class: 'muted' }, 'Loading…'));
     view.append(
-      el('section', { class: 'lang-row' }, [
-        el('div', { class: 'lang-row-head' }, [
-          el('a', { class: 'lang-row-title', href: `#/lang/${encodeURIComponent(language.code)}/tips` }, language.name),
+      el('section', { class: 'lang-section' }, [
+        el('div', { class: 'lang-section-head' }, [
+          el('a', { class: 'lang-section-title', href: `#/lang/${encodeURIComponent(language.code)}/tips` }, language.name),
         ]),
         carousel,
       ])

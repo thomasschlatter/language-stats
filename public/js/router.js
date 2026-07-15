@@ -34,16 +34,10 @@ import { renderFoxyHelp } from './views/foxyHelp.js';
 
 const routes = [
   { pattern: /^#\/community$/, handler: () => renderCommunity() },
-  // "Tips" nav item -> the language-learning tips for a language you're learning.
-  { pattern: /^#\/tips$/, handler: () => {
-    const learning = store.languages
-      .filter((l) => store.isLearning(l.code) && l.code !== store.nativeLang)
-      .sort(byImportance);
-    const target = learning[0]
-      || store.languages.find((l) => l.code !== store.nativeLang)
-      || store.languages[0];
-    if (target) navigate(`#/lang/${encodeURIComponent(target.code)}/tips`);
-  } },
+  // "Tips" nav item -> cards & tips for every language you're learning (one
+  // carousel row per language). A general, language-agnostic entry point.
+  { pattern: /^#\/tips$/, handler: () => renderArticles() },
+  { pattern: /^#\/lang\/tips$/, handler: () => renderArticles() },
   { pattern: /^#\/world$/, handler: () => renderWorld(), auth: true },
   { pattern: /^#\/games$/, handler: () => renderGames(), auth: true },
   { pattern: /^#\/search\/(.+)$/, handler: (m) => renderSearch(dec(m[1])) },

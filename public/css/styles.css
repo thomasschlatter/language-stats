@@ -476,11 +476,11 @@ body.in-msg .view { overflow-y: auto; }
 .article-card h3 { margin: 0.5rem 0 0.35rem; }
 
 /* Per-language rows, each a horizontal carousel of cards (best on the left). */
-.lang-row { margin: 0 0 1.4rem; padding: 0 0 1.4rem; border-bottom: 1px solid var(--border); }
-.lang-row:last-child { border-bottom: none; }
-.lang-row-head { display: flex; align-items: baseline; gap: 0.6rem; margin: 0 0 0.6rem; }
-.lang-row-title { font-size: 1.15rem; font-weight: 600; color: var(--text); }
-.lang-row-title:hover { color: var(--accent); text-decoration: none; }
+.lang-section { display: block; margin: 0 0 1.4rem; padding: 0 0 1.4rem; border-bottom: 1px solid var(--border); }
+.lang-section:last-child { border-bottom: none; }
+.lang-section-head { display: flex; align-items: baseline; gap: 0.6rem; margin: 0 0 0.6rem; }
+.lang-section-title { font-size: 1.15rem; font-weight: 600; color: var(--text); }
+.lang-section-title:hover { color: var(--accent); text-decoration: none; }
 .lang-carousel {
   display: flex; gap: 0.9rem; overflow-x: auto; overflow-y: hidden;
   padding-bottom: 0.5rem; scroll-snap-type: x proximity;
