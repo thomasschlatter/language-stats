@@ -31,6 +31,7 @@ export default class Game extends Phaser.Scene {
   private cursors!: NavKeys
   private keyE!: Phaser.Input.Keyboard.Key
   private keyR!: Phaser.Input.Keyboard.Key
+  private keySit!: Phaser.Input.Keyboard.Key
   private keySpace!: Phaser.Input.Keyboard.Key
   private map!: Phaser.Tilemaps.Tilemap
   myPlayer!: MyPlayer
@@ -79,6 +80,8 @@ export default class Game extends Phaser.Scene {
     // maybe we can have a dedicated method for adding keys if more keys are needed in the future
     this.keyE = this.input.keyboard.addKey('E')
     this.keyR = this.input.keyboard.addKey('R')
+    // Sit toggle. NOT 'S' — that's WASD move-down; X is free.
+    this.keySit = this.input.keyboard.addKey('X')
     this.keySpace = this.input.keyboard.addKey('SPACE')
     this.input.keyboard.disableGlobalCapture()
     // Capture the movement keys so the browser doesn't scroll the (iframe) page
@@ -137,6 +140,7 @@ export default class Game extends Phaser.Scene {
     if (worldMap === 'cafe') this.buildInterior('tilemap')
     else if (worldMap === 'room') this.buildRoom()
     else if (worldMap === 'border') this.buildBorderRoom()
+    else if (worldMap === 'classroom') this.buildClassroom()
     else if (worldMap === 'town') this.buildCity()
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else if (worldMap === 'osaka')
@@ -566,6 +570,32 @@ export default class Game extends Phaser.Scene {
     this.worldColliders.push(wallLayer)
     const over = this.map.createLayer('Over', [borders], 0, 0)!
     over.setDepth(10000) // above the player; the separator overhang occludes the head, no collision
+    const props = (this.map.properties as Array<{ name: string; value: number }>) || []
+    const prop = (n: string) => props.find((p) => p.name === n)?.value
+    this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
+    this.spawnY = prop('spawnY') ?? (this.map.height / 2) * 32
+    this.botX = this.spawnX
+    this.botY = this.spawnY + 64
+  }
+
+
+  // A generated LimeZu classroom: the 3D-walls room + a Furniture layer of classroom
+  // items (chalkboard, desks with chairs facing the board, libraries, globe). Only the
+  // Walls layer collides; furniture is walkable for now so you can step onto a chair
+  // and sit (X) to check the seating lines up.
+  private buildClassroom() {
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key: 'classroomModernMap' })
+    const floors = this.map.addTilesetImage('floors', 'room_floors')!
+    const walls = this.map.addTilesetImage('walls', 'room_walls')!
+    const sky = this.map.addTilesetImage('sky', 'room_sky')!
+    const cls = this.map.addTilesetImage('class', 'room_class')!
+    this.map.createLayer('Ground', [floors, sky], 0, 0)
+    this.map.createLayer('Shadows', [floors], 0, 0)
+    const wallLayer = this.map.createLayer('Walls', [walls], 0, 0)!
+    wallLayer.setCollisionByExclusion([-1, 0])
+    this.worldColliders.push(wallLayer)
+    this.map.createLayer('Furniture', [cls], 0, 0)
     const props = (this.map.properties as Array<{ name: string; value: number }>) || []
     const prop = (n: string) => props.find((p) => p.name === n)?.value
     this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
@@ -1150,7 +1180,7 @@ export default class Game extends Phaser.Scene {
         })
       }
       this.playerSelector.update(this.myPlayer, this.cursors)
-      this.myPlayer.update(this.playerSelector, this.cursors, this.keyE, this.keyR, this.keySpace, this.network)
+      this.myPlayer.update(this.playerSelector, this.cursors, this.keyE, this.keyR, this.keySpace, this.network, this.keySit)
       // Keep the animation-tester sprite hovering above the player.
       if (this.testSprite?.visible)
         this.testSprite.setPosition(this.myPlayer.x, this.myPlayer.y - 70)

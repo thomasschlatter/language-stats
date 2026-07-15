@@ -66,4 +66,11 @@ export const WORLDS: WorldInfo[] = [
     map: 'border',
     emoji: '🏠',
   },
+  {
+    id: 'world_classroom',
+    name: 'Classroom',
+    description: 'A floating classroom — chalkboard, desks facing the front, and a library.',
+    map: 'classroom',
+    emoji: '🎓',
+  },
 ]

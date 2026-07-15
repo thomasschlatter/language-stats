@@ -79,7 +79,8 @@ export default class MyPlayer extends Player {
     keyE: Phaser.Input.Keyboard.Key,
     keyR: Phaser.Input.Keyboard.Key,
     keySpace: Phaser.Input.Keyboard.Key,
-    network: Network
+    network: Network,
+    keySit?: Phaser.Input.Keyboard.Key
   ) {
     if (!cursors) return;
 
@@ -110,6 +111,17 @@ export default class MyPlayer extends Player {
 
     switch (this.playerBehavior) {
       case PlayerBehavior.IDLE:
+        // Standalone sit: sit facing whichever way you're currently facing (walk up to
+        // a chair facing the board, then sit). Press again (or E) to stand.
+        if (keySit && Phaser.Input.Keyboard.JustDown(keySit)) {
+          const dir = this.anims.currentAnim?.key.split("_")[2] ?? "down";
+          this.setVelocity(0, 0);
+          this.playContainerBody.setVelocity(0, 0);
+          this.play(`${this.playerTexture}_sit_${dir}`, true);
+          this.playerBehavior = PlayerBehavior.SITTING;
+          network.updatePlayer(this.x, this.y, this.anims.currentAnim.key);
+          return;
+        }
         if (Phaser.Input.Keyboard.JustDown(keySpace)) {
           //const doorItem = item as Door
           //doorItem.clearDialogBox()
@@ -278,8 +290,11 @@ export default class MyPlayer extends Player {
         break;
 
       case PlayerBehavior.SITTING:
-        // back to idle if player press E while sitting
-        if (Phaser.Input.Keyboard.JustDown(keyE)) {
+        // back to idle if player presses E (or the sit key) while sitting
+        if (
+          Phaser.Input.Keyboard.JustDown(keyE) ||
+          (keySit && Phaser.Input.Keyboard.JustDown(keySit))
+        ) {
           const parts = this.anims.currentAnim.key.split("_");
           parts[1] = "idle";
           this.play(parts.join("_"), true);
