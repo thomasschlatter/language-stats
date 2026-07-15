@@ -14,6 +14,18 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+// Deck cover images (e.g. publisher book covers) are collected in the DB but
+// NOT served to clients unless explicitly enabled — so we can gather content
+// now and keep it hidden until we're licensed to display it. Default: hidden.
+const SHOW_DECK_COVERS = process.env.SHOW_DECK_COVERS === '1';
+function gateCovers(decks) {
+  if (SHOW_DECK_COVERS) return decks;
+  for (const d of (Array.isArray(decks) ? decks : [decks])) {
+    if (d && 'cover_url' in d) d.cover_url = null;
+  }
+  return decks;
+}
+
 // --- shared decks: browse / upvote / copy / publish (like tips) ---
 
 // GET /api/flashcards/browse?lang=de-DE&level=a1&q=&offset=0
@@ -28,14 +40,14 @@ router.get('/browse', (req, res) => {
     limit: 30,
     offset: Math.max(0, Number(req.query.offset) || 0),
   });
-  res.json({ decks, hasMore: decks.length === 30 });
+  res.json({ decks: gateCovers(decks), hasMore: decks.length === 30 });
 });
 
 // GET /api/flashcards/public/:id — a shared deck with a small preview
 router.get('/public/:id', (req, res) => {
   const deck = getPublicDeck(Number(req.params.id), req.user?.id || null);
   if (!deck) return res.status(404).json({ error: 'deck not found' });
-  res.json({ deck });
+  res.json({ deck: gateCovers(deck) });
 });
 
 // GET /api/flashcards/public/:id/cards — every card in a shared deck

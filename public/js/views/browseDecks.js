@@ -79,6 +79,7 @@ function deckCard(d) {
   const href = `#/decks/public/${d.id}`;
   const title = el('a', { class: 'deck-title-link', href }, d.name);
   return el('div', { class: 'card person-card' }, [
+    d.cover_url ? el('a', { href, class: 'deck-cover-link' }, el('img', { class: 'deck-cover', src: d.cover_url, alt: '', loading: 'lazy' })) : null,
     title,
     el('div', { class: 'muted', style: 'font-size:0.8rem; margin-top:0.2rem' }, [
       d.is_official ? el('span', { class: 'badge official' }, 'Official') : el('span', { class: 'badge user' }, `@${d.author || 'user'}`),

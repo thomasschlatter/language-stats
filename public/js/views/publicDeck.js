@@ -15,6 +15,7 @@ export async function renderPublicDeck(id) {
   try {
     const [{ deck }, { cards }] = await Promise.all([api.publicDeck(id), api.publicDeckCards(id)]);
     clear(head).append(
+      deck.cover_url ? el('img', { class: 'deck-cover deck-cover-lg', src: deck.cover_url, alt: '' }) : null,
       el('h1', { style: 'margin-bottom:0.2rem' }, deck.name),
       el('div', { class: 'muted', style: 'font-size:0.9rem' }, [
         deck.is_official ? el('span', { class: 'badge official' }, 'Official') : el('span', { class: 'badge user' }, `@${deck.author || 'user'}`),

@@ -65,7 +65,8 @@ export function ensureOfficialDecks() {
       try {
         db.transaction(() => {
           const deckId = createOfficialDeck({
-            systemUserId, languageId: lang.id, name: d.name, level: d.level || null, source: d.source || 'freq+freedict',
+            systemUserId, languageId: lang.id, name: d.name, level: d.level || null,
+            source: d.source || 'freq+freedict', coverUrl: d.cover || null,
           });
           addCards({ deckId, userId: systemUserId, languageId: lang.id, rows: d.cards || [] });
         })();

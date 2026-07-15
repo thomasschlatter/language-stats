@@ -71,6 +71,12 @@ if (!deckCols.includes('level')) {
 if (!deckCols.includes('copied_from')) {
   db.exec('ALTER TABLE decks ADD COLUMN copied_from INTEGER'); // source deck when copied to study
 }
+if (!deckCols.includes('cover_url')) {
+  // Reference to a book/deck cover image. Collected now, but only SERVED to
+  // clients when SHOW_DECK_COVERS=1 (off by default) — so publisher artwork
+  // stays hidden until we're licensed to show it. See routes/flashcards.js.
+  db.exec('ALTER TABLE decks ADD COLUMN cover_url TEXT');
+}
 db.exec(`CREATE TABLE IF NOT EXISTS deck_votes (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   deck_id INTEGER NOT NULL REFERENCES decks(id) ON DELETE CASCADE,

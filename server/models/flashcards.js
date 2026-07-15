@@ -54,7 +54,7 @@ export function listPublicDecks({ viewerId = null, languageId = null, q = null, 
   if (level) { where.push('d.level = ?'); params.push(level); }
   if (q) { where.push('d.name LIKE ?'); params.push(`%${q}%`); }
   const rows = db.prepare(
-    `SELECT d.id, d.name, d.source, d.is_official, d.level, d.votes, d.created_at,
+    `SELECT d.id, d.name, d.source, d.is_official, d.level, d.votes, d.cover_url, d.created_at,
             l.code AS lang, l.name AS lang_name, u.username AS author,
             (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id) AS total
      FROM decks d
@@ -77,7 +77,7 @@ export function listPublicDecks({ viewerId = null, languageId = null, q = null, 
 
 export function getPublicDeck(id, viewerId = null) {
   const d = db.prepare(
-    `SELECT d.id, d.name, d.source, d.is_official, d.level, d.votes, d.language_id, d.created_at,
+    `SELECT d.id, d.name, d.source, d.is_official, d.level, d.votes, d.cover_url, d.language_id, d.created_at,
             l.code AS lang, l.name AS lang_name, u.username AS author
      FROM decks d JOIN languages l ON l.id = d.language_id
      LEFT JOIN users u ON u.id = d.user_id
@@ -134,10 +134,10 @@ export function copyDeckForUser(userId, deckId) {
 }
 
 // Create an OFFICIAL deck owned by the system user (for seeded starter decks).
-export function createOfficialDeck({ systemUserId, languageId, name, level = null, source = 'official' }) {
+export function createOfficialDeck({ systemUserId, languageId, name, level = null, source = 'official', coverUrl = null }) {
   const info = db.prepare(
-    'INSERT INTO decks (user_id, language_id, name, source, is_official, is_public, level) VALUES (?, ?, ?, ?, 1, 1, ?)'
-  ).run(systemUserId, languageId, name, source, level);
+    'INSERT INTO decks (user_id, language_id, name, source, is_official, is_public, level, cover_url) VALUES (?, ?, ?, ?, 1, 1, ?, ?)'
+  ).run(systemUserId, languageId, name, source, level, coverUrl);
   return info.lastInsertRowid;
 }
 
