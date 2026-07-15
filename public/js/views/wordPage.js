@@ -117,6 +117,8 @@ function definitionEl(d, langCode) {
       el('span', { class: 'def-text', lang: langCode }, renderText(d.text, langCode)),
       el('div', { class: 'def-meta muted' }, [
         d.accepted ? el('span', { class: 'def-accepted' }, '✓ accepted') : null,
+        // Importance = how many cards/strings link to this sense (drives ordering).
+        d.links ? el('span', { class: 'def-links', title: `${d.links} card${d.links === 1 ? '' : 's'} link here` }, `${d.links} link${d.links === 1 ? '' : 's'}`) : null,
         d.source === 'wiktionary' ? el('span', {}, ' Wiktionary') : (d.author ? el('span', {}, ` @${d.author}`) : null),
       ]),
     ]),

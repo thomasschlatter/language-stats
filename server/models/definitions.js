@@ -31,11 +31,14 @@ export function listDefinitions(wordId, userId) {
       `SELECT d.id, d.text, d.source, d.accepted, d.created_at,
               u.username AS author,
               (SELECT COUNT(*) FROM definition_votes v WHERE v.definition_id = d.id) AS votes,
+              (SELECT COUNT(*) FROM cards c WHERE c.definition_id = d.id) AS links,
               ${userId ? '(SELECT COUNT(*) FROM definition_votes v WHERE v.definition_id = d.id AND v.user_id = @uid)' : '0'} AS voted
        FROM word_definitions d
        LEFT JOIN users u ON u.id = d.created_by
        WHERE d.word_id = @wid
-       ORDER BY d.accepted DESC, votes DESC, d.created_at ASC`
+       -- Sense importance = how many string→sense links point at it (PageRank-ish),
+       -- so common senses rank first; votes/recency break ties.
+       ORDER BY links DESC, d.accepted DESC, votes DESC, d.created_at ASC`
     )
     .all({ wid: wordId, uid: userId || 0 })
     .map((r) => ({ ...r, voted: !!r.voted, accepted: !!r.accepted }));
