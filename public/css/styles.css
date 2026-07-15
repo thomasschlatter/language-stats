@@ -260,6 +260,9 @@ body.in-msg .view { overflow-y: auto; }
 
 /* Language picker modal */
 .lang-picker { width: 100%; }
+.tip-editor-modal .CodeMirror { min-height: 200px; font: inherit; }
+.tip-editor-modal .editor-toolbar { border-radius: 6px 6px 0 0; }
+.tip-editor-modal .EasyMDEContainer { margin-bottom: 0.6rem; }
 .lang-picker-search {
   width: 100%; box-sizing: border-box; margin: 0.4rem 0 0;
   padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 8px;

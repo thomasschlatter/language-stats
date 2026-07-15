@@ -51,6 +51,25 @@ export async function renderTip(id) {
 }
 
 // Create (tip omitted) or edit (tip given) a tip. Markdown-aware.
+// Lazy-load the vendored EasyMDE markdown editor (once, on first tip edit).
+let easyMdePromise = null;
+function loadEasyMDE() {
+  if (window.EasyMDE) return Promise.resolve(window.EasyMDE);
+  if (easyMdePromise) return easyMdePromise;
+  easyMdePromise = new Promise((resolve, reject) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = '/vendor/easymde/easymde.min.css';
+    document.head.appendChild(css);
+    const s = document.createElement('script');
+    s.src = '/vendor/easymde/easymde.min.js';
+    s.onload = () => resolve(window.EasyMDE);
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return easyMdePromise;
+}
+
 export function openTipEditor(language, onDone, tip = null) {
   const editing = !!tip;
   const err = el('div', { class: 'error' });
@@ -60,6 +79,8 @@ export function openTipEditor(language, onDone, tip = null) {
     placeholder: 'Share your trick for learning…\n\nMarkdown: # heading, "- " for bullet lists, blank line = new paragraph.\nTip: any list can be turned into a flashcard deck.',
   });
   body.value = tip?.body || '';
+  let editor = null;
+  const getBody = () => (editor ? editor.value() : body.value);
   // "Written for" = the language the tip is ABOUT (defaults to the current
   // page's language). Only offered on create — updating which language a tip
   // belongs to isn't supported.
@@ -83,7 +104,7 @@ export function openTipEditor(language, onDone, tip = null) {
         if (editing) {
           await api.updateTip(tip.id, {
             title: title.value,
-            body: body.value,
+            body: getBody(),
             bodyLanguageCode: writtenIn.value,
           });
           close();
@@ -93,7 +114,7 @@ export function openTipEditor(language, onDone, tip = null) {
             languageCode: writtenFor.value,
             bodyLanguageCode: writtenIn.value,
             title: title.value,
-            body: body.value,
+            body: getBody(),
           });
           close();
           // If the tip is about another language, jump to that language's tips.
@@ -121,5 +142,19 @@ export function openTipEditor(language, onDone, tip = null) {
   ]);
 
   const heading = editing ? 'Edit tip' : `Share a ${language.name} tip`;
-  const close = openModal(el('div', {}, [el('h2', {}, heading), form]));
+  const close = openModal(el('div', { class: 'tip-editor-modal' }, [el('h2', {}, heading), form]));
+
+  // Upgrade the textarea into a markdown editor (toolbar + live preview).
+  // Falls back to the plain textarea if the library can't load.
+  loadEasyMDE().then((EasyMDE) => {
+    editor = new EasyMDE({
+      element: body,
+      spellChecker: false,
+      status: false,
+      autofocus: false,
+      autoDownloadFontAwesome: true,
+      placeholder: 'Share your trick for learning…',
+      toolbar: ['bold', 'italic', 'heading', '|', 'unordered-list', 'ordered-list', 'quote', '|', 'link', 'preview', 'guide'],
+    });
+  }).catch(() => { /* keep the plain textarea */ });
 }
