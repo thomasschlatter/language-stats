@@ -133,11 +133,11 @@ export function copyDeckForUser(userId, deckId) {
     const info = db.prepare('INSERT INTO decks (user_id, language_id, name, source, copied_from) VALUES (?, ?, ?, ?, ?)')
       .run(userId, src.language_id, src.name, 'copy', deckId);
     const newId = info.lastInsertRowid;
-    const cards = db.prepare('SELECT word_lc, front, back FROM cards WHERE deck_id = ?').all(deckId);
+    const cards = db.prepare('SELECT word_lc, front, back, definition_id, fields FROM cards WHERE deck_id = ?').all(deckId);
     const ins = db.prepare(
-      "INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, due_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))"
+      "INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, definition_id, fields, due_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))"
     );
-    for (const c of cards) ins.run(newId, userId, src.language_id, c.word_lc, c.front, c.back);
+    for (const c of cards) ins.run(newId, userId, src.language_id, c.word_lc, c.front, c.back, c.definition_id, c.fields);
     return newId;
   })();
 }
@@ -152,16 +152,16 @@ export function ensureStarterDeck(userId, languageId, limit = 100) {
     "SELECT id FROM decks WHERE is_official = 1 AND language_id = ? AND level = 'a1' ORDER BY (source = 'freq+freedict') DESC, id LIMIT 1"
   ).get(languageId);
   if (!official) return null;
-  const cards = db.prepare('SELECT word_lc, front, back, definition_id FROM cards WHERE deck_id = ? ORDER BY id LIMIT ?').all(official.id, limit);
+  const cards = db.prepare('SELECT word_lc, front, back, definition_id, fields FROM cards WHERE deck_id = ? ORDER BY id LIMIT ?').all(official.id, limit);
   if (!cards.length) return null;
   return db.transaction(() => {
     const info = db.prepare("INSERT INTO decks (user_id, language_id, name, source) VALUES (?, ?, ?, 'starter')")
       .run(userId, languageId, `Starter · ${cards.length} common words`);
     const newId = info.lastInsertRowid;
     const ins = db.prepare(
-      "INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, definition_id, due_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))"
+      "INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, definition_id, fields, due_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))"
     );
-    for (const c of cards) ins.run(newId, userId, languageId, c.word_lc, c.front, c.back, c.definition_id);
+    for (const c of cards) ins.run(newId, userId, languageId, c.word_lc, c.front, c.back, c.definition_id, c.fields);
     return newId;
   })();
 }
@@ -214,10 +214,23 @@ function pickSenseFor(languageId, front, back) {
   return top ? top.id : null;
 }
 
+// Sanitise a card's extra fields (plural, example, audio, ipa, gender, …) to a
+// compact JSON string, or null. Keys/values trimmed; empty dropped; capped.
+export function normalizeFields(fields) {
+  if (!fields || typeof fields !== 'object') return null;
+  const out = {};
+  for (const [k, v] of Object.entries(fields)) {
+    const key = String(k).trim().slice(0, 40);
+    const val = (v == null ? '' : String(v)).trim().slice(0, 500);
+    if (key && val) out[key] = val;
+  }
+  return Object.keys(out).length ? JSON.stringify(out) : null;
+}
+
 export function addCards({ deckId, userId, languageId, rows }) {
   const stmt = db.prepare(
-    `INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, definition_id, due_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`
+    `INSERT INTO cards (deck_id, user_id, language_id, word_lc, front, back, definition_id, fields, due_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
   );
   const tx = db.transaction((list) => {
     let n = 0;
@@ -226,7 +239,7 @@ export function addCards({ deckId, userId, languageId, rows }) {
       if (!front) continue;
       const back = (r.back || '').trim() || null;
       const defId = pickSenseFor(languageId, front, back); // auto-link into the sense graph
-      stmt.run(deckId, userId, languageId, front.toLowerCase(), front, back, defId);
+      stmt.run(deckId, userId, languageId, front.toLowerCase(), front, back, defId, normalizeFields(r.fields));
       n += 1;
     }
     return n;
@@ -234,20 +247,24 @@ export function addCards({ deckId, userId, languageId, rows }) {
   return tx(rows);
 }
 
+// Parse the stored `fields` JSON into an object on the way out.
+function withFields(row) {
+  if (!row) return row;
+  let fields = null;
+  try { fields = row.fields ? JSON.parse(row.fields) : null; } catch { fields = null; }
+  return { ...row, fields };
+}
+
 export function dueCards(userId, deckId, limit = 40) {
-  if (deckId) {
-    return db
-      .prepare(
-        `SELECT * FROM cards WHERE user_id = ? AND deck_id = ? AND due_at <= datetime('now')
+  const rows = deckId
+    ? db.prepare(
+      `SELECT * FROM cards WHERE user_id = ? AND deck_id = ? AND due_at <= datetime('now')
          ORDER BY due_at LIMIT ?`
-      )
-      .all(userId, deckId, limit);
-  }
-  return db
-    .prepare(
+    ).all(userId, deckId, limit)
+    : db.prepare(
       `SELECT * FROM cards WHERE user_id = ? AND due_at <= datetime('now') ORDER BY due_at LIMIT ?`
-    )
-    .all(userId, limit);
+    ).all(userId, limit);
+  return rows.map(withFields);
 }
 
 // All cards in a deck (owner-checked), in insertion order — used for export.

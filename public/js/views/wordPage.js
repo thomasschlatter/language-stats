@@ -224,6 +224,20 @@ async function openAddToDeck(langCode, data) {
   deckSel.addEventListener('change', syncName);
   syncName();
 
+  // Optional extra fields (Anki-style): example sentence, plural, audio URL, IPA…
+  const exampleInput = el('input', { type: 'text', placeholder: 'example sentence' });
+  const pluralInput = el('input', { type: 'text', placeholder: 'plural form' });
+  const audioInput = el('input', { type: 'url', placeholder: 'audio URL (mp3/ogg)' });
+  const moreFields = el('div', { class: 'more-fields', style: 'display:none' }, [
+    el('label', {}, 'Example'), exampleInput,
+    el('label', {}, 'Plural'), pluralInput,
+    el('label', {}, 'Audio URL'), audioInput,
+  ]);
+  const moreToggle = el('button', {
+    class: 'btn small link', type: 'button',
+    onclick: () => { moreFields.style.display = moreFields.style.display === 'none' ? '' : 'none'; },
+  }, '＋ more fields');
+
   const submit = el('button', { class: 'btn', type: 'submit' }, 'Add card');
   let allowDuplicate = false; // set true after the user confirms a duplicate
 
@@ -241,7 +255,11 @@ async function openAddToDeck(langCode, data) {
         } else {
           deckId = Number(deckSel.value);
         }
-        await api.addCard(deckId, { front: data.text, back: back.value, allowDuplicate });
+        const fields = {};
+        if (exampleInput.value.trim()) fields.example = exampleInput.value.trim();
+        if (pluralInput.value.trim()) fields.plural = pluralInput.value.trim();
+        if (audioInput.value.trim()) fields.audio = audioInput.value.trim();
+        await api.addCard(deckId, { front: data.text, back: back.value, allowDuplicate, fields });
         noteCardAdded(langCode, data.text);
         window.dispatchEvent(new Event('ls:decks-changed'));
         close();
@@ -262,6 +280,7 @@ async function openAddToDeck(langCode, data) {
     nameWrap,
     el('label', {}, 'Front'), el('div', { class: 'muted', style: 'font-size:1.05rem' }, data.text),
     el('label', {}, 'Back'), back,
+    moreToggle, moreFields,
     err,
     el('div', { class: 'row', style: 'margin-top:1rem' }, [submit]),
   ]);

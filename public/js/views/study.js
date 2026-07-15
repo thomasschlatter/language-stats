@@ -4,6 +4,7 @@
 import { api } from '../api.js';
 import { store } from '../store.js';
 import { el, clear } from '../dom.js';
+import { renderText } from '../render.js';
 
 export async function renderStudy(deckId) {
   const view = clear(document.getElementById('view'));
@@ -43,8 +44,12 @@ export async function renderStudy(deckId) {
       return;
     }
     const card = queue[0];
+    const cardLang = store.languages.find((l) => l.id === card.language_id);
+    const cardLangCode = cardLang?.code || store.nativeLang;
     const back = el('div', { class: 'flash-back' }, card.back || '—');
     back.style.display = 'none';
+    const extra = fieldsEl(card.fields, cardLangCode);
+    if (extra) extra.style.display = 'none';
     const senses = senseControls(card);
     senses.style.display = 'none';
     const rateRow = el('div', { class: 'rate-row' }, [
@@ -56,18 +61,48 @@ export async function renderStudy(deckId) {
     rateRow.style.display = 'none';
     const show = el('button', {
       class: 'btn',
-      onclick: () => { back.style.display = ''; senses.style.display = ''; show.style.display = 'none'; rateRow.style.display = ''; },
+      onclick: () => {
+        back.style.display = ''; senses.style.display = ''; show.style.display = 'none'; rateRow.style.display = '';
+        if (extra) extra.style.display = '';
+      },
     }, 'Show answer');
 
     stage.append(el('div', { class: 'flash-card' }, [
       el('div', { class: 'flash-count muted' }, `${queue.length} due`),
       el('div', { class: 'flash-front' }, card.front),
       back,
+      extra,
       senses,
       show,
       rateRow,
     ]));
   }
+}
+
+// Extra card fields (plural, example sentence, audio, IPA, gender, or any custom
+// field) shown once the answer is revealed. Audio renders a player; the example
+// sentence stays clickable (each word links into the dictionary).
+function fieldsEl(fields, langCode) {
+  if (!fields || typeof fields !== 'object' || !Object.keys(fields).length) return null;
+  const wrap = el('div', { class: 'flash-fields' });
+  const isAudio = (v) => /^https?:\/\/\S+\.(mp3|ogg|wav|m4a|opus)(\?\S*)?$/i.test(v);
+  const priority = ['example', 'plural', 'gender', 'ipa', 'audio'];
+  const keys = [...new Set([...priority.filter((k) => fields[k]), ...Object.keys(fields)])];
+  for (const k of keys) {
+    const v = fields[k];
+    if (!v) continue;
+    if (k === 'audio' || isAudio(v)) {
+      wrap.append(el('div', { class: 'flash-field' }, el('audio', { controls: '', src: v, preload: 'none' })));
+    } else if (k === 'example') {
+      wrap.append(el('div', { class: 'flash-field ff-example', lang: langCode }, renderText(v, langCode)));
+    } else {
+      wrap.append(el('div', { class: 'flash-field' }, [
+        el('span', { class: 'ff-label' }, k),
+        el('span', { lang: langCode }, k === 'plural' ? renderText(v, langCode) : v),
+      ]));
+    }
+  }
+  return wrap;
 }
 
 // Collapsible sense picker: shows the word's ranked dictionary senses, lets the

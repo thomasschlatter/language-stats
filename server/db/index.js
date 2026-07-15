@@ -115,6 +115,14 @@ if (!wordCols.includes('lemma_id')) {
 }
 db.exec('CREATE INDEX IF NOT EXISTS idx_words_lemma ON words(lemma_id)');
 
+// --- extra card fields: a card can carry arbitrary named fields beyond front/back
+// (e.g. plural, example sentence, audio URL, IPA, gender) as a JSON object. This is
+// how the flashcards grow toward Anki-style multi-field notes without a rigid schema.
+const cardCols2 = db.prepare('PRAGMA table_info(cards)').all().map((c) => c.name);
+if (!cardCols2.includes('fields')) {
+  db.exec('ALTER TABLE cards ADD COLUMN fields TEXT'); // JSON object, or NULL
+}
+
 // --- Groups: user-made group chats you join via an invite link. ---
 db.exec(`CREATE TABLE IF NOT EXISTS groups (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

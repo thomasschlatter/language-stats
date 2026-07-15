@@ -127,7 +127,7 @@ router.post('/decks/:id(\\d+)/cards', requireAuth, (req, res) => {
   }
   const added = addCards({
     deckId: deck.id, userId: req.user.id, languageId: deck.language_id,
-    rows: [{ front, back }],
+    rows: [{ front, back, fields: req.body?.fields }],
   });
   res.status(201).json({ added, deck });
 });

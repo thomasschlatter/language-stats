@@ -731,6 +731,13 @@ body.in-world .view { padding: 0; }
 .flash-count { font-size: 0.8rem; margin-bottom: 1rem; }
 .flash-front { font-size: 1.9rem; font-weight: 600; margin-bottom: 1rem; }
 .flash-back { font-size: 1.3rem; color: var(--accent-2); margin-bottom: 1.5rem; }
+/* Extra card fields (example sentence, plural, audio, IPA, …) */
+.flash-fields { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.2rem; }
+.flash-field { display: flex; align-items: center; gap: 0.5rem; justify-content: center; flex-wrap: wrap; font-size: 1rem; }
+.ff-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.ff-example { font-style: italic; color: var(--text); max-width: 32rem; }
+.flash-field audio { height: 32px; }
+.more-fields { display: flex; flex-direction: column; gap: 0.3rem; margin: 0.3rem 0; }
 .rate-row { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
 .study-done { text-align: center; margin-top: 2rem; }
 .study-done h2 { margin-bottom: 0.5rem; }
