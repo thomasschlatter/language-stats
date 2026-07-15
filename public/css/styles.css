@@ -119,6 +119,8 @@ body:not(.authed) .auth-only { display: none !important; }
 .welcome-steps li { margin: 0.4rem 0; }
 .native-picker { display: flex; align-items: center; gap: 0.35rem; }
 .native-select { width: auto; padding: 0.3rem 0.5rem; font-size: 0.85rem; }
+.native-add-row { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.native-search { padding: 0.3rem 0.5rem; font-size: 0.85rem; max-width: 12rem; }
 
 /* ---- Layout ---- */
 .layout {

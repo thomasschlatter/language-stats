@@ -24,6 +24,34 @@ export function nativeLanguagesSetting(prof, reRender) {
     reRender();
   };
 
+  const addNative = (code) => { if (code) save({ native: [...natives.map((n) => n.code), code] }); };
+  const optionsFor = (langs) => [
+    el('option', { value: '' }, '+ Add a native language…'),
+    ...langs.map((l) => el('option', { value: l.code },
+      l.tier && l.tier !== 'official' && l.tier !== 'regional' ? `${l.name} · ${l.tier}` : l.name)),
+  ];
+  const addSelect = el('select', {
+    class: 'native-select',
+    onchange: (e) => addNative(e.target.value),
+  }, optionsFor(available));
+
+  // Search the full 7,800+ catalogue so deep languages are reachable, not just
+  // the surface set. Typing swaps the select's options for the matches.
+  const searchBox = el('input', { type: 'search', class: 'native-search', placeholder: 'search all languages…' });
+  let st;
+  searchBox.addEventListener('input', () => {
+    clearTimeout(st);
+    st = setTimeout(async () => {
+      const q = searchBox.value.trim();
+      if (!q) { clear(addSelect).append(...optionsFor(available)); return; }
+      try {
+        const { languages } = await api.languages({ search: q });
+        const opts = languages.filter((l) => !natives.some((n) => n.code === l.code));
+        clear(addSelect).append(...optionsFor(opts));
+      } catch { /* ignore */ }
+    }, 250);
+  });
+
   return el('div', { class: 'prof-setting' }, [
     el('span', { class: 'prof-langs-label' }, 'Native languages'),
     el('div', { class: 'muted', style: 'font-size:0.8rem; margin:0.15rem 0 0.45rem' }, 'Words translate into your ★ primary language.'),
@@ -46,13 +74,7 @@ export function nativeLanguagesSetting(prof, reRender) {
           })
         : el('span', { class: 'muted' }, 'None yet — add one below.')
     ),
-    el('select', {
-      class: 'native-select',
-      onchange: (e) => { if (e.target.value) save({ native: [...natives.map((n) => n.code), e.target.value] }); },
-    }, [
-      el('option', { value: '' }, '+ Add a native language…'),
-      ...available.map((l) => el('option', { value: l.code }, l.name)),
-    ]),
+    el('div', { class: 'native-add-row' }, [searchBox, addSelect]),
   ]);
 }
 
