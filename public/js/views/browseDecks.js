@@ -52,13 +52,18 @@ export async function renderBrowseDecks() {
 
   const grid = el('div', { class: 'card-grid' });
   view.append(grid);
+  const moreWrap = el('div', { class: 'row', style: 'justify-content:center; margin:1rem 0' });
+  view.append(moreWrap);
 
-  async function load() {
-    clear(grid).append(el('span', { class: 'muted' }, 'Loading…'));
+  let offset = 0;
+
+  // Fetch a page. reset=true starts over (new filter/search); otherwise append.
+  async function load(reset = true) {
+    if (reset) { offset = 0; clear(grid).append(el('span', { class: 'muted' }, 'Loading…')); clear(moreWrap); }
     try {
-      const { decks } = await api.browseDecks({ lang: langSel.value, level: levelSel.value, q: q.value, kind });
-      clear(grid);
-      if (!decks.length) {
+      const { decks, hasMore } = await api.browseDecks({ lang: langSel.value, level: levelSel.value, q: q.value, kind, offset });
+      if (reset) clear(grid);
+      if (reset && !decks.length) {
         const msg = kind === 'exam' ? 'No exam-board decks yet (Goethe, DELF, DELE… coming soon).'
           : kind === 'textbook' ? 'No textbook decks for this filter yet.'
             : kind === 'community' ? 'No community decks yet. Share one from your decks!'
@@ -67,12 +72,15 @@ export async function renderBrowseDecks() {
         return;
       }
       for (const d of decks) grid.append(deckCard(d));
-    } catch (ex) { clear(grid).append(el('p', { class: 'error' }, ex.message)); }
+      offset += decks.length;
+      clear(moreWrap);
+      if (hasMore) moreWrap.append(el('button', { class: 'btn secondary', onclick: () => load(false) }, 'Load more'));
+    } catch (ex) { if (reset) clear(grid).append(el('p', { class: 'error' }, ex.message)); }
   }
-  langSel.addEventListener('change', load);
-  levelSel.addEventListener('change', load);
+  langSel.addEventListener('change', () => load());
+  levelSel.addEventListener('change', () => load());
   let t;
-  q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(load, 250); });
+  q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => load(), 250); });
   load();
 }
 
