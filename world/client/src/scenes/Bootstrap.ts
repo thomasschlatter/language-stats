@@ -28,6 +28,7 @@ export default class Bootstrap extends Phaser.Scene {
     lobbyMap: 'assets/map/lobbyMap.json',
     tilemap: 'assets/map/map.json',
     cityMap: 'assets/map/cityMap.json',
+    roomMap: 'assets/map/roomMap.json',
   }
   
    OBJECTS = {

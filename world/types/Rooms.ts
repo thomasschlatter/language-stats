@@ -52,4 +52,11 @@ export const WORLDS: WorldInfo[] = [
     map: 'osaka',
     emoji: '🏮',
   },
+  {
+    id: 'world_room',
+    name: 'Room',
+    description: 'A simple empty room with four solid walls — a starter indoor space.',
+    map: 'room',
+    emoji: '🚪',
+  },
 ]

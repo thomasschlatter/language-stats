@@ -135,6 +135,7 @@ export default class Game extends Phaser.Scene {
     // Dispatch to the right map builder based on the world the player picked.
     const worldMap = (this.network as any).worldMap || 'meadow'
     if (worldMap === 'cafe') this.buildInterior('tilemap')
+    else if (worldMap === 'room') this.buildRoom()
     else if (worldMap === 'town') this.buildCity()
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else if (worldMap === 'osaka')
@@ -520,6 +521,24 @@ export default class Game extends Phaser.Scene {
   }
 
   // A designed indoor Tiled map (café = the office map, lounge = the lobby map).
+  // A simple starter room: a floor fill + a 4-wall border (roomMap.json). The
+  // "Walls" tile layer collides on every non-empty tile, so you can't leave the
+  // room. Model for reliable, generated indoor levels.
+  private buildRoom() {
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key: 'roomMap' })
+    const floor = this.map.addTilesetImage('FloorAndGround', 'tiles_wall')!
+    this.map.createLayer('Ground', [floor], 0, 0)
+    const walls = this.map.createLayer('Walls', [floor], 0, 0)!
+    walls.setCollisionByExclusion([-1, 0]) // every non-empty wall tile is solid
+    this.worldColliders.push(walls)
+    // Spawn in the middle of the room, well clear of the walls.
+    this.spawnX = (this.map.width / 2) * 32
+    this.spawnY = (this.map.height / 2) * 32
+    this.botX = this.spawnX
+    this.botY = this.spawnY + 64
+  }
+
   private buildInterior(key: string) {
     this.worldColliders = []
     this.map = this.make.tilemap({ key })
