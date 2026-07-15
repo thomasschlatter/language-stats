@@ -5,10 +5,11 @@
 // the ensureOfficialDecks() loader format to server/seed-data/official-decks/.
 //
 //   DATA_DIR=/var/data/language-stats node server/scripts/curate-book-decks.mjs
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { llmAvailable, llmChat } from '../models/llm.js';
+import db from '../db/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const inDir = join(__dirname, '..', 'seed-data', 'book-decks');
@@ -49,14 +50,39 @@ async function curate(words, level) {
     .map((r) => ({ front: r.front.trim(), back: r.back.trim() }));
 }
 
-if (!llmAvailable()) { console.error('LLM not configured (ANTHROPIC_API_KEY missing).'); process.exit(1); }
+// No-LLM fallback: keep candidates that have an English gloss in our French sense
+// data (drops proper names and junk), minus obvious classroom meta-terms.
+const frLang = db.prepare("SELECT id FROM languages WHERE lang = 'fr' ORDER BY (code = 'fr-FR') DESC, id LIMIT 1").get();
+const findFr = db.prepare('SELECT id FROM words WHERE language_id = ? AND text = ? COLLATE NOCASE');
+const topSense = db.prepare('SELECT text FROM word_definitions WHERE word_id = ? ORDER BY accepted DESC, id LIMIT 1');
+const META = new Set('exercice exercices leçon leçons page pages activité activités unité unités transcription transcriptions professeur professeurs élève élèves éditions instituts plénum consigne consignes corrigé corrigés lisez écoutez complétez cochez observez regardez répondez'.split(/\s+/));
+function fromDb(words) {
+  if (!frLang) return [];
+  const cards = [];
+  for (const w of words) {
+    if (META.has(w)) continue;
+    const rec = findFr.get(frLang.id, w);
+    if (!rec) continue;
+    const s = topSense.get(rec.id);
+    if (!s) continue;
+    cards.push({ front: w, back: s.text });
+  }
+  return cards;
+}
+
 mkdirSync(outDir, { recursive: true });
 for (const b of BOOKS) {
+  const outPath = join(outDir, b.out);
+  if (existsSync(outPath)) { console.error(`${b.name}: already built, skipping`); continue; }
   let words;
   try { words = JSON.parse(readFileSync(join(inDir, b.file), 'utf8')); } catch { console.error('missing', b.file); continue; }
-  console.error(`${b.name}: curating ${words.length} candidates…`);
-  const cards = await curate(words, b.level);
-  const deck = [{ name: b.name, level: b.level, source: 'tendances', cards }];
-  writeFileSync(join(outDir, b.out), JSON.stringify(deck));
+  let cards = [];
+  if (llmAvailable()) {
+    try { console.error(`${b.name}: curating ${words.length} candidates via LLM…`); cards = await curate(words, b.level); }
+    catch (e) { console.error(`${b.name}: LLM failed (${e.message}); using dictionary fallback`); }
+  }
+  if (!cards.length) { console.error(`${b.name}: building from French dictionary senses…`); cards = fromDb(words); }
+  if (!cards.length) { console.error(`${b.name}: no cards, skipping`); continue; }
+  writeFileSync(outPath, JSON.stringify([{ name: b.name, level: b.level, source: 'tendances', cards }]));
   console.error(`${b.name}: ${cards.length} cards -> official-decks/${b.out}`);
 }
