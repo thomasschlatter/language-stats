@@ -438,6 +438,11 @@ export default class Game extends Phaser.Scene {
     this.addTiled('Objects', false)
     this.addTiled('ObjectsOnCollide', true)
     this.addTiled('ObjectsOnCollide 2', true)
+    // These layers were being skipped: 'Wall' holds the fences/boundaries and
+    // 'GenericObjectsOnCollide' the bus station + street vendor. Add them WITH
+    // collision so you can't walk through them (and stay visually behind them).
+    this.addTiled('Wall', true)
+    this.addTiled('GenericObjectsOnCollide', true)
     this.spawnX = 1000
     this.spawnY = 740
     this.botX = 900
