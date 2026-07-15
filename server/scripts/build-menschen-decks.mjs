@@ -27,19 +27,31 @@ const topSense = db.prepare('SELECT text FROM word_definitions WHERE word_id = ?
 const deckExists = db.prepare('SELECT 1 FROM decks WHERE language_id = ? AND is_official = 1 AND name = ? LIMIT 1');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const clean = (g) => g.replace(/^\([^)]*\)\s*/, '').split(/[;]/)[0].trim(); // drop "(Noun) ", first sense
+// Skip form-of / inflection glosses — they're noise on a vocabulary card.
+const BAD = /\b(inflection|plural|singular|genitive|dative|accusative|nominative|vocative|past participle|present participle|imperative|subjunctive|form|alternative form|abbreviation) of\b/i;
+// "(Noun) country (a nation…)" -> "country": drop POS + parentheticals, first sense, cap length.
+const clean = (g) => g.replace(/^\([^)]*\)\s*/, '').replace(/\s*\([^)]*\)/g, '').split(/[;]/)[0].trim().slice(0, 60);
+// First gloss that's a real meaning (not a form-of pointer).
+const bestGloss = (glosses) => {
+  for (const g of glosses) { const c = clean(g); if (c && !BAD.test(g)) return c; }
+  return null;
+};
 
 // English gloss for a German word: DB first, then Wiktionary (cached).
 async function glossOf(word) {
   const rec = findWord.get(lang.id, word);
-  if (rec) { const s = topSense.get(rec.id); if (s) return clean(s.text); }
+  if (rec) {
+    const all = db.prepare('SELECT text FROM word_definitions WHERE word_id = ? ORDER BY accepted DESC, id').all(rec.id).map((r) => r.text);
+    const g = bestGloss(all);
+    if (g) return g;
+  }
   try {
     const defs = await fetchDefinitions(word, lang.lang);
     await sleep(120); // be polite to Wiktionary
     if (!defs.length) return null;
     const wid = ensureWord(lang.id, word);
     for (const d of defs) addDefinition({ wordId: wid, text: d.replace(/^\([^)]*\)\s*/, ''), source: 'wiktionary', accepted: true });
-    return clean(defs[0]);
+    return bestGloss(defs);
   } catch { return null; }
 }
 
