@@ -75,6 +75,11 @@ export default class WebRTC {
       })
       .then((stream) => {
         this.myStream = stream;
+        // Privacy: camera AND mic start OFF when entering the world. The stream
+        // is acquired (so calls work the instant the user opts in) but both
+        // tracks are disabled until they explicitly turn them on.
+        stream.getVideoTracks().forEach((t) => { t.enabled = false; });
+        stream.getAudioTracks().forEach((t) => { t.enabled = false; });
         this.addVideoStream(this.myVideo, this.myStream);
         this.setUpButtons();
         store.dispatch(setVideoConnected(true));
@@ -142,7 +147,7 @@ export default class WebRTC {
   // method to set up mute/unmute and video on/off buttons
   setUpButtons() {
     const audioButton = document.createElement("button");
-    audioButton.innerText = "Mute";
+    audioButton.innerText = "Unmute"; // mic starts OFF
     audioButton.addEventListener("click", () => {
       if (this.myStream) {
         const audioTrack = this.myStream.getAudioTracks()[0];
@@ -156,7 +161,7 @@ export default class WebRTC {
       }
     });
     const videoButton = document.createElement("button");
-    videoButton.innerText = "Video off";
+    videoButton.innerText = "Video on"; // camera starts OFF
     videoButton.addEventListener("click", () => {
       if (this.myStream) {
         const audioTrack = this.myStream.getVideoTracks()[0];
