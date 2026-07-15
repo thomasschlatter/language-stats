@@ -791,9 +791,12 @@ body.in-world .view { padding: 0; }
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* messages sit at the bottom, next to the composer */
   gap: 0.7rem;
 }
+/* Bottom-align messages without breaking scroll: the auto margin fills free
+   space when there are few messages, and collapses to 0 when they overflow. */
+.chat-list > :first-child, .drawer-chat-list > :first-child { margin-top: auto; }
+.drawer-chat-list { min-height: 100%; box-sizing: border-box; }
 .study-all-bar {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
   padding: 0.6rem 1rem; margin-bottom: 0.9rem;
