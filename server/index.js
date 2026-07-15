@@ -49,6 +49,7 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false 
 // .apkg uploads (base64) need a bigger limit than the default — apply it only
 // to that path, before the small global JSON parser.
 app.use('/api/flashcards/import-apkg', express.json({ limit: '30mb' }));
+app.use('/api/flashcards/import-pdf', express.json({ limit: '30mb' }));
 app.use('/api/profile/avatar-image', express.json({ limit: '5mb' })); // base64 photo
 app.use(express.json({ limit: '256kb' }));
 app.use(cookieParser());

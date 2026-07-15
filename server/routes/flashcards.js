@@ -10,6 +10,7 @@ import { topWords, totalCount } from '../models/frequency.js';
 import { unpredictableGenderNouns } from '../models/analysis.js';
 import { aiTranslate } from '../models/aiTranslate.js';
 import { parseApkg } from '../lib/anki.js';
+import { extractPdfCards } from '../models/pdfDeck.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
@@ -305,6 +306,25 @@ router.post('/import-apkg', requireAuth, (req, res) => {
 
   const deck = createDeck({ userId: req.user.id, languageId: language.id, name: name?.trim() || 'Anki import', source: 'anki' });
   const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows: rows.slice(0, 5000) });
+  res.status(201).json({ deck, added });
+});
+
+// POST /api/flashcards/import-pdf  { languageCode, name, data (base64) }
+// Extracts the vocabulary (word list) from a PDF and builds a study deck.
+router.post('/import-pdf', requireAuth, async (req, res) => {
+  const { languageCode, name, data } = req.body ?? {};
+  const language = getLanguageByCode(languageCode);
+  if (!language) return res.status(404).json({ error: 'unknown language' });
+  if (!data) return res.status(400).json({ error: 'file data is required' });
+  let rows;
+  try {
+    rows = await extractPdfCards(Buffer.from(data, 'base64'), language.id, 250);
+  } catch (err) {
+    return res.status(400).json({ error: err.message || 'could not read the PDF' });
+  }
+  if (!rows.length) return res.status(400).json({ error: 'no words could be extracted from this PDF' });
+  const deck = createDeck({ userId: req.user.id, languageId: language.id, name: name?.trim() || 'PDF vocabulary', source: 'pdf' });
+  const added = addCards({ deckId: deck.id, userId: req.user.id, languageId: language.id, rows });
   res.status(201).json({ deck, added });
 });
 

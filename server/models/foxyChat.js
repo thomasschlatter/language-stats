@@ -2,6 +2,8 @@
 // instruction model (transformers.js, CPU, no external API). Same lazy-load
 // pattern as aiTranslate: the model downloads on first use, then is cached, so
 // the server boots instantly and only pays the cost when someone talks to Foxy.
+import { llmAvailable, llmChat } from './llm.js';
+
 const MODEL = 'Xenova/LaMini-Flan-T5-77M';
 
 // Flan-T5 sometimes emits the generic assistant disclaimer — swap those (and
@@ -34,9 +36,19 @@ async function getGen() {
   return genPromise;
 }
 
+const FOXY_PERSONA = 'You are Foxy, a friendly, playful pet fox mascot for the Groupifier language-learning app. '
+  + 'Answer in one or two short, warm sentences. Be encouraging and help with languages. Never say you are an AI.';
+
 export async function foxyReply(message) {
-  const clean = String(message || '').replace(/@[Ff]oxy/g, '').slice(0, 300).trim();
+  const clean = String(message || '').replace(/@[Ff]oxy/g, '').slice(0, 500).trim();
   if (!clean) return 'Yip! Ask me something and I will do my best to answer.';
+  // Prefer the cloud LLM when configured; fall back to the local model.
+  if (llmAvailable()) {
+    try {
+      const r = await llmChat({ system: FOXY_PERSONA, messages: [{ role: 'user', content: clean }], maxTokens: 160, temperature: 0.7 });
+      if (r) return r;
+    } catch { /* fall back to local model */ }
+  }
   const gen = await getGen();
   // Give Foxy a persona; LaMini-Flan-T5 is instruction-tuned, so the output is
   // just the answer (it doesn't echo the prompt).
@@ -53,8 +65,18 @@ export async function foxyReply(message) {
 // Foxy answering a HELP question, grounded on retrieved app facts (RAG). Uses
 // only the given context; the caller also returns the source links separately.
 export async function foxyAssist(question, context) {
-  const q = String(question || '').replace(/@[Ff]oxy/g, '').slice(0, 300).trim();
+  const q = String(question || '').replace(/@[Ff]oxy/g, '').slice(0, 500).trim();
   if (!q) return "Yip! Ask me anything about Groupifier — decks, tips, groups, the World…";
+  if (llmAvailable()) {
+    try {
+      const r = await llmChat({
+        system: `${FOXY_PERSONA} You are answering a help question about Groupifier. Use ONLY these facts and do not invent features: ${String(context || '').slice(0, 1200)}. If the facts don't cover it, say you're not sure.`,
+        messages: [{ role: 'user', content: q }],
+        maxTokens: 180, temperature: 0.4,
+      });
+      if (r) return r;
+    } catch { /* fall back to local model */ }
+  }
   const gen = await getGen();
   const ctx = String(context || '').slice(0, 600);
   const prompt = `You are Foxy, the friendly Groupifier helper fox. Using ONLY these facts: "${ctx}" `

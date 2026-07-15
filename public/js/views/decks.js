@@ -184,50 +184,62 @@ function openImport(onDone) {
     placeholder: 'Paste CSV or TSV — front,back per line:\nHallo,hello\nDanke,thank you',
     style: 'min-height:150px; font-family:ui-monospace, monospace;',
   });
-  const file = el('input', { type: 'file', accept: '.csv,.tsv,.txt,.apkg' });
+  const file = el('input', { type: 'file', accept: '.csv,.tsv,.txt,.apkg,.pdf' });
   let apkgFile = null;
+  let pdfFile = null;
   file.addEventListener('change', async () => {
     const f = file.files[0];
     if (!f) return;
     if (!name.value) name.value = f.name.replace(/\.[^.]+$/, '');
-    if (f.name.toLowerCase().endsWith('.apkg')) {
-      apkgFile = f;
-      text.value = '';
-      text.disabled = true;
+    const lower = f.name.toLowerCase();
+    apkgFile = null; pdfFile = null;
+    if (lower.endsWith('.apkg')) {
+      apkgFile = f; text.value = ''; text.disabled = true;
       text.placeholder = `Anki package “${f.name}” selected — click Import.`;
+    } else if (lower.endsWith('.pdf')) {
+      pdfFile = f; text.value = ''; text.disabled = true;
+      text.placeholder = `PDF “${f.name}” selected — we'll pull the vocabulary out. Click Import.`;
     } else {
-      apkgFile = null;
       text.disabled = false;
       try { text.value = await f.text(); } catch { err.textContent = 'could not read file'; }
     }
   });
+  const fileToB64 = async (f) => {
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  };
 
+  const status = el('div', { class: 'muted' });
+  const submitBtn = el('button', { class: 'btn', type: 'submit' }, 'Import');
   const form = el('form', {
     onsubmit: async (e) => {
       e.preventDefault();
-      err.textContent = '';
+      err.textContent = ''; status.textContent = '';
+      submitBtn.disabled = true;
       try {
         if (apkgFile) {
-          const bytes = new Uint8Array(await apkgFile.arrayBuffer());
-          let bin = '';
-          for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-          await api.importApkg({ languageCode: langSel.value, name: name.value, data: btoa(bin) });
+          await api.importApkg({ languageCode: langSel.value, name: name.value, data: await fileToB64(apkgFile) });
+        } else if (pdfFile) {
+          status.textContent = 'Reading the PDF and pulling out the vocabulary…';
+          await api.importPdf({ languageCode: langSel.value, name: name.value, data: await fileToB64(pdfFile) });
         } else {
           await api.importDeck({ languageCode: langSel.value, name: name.value, text: text.value, source: 'csv' });
         }
         close();
         onDone();
-      } catch (ex) { err.textContent = ex.message; }
+      } catch (ex) { err.textContent = ex.message; submitBtn.disabled = false; status.textContent = ''; }
     },
   }, [
     el('label', {}, 'Deck name'), name,
     el('label', {}, 'Language of the words (front)'), langSel,
     el('label', {}, 'Paste CSV / TSV'), text,
-    el('label', {}, '…or choose a file (CSV, TSV, or Anki .apkg)'), file,
+    el('label', {}, '…or choose a file (CSV, TSV, Anki .apkg, or a PDF)'), file,
     el('div', { class: 'muted', style: 'font-size:0.78rem; margin-top:0.3rem' },
-      'Two columns: front (the word) then back (meaning/translation). Anki: a .apkg export works, or File → Export → “Notes in Plain Text”.'),
-    err,
-    el('div', { class: 'row', style: 'margin-top:1rem' }, [el('button', { class: 'btn', type: 'submit' }, 'Import')]),
+      'CSV/TSV: front then back per line. Anki .apkg works too. A PDF builds a deck from its most common words (their meanings are filled in from the dictionary where known).'),
+    err, status,
+    el('div', { class: 'row', style: 'margin-top:1rem' }, [submitBtn]),
   ]);
 
   const close = openModal(el('div', { class: 'import-modal' }, [el('h2', {}, 'Import a deck'), form]));

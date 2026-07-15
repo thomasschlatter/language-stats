@@ -149,6 +149,7 @@ export const api = {
   relinkCardSense: (cardId, definitionId) => request('PATCH', `/flashcards/cards/${cardId}/sense`, { definitionId }),
   importDeck: (b) => request('POST', '/flashcards/import', b),
   importApkg: (b) => request('POST', '/flashcards/import-apkg', b),
+  importPdf: (b) => request('POST', '/flashcards/import-pdf', b),
   generateDeck: (b) => request('POST', '/flashcards/generate', b),
   genderDeck: (b) => request('POST', '/flashcards/gender-deck', b),
   // Shared decks (official + user-published, upvotable)
