@@ -11,6 +11,7 @@ import { parseArticle } from '../articleMarkup.js';
 import { attachDeckButtons, attachAnkiButtons } from './listToDeck.js';
 import { voteButton } from './voteButton.js';
 import { navigate } from '../router.js';
+import { toast } from '../toast.js';
 
 // A tip's own page (a "card" in the unified list links here). Same layout as an
 // article: title, vote, author-only edit, markdown body with clickable words and
@@ -83,16 +84,33 @@ export function openTipEditor(language, onDone, tip = null) {
   let editor = null;
   const getBody = () => (editor ? editor.value() : body.value);
 
-  // Draft auto-save so a user can continue later. EasyMDE autosaves the body
-  // under this uniqueId; we save the title alongside and restore it here.
+  // Draft auto-save so a user can continue later — the whole tip (title, body,
+  // languages) is stored on every change and restored when the editor reopens.
   const draftId = editing ? `edit-${tip.id}` : `new-${language.code}`;
-  const TITLE_KEY = `gf_tipdraft_title_${draftId}`;
-  if (!editing && !title.value) title.value = localStorage.getItem(TITLE_KEY) || '';
-  title.addEventListener('input', () => localStorage.setItem(TITLE_KEY, title.value));
-  const clearDraft = () => {
-    try { editor?.clearAutosavedValue(); } catch { /* ignore */ }
-    localStorage.removeItem(TITLE_KEY);
+  const DRAFT_KEY = `gf_tipdraft_${draftId}`;
+  let savedDraft = null;
+  try { savedDraft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch { /* ignore */ }
+  if (savedDraft) {
+    if (savedDraft.title) title.value = savedDraft.title;
+    if (savedDraft.body) body.value = savedDraft.body; // EasyMDE reads the textarea
+  }
+  const saveDraft = () => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        title: title.value, body: getBody(),
+        writtenFor: writtenFor?.value, writtenIn: writtenIn?.value, ts: Date.now(),
+      }));
+    } catch { /* ignore */ }
   };
+  const clearDraft = () => localStorage.removeItem(DRAFT_KEY);
+  // Restore body/html scroll and exit fullscreen when leaving the editor (a
+  // torn-down EasyMDE fullscreen otherwise leaves the page scroll-locked).
+  const cleanup = () => {
+    try { editor?.codemirror.setOption('fullScreen', false); } catch { /* ignore */ }
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  };
+  title.addEventListener('input', saveDraft);
   // "Written for" = the language the tip is ABOUT (defaults to the current
   // page's language). Only offered on create — updating which language a tip
   // belongs to isn't supported.
@@ -107,11 +125,27 @@ export function openTipEditor(language, onDone, tip = null) {
       return el('option', { value: l.code, selected: selected ? '' : null }, l.name);
     })
   );
+  // Restore the draft's languages + keep the draft updated on change.
+  if (savedDraft?.writtenFor) writtenFor.value = savedDraft.writtenFor;
+  if (savedDraft?.writtenIn) writtenIn.value = savedDraft.writtenIn;
+  writtenIn.addEventListener('change', saveDraft);
+  // Heading follows the "written for" language.
+  const langNameOf = (code) => store.languages.find((l) => l.code === code)?.name || language.name;
+  const headingEl = el('h1', {}, editing ? 'Edit tip' : `Share a ${langNameOf(writtenFor.value)} tip`);
+  if (!editing) {
+    writtenFor.addEventListener('change', () => {
+      headingEl.textContent = `Share a ${langNameOf(writtenFor.value)} tip`;
+      saveDraft();
+    });
+  }
 
   const form = el('form', {
     onsubmit: async (e) => {
       e.preventDefault();
       err.textContent = '';
+      // Validate up front with a visible toast (rather than a silent 400).
+      if (!title.value.trim()) { toast('Please add a title.'); return; }
+      if (!getBody().trim()) { toast('Please write your tip before posting.'); return; }
       try {
         if (editing) {
           await api.updateTip(tip.id, {
@@ -119,7 +153,7 @@ export function openTipEditor(language, onDone, tip = null) {
             body: getBody(),
             bodyLanguageCode: writtenIn.value,
           });
-          clearDraft();
+          clearDraft(); cleanup();
           close();
           onDone();
         } else {
@@ -129,7 +163,7 @@ export function openTipEditor(language, onDone, tip = null) {
             title: title.value,
             body: getBody(),
           });
-          clearDraft();
+          clearDraft(); cleanup();
           close();
           // If the tip is about another language, jump to that language's tips.
           if (writtenFor.value !== language.code) navigate(`#/lang/${writtenFor.value}/tips`);
@@ -137,15 +171,16 @@ export function openTipEditor(language, onDone, tip = null) {
         }
       } catch (ex) {
         err.textContent = ex.message;
+        toast(ex.message || 'Could not save the tip.', 'error');
       }
     },
   }, [
     // Header bar with the actions at the TOP — above the editor and above
     // EasyMDE's fixed side-by-side preview, so they never overlap the editor.
     el('div', { class: 'tip-editor-bar' }, [
-      el('h1', {}, editing ? 'Edit tip' : `Share a ${language.name} tip`),
+      headingEl,
       el('div', { class: 'tip-editor-bar-actions' }, [
-        el('button', { class: 'btn small secondary', type: 'button', onclick: () => onDone() }, 'Cancel'),
+        el('button', { class: 'btn small secondary', type: 'button', onclick: () => { cleanup(); onDone(); } }, 'Cancel'),
         el('button', { class: 'btn small', type: 'submit' }, editing ? 'Save changes' : 'Post tip'),
       ]),
     ]),
@@ -179,7 +214,6 @@ export function openTipEditor(language, onDone, tip = null) {
       autofocus: false,
       autoDownloadFontAwesome: true,
       placeholder: 'Share your trick for learning…',
-      autosave: { enabled: true, uniqueId: `gf_tip_${draftId}`, delay: 1000 },
       toolbar: ['bold', 'italic', 'heading', '|', 'unordered-list', 'ordered-list', 'quote', '|', {
         name: 'anki',
         title: 'Anki list — becomes an add-to-deck flashcard list',
@@ -189,7 +223,9 @@ export function openTipEditor(language, onDone, tip = null) {
           cm.replaceSelection('\n[anki: My deck]\n- word — meaning\n- another — meaning\n');
           cm.focus();
         },
-      }, '|', 'side-by-side', 'preview', 'guide'],
+      }, '|', 'preview', 'guide'],
     });
+    // Save the draft on every keystroke so it can be picked up later.
+    editor.codemirror.on('change', saveDraft);
   }).catch(() => { /* keep the plain textarea */ });
 }

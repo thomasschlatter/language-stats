@@ -286,12 +286,12 @@ body.in-msg .view { overflow-y: auto; }
   background: var(--surface); color: var(--text);
 }
 .tip-editor-page .editor-statusbar { color: var(--muted); }
-.tip-editor-page .CodeMirror { min-height: 55vh; font: inherit; }
+/* Grow with content (height:auto) with matching min-heights so no internal
+   scrollbar shows in the middle of the field for short/medium text. */
+.tip-editor-page .CodeMirror { min-height: 300px; height: auto; font: inherit; }
+.tip-editor-page .CodeMirror-scroll { min-height: 300px; }
 .tip-editor-page .editor-toolbar { border-radius: 6px 6px 0 0; }
 .tip-editor-page .EasyMDEContainer { margin-bottom: 0.6rem; }
-/* Side-by-side preview fills the same tall height as the editor. */
-.tip-editor-page .CodeMirror-sided { width: 50% !important; }
-.tip-editor-page .editor-preview-side { width: 50%; min-height: 55vh; }
 .lang-picker-search {
   width: 100%; box-sizing: border-box; margin: 0.4rem 0 0;
   padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 8px;
@@ -507,6 +507,20 @@ body.in-msg .view { overflow-y: auto; }
 .foxy-sources { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.2rem; }
 .foxy-source { font-size: 0.82rem; }
 .group-card { display: block; text-decoration: none; color: inherit; margin-bottom: 0.6rem; }
+/* Toast notifications */
+.toast-container {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem; align-items: center; pointer-events: none;
+}
+.toast {
+  background: var(--surface); color: var(--text); border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.6rem 1rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  opacity: 0; transform: translateY(-8px); transition: opacity 0.3s, transform 0.3s;
+  max-width: 90vw; font-size: 0.9rem; font-weight: 500;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-error { border-color: var(--danger); }
+.toast-success { border-color: var(--accent); }
 /* Shared group link rendered as a button inside a chat message. */
 .group-link-btn {
   display: inline-flex; align-items: center; gap: 0.25rem; font: inherit; font-size: 0.85rem;
