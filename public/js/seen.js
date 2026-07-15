@@ -37,6 +37,13 @@ function applyColor(elm) {
   if (!lang || wlc == null) return;
   const key = keyOf(lang, wlc);
 
+  // 'off' = no colouring or markers at all.
+  if (mode === 'off') {
+    elm.style.removeProperty('--seen-bg');
+    elm.classList.remove('in-deck');
+    return;
+  }
+
   elm.classList.toggle('in-deck', studyLevels.has(key)); // deck marker (both modes)
 
   let color = null;
@@ -133,15 +140,18 @@ export function noteCardAdded(lang, word) {
 
 // A top-bar toggle button to switch colouring mode.
 export function colorModeToggle() {
-  const label = () => (mode === 'studied' ? '🎴 Studied' : '👁 Seen');
-  const btn = el('button', { class: 'btn secondary small', title: 'Colour words by how often seen, or by study progress' }, label());
+  const NEXT = { studied: 'seen', seen: 'off', off: 'studied' };
+  const label = () => (mode === 'studied' ? '🎴 Studied' : mode === 'seen' ? '👁 Seen' : '⚪ Off');
+  const btn = el('button', { class: 'btn secondary small', title: 'Colour words by study progress, by how often seen, or turn colouring off' }, label());
   btn.addEventListener('click', () => {
-    mode = mode === 'studied' ? 'seen' : 'studied';
+    mode = NEXT[mode] || 'studied';
     localStorage.setItem('ls_color_mode', mode);
     btn.textContent = label();
-    // Make sure the data the new mode needs is loaded for on-screen languages.
-    new Set([...document.querySelectorAll('.w[data-lang]')].map((w) => w.getAttribute('data-lang')))
-      .forEach((lang) => ensureLoaded(lang));
+    if (mode !== 'off') {
+      // Make sure the data the new mode needs is loaded for on-screen languages.
+      new Set([...document.querySelectorAll('.w[data-lang]')].map((w) => w.getAttribute('data-lang')))
+        .forEach((lang) => ensureLoaded(lang));
+    }
     recolorAll();
   });
   return btn;
