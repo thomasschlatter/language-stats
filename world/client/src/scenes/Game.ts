@@ -136,6 +136,7 @@ export default class Game extends Phaser.Scene {
     const worldMap = (this.network as any).worldMap || 'meadow'
     if (worldMap === 'cafe') this.buildInterior('tilemap')
     else if (worldMap === 'room') this.buildRoom()
+    else if (worldMap === 'border') this.buildBorderRoom()
     else if (worldMap === 'town') this.buildCity()
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else if (worldMap === 'osaka')
@@ -525,9 +526,9 @@ export default class Game extends Phaser.Scene {
   // 3D wall frame with a door gap). Only the Walls layer collides — every non-empty
   // wall tile is solid, and the door gap is empty so it stays walkable. Floor and
   // shadow layers never collide. Model for reliable, generated indoor levels.
-  private buildRoom() {
+  private buildRoom(key = 'roomMap') {
     this.worldColliders = []
-    this.map = this.make.tilemap({ key: 'roomMap' })
+    this.map = this.make.tilemap({ key })
     const floors = this.map.addTilesetImage('floors', 'room_floors')!
     const walls = this.map.addTilesetImage('walls', 'room_walls')!
     const sky = this.map.addTilesetImage('sky', 'room_sky')!
@@ -537,6 +538,34 @@ export default class Game extends Phaser.Scene {
     wallLayer.setCollisionByExclusion([-1, 0]) // solid on every wall tile; door gap is empty → walkable
     this.worldColliders.push(wallLayer)
     // Spawn where the map says (room centre), falling back to the map centre.
+    const props = (this.map.properties as Array<{ name: string; value: number }>) || []
+    const prop = (n: string) => props.find((p) => p.name === n)?.value
+    this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
+    this.spawnY = prop('spawnY') ?? (this.map.height / 2) * 32
+    this.botX = this.spawnX
+    this.botY = this.spawnY + 64
+  }
+
+  // A generated LimeZu border room (borderRoomMap.json, made by gen-border-room.mjs):
+  // Ground + Shadows + Wallpaper (upper wall face) + Walls (thin white wall-tops, door
+  // gap, left/right separator) + Over. Only the Walls layer collides (door + separator
+  // doorway are empty → walkable). The Over layer holds the separator's overhang top,
+  // drawn ABOVE the player with no collision (2.5D depth: walk behind the wall's top edge).
+  private buildBorderRoom() {
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key: 'borderRoomMap' })
+    const floors = this.map.addTilesetImage('floors', 'room_floors')!
+    const borders = this.map.addTilesetImage('borders', 'room_borders')!
+    const sky = this.map.addTilesetImage('sky', 'room_sky')!
+    const wallpaper = this.map.addTilesetImage('wallpaper', 'room_wallpaper')!
+    this.map.createLayer('Ground', [floors, sky], 0, 0)
+    this.map.createLayer('Shadows', [floors], 0, 0) // transparent overlay, non-colliding
+    this.map.createLayer('Wallpaper', [wallpaper], 0, 0) // upper-wall face, non-colliding
+    const wallLayer = this.map.createLayer('Walls', [borders], 0, 0)!
+    wallLayer.setCollisionByExclusion([-1, 0]) // solid walls; door + separator doorway are empty → walkable
+    this.worldColliders.push(wallLayer)
+    const over = this.map.createLayer('Over', [borders], 0, 0)!
+    over.setDepth(10000) // above the player; the separator overhang occludes the head, no collision
     const props = (this.map.properties as Array<{ name: string; value: number }>) || []
     const prop = (n: string) => props.find((p) => p.name === n)?.value
     this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32

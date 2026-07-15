@@ -59,4 +59,11 @@ export const WORLDS: WorldInfo[] = [
     map: 'room',
     emoji: '🚪',
   },
+  {
+    id: 'world_border',
+    name: 'Apartment',
+    description: 'A wallpapered floating apartment split into two rooms by an inner wall and doorway.',
+    map: 'border',
+    emoji: '🏠',
+  },
 ]
