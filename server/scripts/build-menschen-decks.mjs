@@ -29,11 +29,13 @@ const deckExists = db.prepare('SELECT 1 FROM decks WHERE language_id = ? AND is_
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // Skip form-of / inflection glosses — they're noise on a vocabulary card.
 const BAD = /\b(inflection|plural|singular|genitive|dative|accusative|nominative|vocative|past participle|present participle|imperative|subjunctive|form|alternative form|abbreviation) of\b/i;
+// Grammar-metadata masquerading as a definition ("first-person singular present").
+const META = /\b(first-person|second-person|third-person|person singular|person plural|subjunctive|indicative|imperative mood|participle|conjugation|declension)\b/i;
 // "(Noun) country (a nation…)" -> "country": drop POS + parentheticals, first sense, cap length.
 const clean = (g) => g.replace(/^\([^)]*\)\s*/, '').replace(/\s*\([^)]*\)/g, '').split(/[;]/)[0].trim().slice(0, 60);
 // First gloss that's a real meaning (not a form-of pointer).
 const bestGloss = (glosses) => {
-  for (const g of glosses) { const c = clean(g); if (c && !BAD.test(g)) return c; }
+  for (const g of glosses) { const c = clean(g); if (c && !BAD.test(g) && !META.test(g) && !META.test(c)) return c; }
   return null;
 };
 
