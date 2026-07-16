@@ -29,6 +29,7 @@ const ground = new Array(W * H).fill(0);
 const walls = new Array(W * H).fill(0);
 const shadows = new Array(W * H).fill(0);
 const furniture = new Array(W * H).fill(0);
+const over = new Array(W * H).fill(0); // tall-object tops: above the player, no collision
 const wput = (x, y, id) => { if (id != null) walls[y * W + x] = WL + id; };
 const alt = (a, i) => a[i % a.length];
 
@@ -65,17 +66,23 @@ for (let y = iy0 + 1; y <= iy1; y++) shadows[y * W + ix0] = FL + SHADOW.left;
 //   plain desk 1x2 @18 · chair (backrest to us → student faces the board) 1x2 @50
 // Objects are spaced so every neighbouring cell (left/right/above/below) stays free.
 const CLCOLS = 16;
-const putRect = (x, y, w, h, id0) => {
+const putRect = (x, y, w, h, id0, target = furniture) => {
   for (let r = 0; r < h; r++) for (let c = 0; c < w; c++)
-    furniture[(y + r) * W + (x + c)] = CL + id0 + r * CLCOLS + c;
+    target[(y + r) * W + (x + c)] = CL + id0 + r * CLCOLS + c;
+};
+// A tall object: its BASE row collides (Furniture); the rows above it go to Over so the
+// player is occluded walking behind it and can stand in that space.
+const putTall = (x, y, w, h, id0) => {
+  putRect(x, y, w, h - 1, id0, over);                            // upper part -> Over
+  putRect(x, y + h - 1, w, 1, id0 + (h - 1) * CLCOLS, furniture); // base -> collides
 };
 const cx = ox + (RW >> 1);
 
 putRect(cx - 1, oy + 2, 2, 2, 90);        // green chalkboard, front-centre
-putRect(ox + 1, oy, 3, 3, 208);           // library, standing against the back wall (up 2)
+putTall(ox + 1, oy, 3, 3, 208);           // library against the back wall: top is Over, base collides
 putRect(cx + 3, oy + 2, 2, 2, 21);        // teacher's desk, right of the board
 putRect(cx + 6, oy + 2, 1, 2, 29);        // globe
-putRect(ox + RW - 4, oy + 6, 3, 3, 208);  // second library, against the right wall
+putTall(ox + RW - 4, oy + 6, 3, 3, 208);  // second library: top is Over, base collides
 
 // student seats facing the board: desk with its chair behind it (4 tall per seat)
 for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) {
@@ -89,7 +96,7 @@ const map = {
   type: 'map', version: '1.10', orientation: 'orthogonal', renderorder: 'right-down',
   width: W, height: H, tilewidth: 32, tileheight: 32, infinite: false, nextlayerid: 5, nextobjectid: 1,
   tilesets: SETS.map((s) => ({ firstgid: s.firstgid, name: s.name, image: s.image, imagewidth: s.cols * 32, imageheight: (s.tilecount / s.cols) * 32, tilewidth: 32, tileheight: 32, columns: s.cols, tilecount: s.tilecount, margin: 0, spacing: 0 })),
-  layers: [layer('Ground', ground), layer('Shadows', shadows), layer('Walls', walls), layer('Furniture', furniture)],
+  layers: [layer('Ground', ground), layer('Shadows', shadows), layer('Walls', walls), layer('Furniture', furniture), layer('Over', over)],
   properties: [{ name: 'spawnX', type: 'int', value: (ox + RW / 2) * 32 }, { name: 'spawnY', type: 'int', value: (oy + RH - 2) * 32 }],
 };
 writeFileSync(out, JSON.stringify(map));

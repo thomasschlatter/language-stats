@@ -635,6 +635,12 @@ export default class Game extends Phaser.Scene {
       chair.setDepth(t.getCenterY())
       if (chair.refreshBody) chair.refreshBody()
     })
+    // Tall furniture (libraries): only their BASE row is on Furniture and collides. Their
+    // upper rows live on Over — drawn above the player with NO collision, so you can stand
+    // in that space and disappear behind the shelf.
+    const overLayer = this.map.createLayer('Over', [cls], 0, 0)
+    overLayer?.setDepth(10000)
+
     // The player selector doesn't exist until setupPlayerAndNetwork() runs, so stash
     // the group and let that register the overlap.
     this.chairGroup = chairGroup
