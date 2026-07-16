@@ -27,6 +27,12 @@ import { setFocused, setShowChat } from '../stores/ChatStore'
 import { NavKeys, Keyboard } from '../../../types/KeyboardState'
 
 export default class Game extends Phaser.Scene {
+  // Generated indoor room worlds where the Foxy sprite is hidden (he still answers in
+  // chat). These are the small themed rooms; open/outdoor worlds keep the sprite.
+  private static readonly INDOOR_ROOM_WORLDS = new Set([
+    'room', 'border', 'classroom', 'doctor', 'shop', 'kitchen', 'bedroom',
+    'living', 'clothing', 'icecream', 'museum', 'bathroom', 'gym',
+  ])
   network!: Network
   private cursors!: NavKeys
   private keyE!: Phaser.Input.Keyboard.Key
@@ -35,7 +41,7 @@ export default class Game extends Phaser.Scene {
   private keySpace!: Phaser.Input.Keyboard.Key
   private map!: Phaser.Tilemaps.Tilemap
   myPlayer!: MyPlayer
-  botPlayer!: OtherPlayer
+  botPlayer?: OtherPlayer
   private playerSelector!: Phaser.GameObjects.Zone
   private chairGroup?: Phaser.Physics.Arcade.StaticGroup
   private otherPlayers!: Phaser.Physics.Arcade.Group
@@ -304,8 +310,15 @@ export default class Game extends Phaser.Scene {
       )
     this.otherPlayers = this.physics.add.group({ classType: OtherPlayer })
 
-    this.botPlayer = this.add.otherPlayer(this.botX, this.botY, 'fox', 'bot', 'Foxy', 1)
-    this.botPlayer.setScale(2)
+    // Foxy the fox is hidden in the generated indoor room worlds for now (he clutters
+    // the small themed rooms). He stays fully responsive in chat regardless: @foxy
+    // replies are added to the chat log server-side (ChatBotMessageUpdateCommand),
+    // separate from his in-world dialog bubble. Non-room worlds still show the sprite.
+    const worldMap = (this.network as any).worldMap || 'meadow'
+    if (!Game.INDOOR_ROOM_WORLDS.has(worldMap)) {
+      this.botPlayer = this.add.otherPlayer(this.botX, this.botY, 'fox', 'bot', 'Foxy', 1)
+      this.botPlayer.setScale(2)
+    }
 
     this.cameras.main.zoom = 2 // zoomed in; integer zoom keeps pixel art crisp
     this.cameras.main.startFollow(this.myPlayer, true)
@@ -319,7 +332,8 @@ export default class Game extends Phaser.Scene {
       this.physics.add.collider(this.myPlayer, c)
 
     this.physics.add.overlap(this.myPlayer, this.otherPlayers, this.handlePlayersOverlap, undefined, this)
-    this.physics.add.overlap(this.myPlayer, this.botPlayer, this.handleBotOverlap, undefined, this)
+    if (this.botPlayer)
+      this.physics.add.overlap(this.myPlayer, this.botPlayer, this.handleBotOverlap, undefined, this)
 
     // Click / tap-to-walk: send the player toward the clicked point. Listen on
     // the window (not Phaser input) because the React UI overlay sits above the
@@ -1346,7 +1360,8 @@ export default class Game extends Phaser.Scene {
   }
 
   private handleBotMessagesAdded(content: string) {
-    this.botPlayer.updateDialogBubble(content.trim())
+    // No fox sprite in the indoor rooms — the reply still shows in the chat log.
+    this.botPlayer?.updateDialogBubble(content.trim())
   }
 
 
