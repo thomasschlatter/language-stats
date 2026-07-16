@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -145,6 +145,18 @@ const WorldCard = styled.button`
     line-height: 1.35;
     color: #b7bcda;
   }
+
+  .lang {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #33ac9622;
+    border: 1px solid #33ac9655;
+    font-size: 11px;
+    color: #7fd9c8;
+    white-space: nowrap;
+  }
 `;
 
 // Full-width, same padding/look as the world cards.
@@ -190,6 +202,25 @@ export default function RoomSelectionDialog() {
   const [showCreateRoomForm, setShowCreateRoomForm] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const lobbyJoined = useAppSelector((state) => state.room.lobbyJoined);
+  // Every world is matched per language (joinWorld filters by it), so show WHICH
+  // language you'll be grouped in. Fetched once here; handleJoinWorld re-fetches at
+  // join time so the label is a hint, never the source of truth.
+  const [learnLang, setLearnLang] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/me", { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((me) => {
+        const learning = me?.user?.learning;
+        if (!cancelled && learning && learning.length) setLearnLang(learning[0]);
+      })
+      .catch(() => {
+        /* no label — the picker still works */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const joiningRef = useRef(false);
   const handleJoinWorld = async (world: WorldInfo) => {
@@ -304,6 +335,11 @@ export default function RoomSelectionDialog() {
                       <div className="info">
                         <h3>{world.name}</h3>
                         <p>{world.description}</p>
+                        {learnLang && (
+                          <span className="lang">
+                            🗣 {languageDisplayName(learnLang)}
+                          </span>
+                        )}
                       </div>
                     </WorldCard>
                   ))}

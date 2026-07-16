@@ -7,9 +7,24 @@
 // Theme_Sorter_32x32/21_Clothing_Store_32x32.png into the COMMITTED assets/tileset/ dir.
 //
 // FOOTPRINTS ARE NOT GUESSED. Every rect below was derived by template-matching the pack's
-// per-object exports (Theme_Sorter_Singles_32x32/21_Clothing_Store_Singles_32x32/) into the
-// sheet for ground truth, cross-checked with the navy-outline test + flood fill. Notes:
-//  - fitting_room is MODULAR: two 16px poles (384/387) flank a 2x2 curtain (401) -> 4x3 @384.
+// SHADOWLESS per-object exports (Theme_Sorter_Shadowless_Singles_32x32/21_Clothing_Store_
+// Singles_Shadowless_32x32/) into the SHADOWLESS sheet (shadowed matching fails: on this
+// zero-gutter sheet a neighbour's drop shadow bleeds across the object boundary). Each rect
+// then had to agree with an alpha profile of the sheet region. Notes:
+//  - fitting_room is MODULAR and 6 ROWS TALL. Each pole is TWO stacked singles:
+//    left  = 336 (rows 21-23, cap) + 384 (rows 24-26, foot);
+//    right = 339 (rows 21-23, cap) + 387 (rows 24-26, foot).
+//    Proof they stack: 336/339 have BOTTOM pad 0 and 384/387 have TOP pad 0 (art runs to the
+//    joining edge of the single's own rect => modular segment), and their art butts exactly at
+//    y=767|768. A previous pass placed only the lower half (4x3 @384) which CLIPPED both poles
+//    to bare cut sticks AND dragged in the stray divider stick 369/370 -> read as "split".
+//    Horizontally the three pieces butt with no gap: pole x24-31 | curtain x32-95 | pole x96-101.
+//    The 4x6 block is NOT a putRect: cols 1-2 rows 21-22 hold two unrelated stools and rows
+//    23-24 the divider stick, so the pieces are placed individually.
+//  - 890/922 are the pack's DISARRANGED shelf variants (one shelf slot left empty + a garment
+//    tossed on the floor). Their rects are correct and complete (single == sheet region
+//    exactly, 4px transparent pad on all four sides => transparency-isolated, cannot be
+//    clipped) — they simply READ as broken next to the tidy 892/924. Use the tidy ones.
 //  - 390/425/473 show bare LEFT/RIGHT pixels at their base; those are the LimeZu base-shadow
 //    band (colour 167,151,150) and are present in the STANDALONE singles too => not clipped.
 //  - benches 884/886 were REJECTED: art 64x64 with un-outlined L/R edges = tileable segments
@@ -107,33 +122,39 @@ putTall(5, backWall(3), 2, 3, 249, 'rail_blue');    // clothes rail, blue garmen
 putTall(8, backWall(3), 2, 3, 486, 'rail_white');   // clothes rail, white/pink garments
 putTall(18, backWall(3), 2, 3, 390, 'shelf_shoes'); // shelf of shoes / bags
 
-// ---- fitting room (poles + curtain, 4x3) ----
-// Unlike the sprites above, this one's art fills all 96px of its rect, so it is a full tile
-// taller than the 2-row wall band. Both placements were generated and compared as PNGs:
-//   topRow = oy+1 -> roofline intact, but the cubicle visibly FLOATS a tile off the wall with
-//                    floor showing behind its rail. That is the failure the skill forbids.
-//   topRow = oy   -> flush to the wall, base on the first floor row, NO floor strip; its poles
-//                    stop exactly at the room's top edge (verified: sky at y=95 is untouched
-//                    above every pole column) and merely overdraw the wall's white cap line,
-//                    reading as a cubicle taller than the wall.
-// The second is the lesser artifact and is what the skill's backWall() rule prescribes.
-putTall(11, backWall(3), 4, 3, 384, 'fitting_room');
+// ---- fitting room / changing cabin: FREE-STANDING, 4 cols x 6 rows ----
+// NOT back-wall furniture, so backWall() does NOT apply: its art is 176px tall (5.5 tiles),
+// far taller than the 2-row wall band, and hanging it at oy made the poles overdraw the wall's
+// white cap line so it read as a cubicle taller than the wall. It stands in the room instead,
+// with the whole first floor row (oy+2) as clear floor above it -> reads free-standing.
+// Assembled from three pack singles that butt exactly (see header); cols FR_X+1..FR_X+2 rows
+// FR_Y..FR_Y+3 are deliberately left EMPTY — that open "U" is the cubicle's interior floor,
+// and the player can step into it (only the base row collides).
+// Side clearance is built in: the art spans only x+26..x+101 of the 128px rect, i.e. ~26px of
+// transparent padding inside each outer column, so neighbours at FR_X-1 / FR_X+4 stay clear.
+const FR_X = 11, FR_Y = oy + 3;                    // rows oy+3 .. oy+8, base on oy+8
+putTall(FR_X, FR_Y, 1, 6, 336, 'fitting_pole_l');  // 336(cap,r21-23) + 384(foot,r24-26)
+putTall(FR_X + 3, FR_Y, 1, 6, 339, 'fitting_pole_r'); // 339(cap) + 387(foot)
+putTall(FR_X + 1, FR_Y + 4, 2, 2, 401, 'fitting_curtain'); // rail + curtain across the front
 
 // ---- wall-mounted (1x2 only: spans the cap row oy + face row oy+1) ----
 putRect(7, oy, 1, 2, 207, furniture, 'mirror_wall_silver');  // between the two rails
 putRect(16, oy, 1, 2, 239, furniture, 'mirror_wall_gold');   // beside the fitting room
 
 // ---- mid shop: shelves of folded clothes ----
-putTall(5, 8, 2, 2, 922, 'shelf_folded_a');   // folded shirts (green/red/pink)
-putTall(8, 8, 2, 2, 924, 'shelf_folded_b');
-putTall(11, 8, 2, 2, 890, 'shelf_folded_c');
+// 892/924 are the TIDY variants. 922 and 890 (the old shelf_folded_a / _c) were the pack's
+// DISARRANGED variants — correct rects, but an empty shelf slot plus a garment dropped on the
+// floor reads as a broken/split sprite beside a tidy neighbour. shelf_folded_c's slot is now
+// the fitting-room cabin, which fills the middle of the shop.
+putTall(5, 8, 2, 2, 892, 'shelf_folded_a');   // folded shirts (grey/purple/green)
+putTall(8, 8, 2, 2, 924, 'shelf_folded_b');   // folded shirts (green/red/pink)
 putTall(15, 8, 2, 2, 954, 'shelf_hats');      // hats / caps
 putTall(18, 8, 2, 2, 268, 'boxes');           // stock boxes
 
 // ---- shop floor: free-standing clothes rails (this is what says "clothes shop") ----
 putTall(5, 11, 2, 3, 249, 'rail_blue_2');
 putTall(8, 11, 2, 3, 486, 'rail_white_2');
-putTall(11, 11, 2, 3, 249, 'rail_blue_3');
+// (the old rail_blue_3 at (11,11) is gone: the fitting-room cabin occupies that bay)
 putTall(15, 11, 1, 3, 425, 'mirror_stand_silver');
 putTall(17, 11, 2, 3, 496, 'counter_till');   // counter with cash register
 putTall(20, 11, 1, 3, 473, 'mirror_stand_gold');

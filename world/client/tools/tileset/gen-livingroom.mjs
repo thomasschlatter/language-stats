@@ -69,10 +69,34 @@ for (let y = iy0 + 1; y <= iy1; y++) shadows[y * W + ix0] = FL + SHADOW.left;
 //   potted tree 2x3 @10   (single #13)   potted plant   1x2 @332 (single #16)
 //   coffee table 2x2 @114 (single #29)   TV stand/sideboard 2x2 @179 (single #51)
 //   floor lamp  1x3 @156  (single #79)   chair          1x2 @300 (single #92)
-//   sofa 3-seat (faces S) 3x2 @449 · sofa 2-seat (faces N) 2x2 @481 · ottoman 1x1 @483
-//   armchair (faces E) 2x3 @517 · armchair (faces W) 2x3 @515
-//   (the seating is modular so it ships no singles; each rect was verified by the
-//    navy-outline test + zero spill outside the rect on the sheet.)
+//
+// SEATING (re-derived from pixels 2026-07-16 — the modular seating block, sheet rows 28-35,
+// ships NO singles: all 122 Living_Room_Singles were template-matched into the sheet and not
+// one lands in rows 28-35, so singles cannot verify it. Flood fill is also useless here — the
+// pieces butt together with zero gutter and merge into one 15x2 blob. Verified instead by the
+// navy-outline test (LimeZu outlines every FINISHED edge in navy, lum<95): a full-height navy
+// column marks an object boundary. Rows 30-31 give navy edges at x32/33, x94/95, x96/97,
+// x126/127, x128/129 -> objects at cols 1-2, col 3, cols 4-5 exactly. Then render-and-look.)
+//   sofa 3-seat  3x2 @449 (blue) / @452 (grey)  -- FACES SOUTH (back at top)
+//   sofa 2-seat  2x2 @481 (blue) / @484 (grey)  -- FACES NORTH (we see its BACK)
+//   ottoman 1x1 @483 (blue) / @486 (grey) · bench 2x2 @455 (orange) / @487 (lilac)
+//   armchair, profile, 2x3: @515/@519 FACE WEST (backrest post on the right)
+//                           @517/@521 FACE EAST (backrest post on the left)
+//
+// How S vs N was settled (the two look alike at map scale): 449's vertical structure is
+// navy top / 20px BACKREST / navy seam / 20px SEAT CUSHIONS / rail / feet+shadow. The
+// backrest is woven from 162,168,190 + 172,177,197 in a 1:1 ratio; the seat cushions add a
+// third, darker shade 144,151,177. 481's big panels are 162,168,190 x835 + 172,177,197 x790
+// (1:1) with almost no 144,151,177 (104px) -> 481 shows a BACKREST, not cushions, i.e. we are
+// looking at the back of the sofa and the sitter faces N. 449 shows cushions below its
+// backrest, i.e. the sitter faces S.
+// CONSEQUENCE (why there is no 3-seat sofa at the TV): the TV is drawn front-on and can only
+// live on the NORTH wall, so seating must face NORTH -> only @481/@484 work. @449/@452 face
+// SOUTH and have NO correct home in this room; a S-facing sofa anywhere here either turns its
+// back on the TV or floats with its back against nothing. Do not re-add one.
+// Armchair h: the flood fill reports 2x4 because a modular extension strip in sheet row 35
+// touches the chair's shadow. Rendering @515 as 2x4 shows that strip detached below the
+// shadow -> the chair is 2x3. h=3 is correct.
 // Objects are spaced so every neighbouring cell (left/right/above/below) stays free.
 const LVCOLS = 16;
 const claimed = new Set(); // overlap guard: each furniture cell may be written once
@@ -119,9 +143,16 @@ putTall(ox + 4, oy + 8, 2, 3, 521, 'armchair-facing-E');        // cols 8-9,   r
 putTall(ox + 12, oy + 8, 2, 3, 519, 'armchair-facing-W');       // cols 16-17, rows 11-13
 putRect(ox + 11, oy + 12, 1, 1, 483, furniture, 'ottoman');     // col 15,     row 15
 
-// ---- edges: lamp, second sofa, chair, plants ----
+// ---- edges: lamp, reading armchair, chair, plants ----
 putTall(ox + 15, oy + 6, 1, 3, 156, 'floor-lamp');              // col 19, rows 9-11
-putRect(ox + 1, oy + 5, 3, 2, 449, furniture, 'sofa-3seat');    // cols 5-7, rows 8-9
+// This spot is FLUSH AGAINST THE LEFT WALL, so whatever sits here must face EAST. It used to
+// hold the 3-seat sofa @449, which is drawn FACING SOUTH (backrest along its top edge) — i.e.
+// a sofa whose back wants the upper wall. Parked against the left wall it read as misplaced:
+// its back faced nothing and its front faced the bottom of the room, not the TV. The sheet has
+// no E/W-facing sofa (sofas are N or S only), so there is no sofa variant that reads here —
+// the only east-facing seat is the profile armchair. Grey @517 (not blue-grey @521) so it
+// reads as a distinct reading chair rather than a third match for the TV pair.
+putTall(ox + 1, oy + 4, 2, 3, 517, 'armchair-left-wall-facing-E'); // cols 5-6, rows 7-9
 putRect(ox + 1, oy + 9, 1, 2, 332, furniture, 'plant-left');    // col 5,  rows 12-13
 putRect(ox + 1, oy + 13, 1, 2, 300, furniture, 'chair');        // col 5,  rows 16-17
 putRect(ox + 16, oy + 13, 1, 2, 332, furniture, 'plant-corner'); // col 20, rows 16-17
