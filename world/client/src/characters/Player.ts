@@ -39,10 +39,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.anims.play(`${this.playerTexture}_idle_down`, true)
 
-    this.playerContainer = this.scene.add.container(this.x, this.y - 30).setDepth(5000)
+    // The name/dialog container must sit above EVERYTHING, including the room "Over"
+    // foreground layer (depth 10000) that draws tall objects' tops over the player —
+    // otherwise the name label vanishes behind a shelf. Labels never need occluding.
+    this.playerContainer = this.scene.add.container(this.x, this.y - 30).setDepth(20000)
 
     // add dialogBubble to playerContainer
-    this.playerDialogBubble = this.scene.add.container(0, 0).setDepth(5000)
+    this.playerDialogBubble = this.scene.add.container(0, 0).setDepth(20000)
     this.playerContainer.add(this.playerDialogBubble)
 
     // add playerName to playerContainer
