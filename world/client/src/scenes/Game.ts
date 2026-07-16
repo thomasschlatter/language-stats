@@ -625,6 +625,10 @@ export default class Game extends Phaser.Scene {
     const theme = this.map.addTilesetImage(tilesetName, textureKey)!
     this.map.createLayer('Ground', [floors, sky], 0, 0)
     this.map.createLayer('Shadows', [floors], 0, 0)
+    // Decor: flat floor decals (rugs, mats) you WALK ON — drawn over the floor, under the
+    // player, never colliding. Without it a rug has nowhere to live: Furniture collides
+    // wholesale (an invisible wall) and Over draws above the player. Optional per map.
+    this.map.createLayer('Decor', [theme, floors], 0, 0)
     const wallLayer = this.map.createLayer('Walls', [walls], 0, 0)!
     wallLayer.setCollisionByExclusion([-1, 0])
     this.worldColliders.push(wallLayer)
