@@ -613,12 +613,10 @@ export default class Game extends Phaser.Scene {
     this.worldColliders.push(wallLayer)
     const furniture = this.map.createLayer('Furniture', [cls], 0, 0)!
     furniture.setDepth(0)
-    // Furniture is solid — you can't walk through desks, libraries or the chalkboard.
-    // The chair seats are the exception: they stay walkable so E-to-sit can snap the
-    // player onto the seat without the collider shoving them straight back out.
+    // ALL furniture is solid — desks, chairs, libraries and the board behave the same.
+    // Chairs don't need to be walkable: E-to-sit snaps the player onto the seat from
+    // beside it (see sittingShiftData), so there's no reason to make them inconsistent.
     furniture.setCollisionByExclusion([-1, 0])
-    furniture.setCollision(cls.firstgid + 50, false) // chair top (backrest)
-    furniture.setCollision(cls.firstgid + 66, false) // chair bottom (seat/legs)
     this.worldColliders.push(furniture)
 
     // Hybrid chairs: no Tiled objects needed — derive a Chair item from every chair
