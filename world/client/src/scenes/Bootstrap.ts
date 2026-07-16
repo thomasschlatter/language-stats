@@ -38,6 +38,9 @@ export default class Bootstrap extends Phaser.Scene {
     livingRoomMap: 'assets/map/livingRoomMap.json',
     clothingMap: 'assets/map/clothingMap.json',
     iceCreamMap: 'assets/map/iceCreamMap.json',
+    museumMap: 'assets/map/museumMap.json',
+    bathroomMap: 'assets/map/bathroomMap.json',
+    gymMap: 'assets/map/gymMap.json',
   }
   
    OBJECTS = {
@@ -56,6 +59,9 @@ export default class Bootstrap extends Phaser.Scene {
     room_living: ['assets/tileset/LivingRoom_Modern_32x32.png', {frameWidth: 32, frameHeight: 32}],
     room_clothing: ['assets/tileset/Clothing_Modern_32x32.png', {frameWidth: 32, frameHeight: 32}],
     room_icecream: ['assets/tileset/IceCream_Modern_32x32.png', {frameWidth: 32, frameHeight: 32}],
+    room_museum: ['assets/tileset/Museum_Modern_32x32.png', {frameWidth: 32, frameHeight: 32}],
+    room_bathroom: ['assets/tileset/Bathroom_Modern_32x32.png', {frameWidth: 32, frameHeight: 32}],
+    room_gym: ['assets/tileset/Gym_Modern_32x32.png', {frameWidth: 32, frameHeight: 32}],
     //outside_objects: ['assets/tileset/Modern_Exteriors_Complete_Tileset.png', {frameWidth: 32, frameHeight: 32}],
     chairs: ['assets/items/chair.png', {frameWidth: 32, frameHeight: 64}],
     computers: ['assets/items/computer.png', {frameWidth: 96, frameHeight: 64}],

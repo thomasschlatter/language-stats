@@ -122,4 +122,25 @@ export const WORLDS: WorldInfo[] = [
     map: 'icecream',
     emoji: '🍦',
   },
+  {
+    id: 'world_museum',
+    name: 'Museum',
+    description: 'A floating gallery — paintings, statues, dinosaur skeletons and a bench to sit on.',
+    map: 'museum',
+    emoji: '🏛️',
+  },
+  {
+    id: 'world_bathroom',
+    name: 'Bathroom',
+    description: 'A floating bathroom — bath and shower, washbasin, mirror and a towel rail.',
+    map: 'bathroom',
+    emoji: '🚿',
+  },
+  {
+    id: 'world_gym',
+    name: 'Gym',
+    description: 'A floating gym — treadmills, exercise bike, weights and a mirrored wall.',
+    map: 'gym',
+    emoji: '💪',
+  },
 ]

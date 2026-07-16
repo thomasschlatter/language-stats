@@ -144,11 +144,14 @@ export default class Game extends Phaser.Scene {
     else if (worldMap === 'classroom') this.buildClassroom()
     else if (worldMap === 'doctor') this.buildDoctorsOffice()
     else if (worldMap === 'shop') this.buildShop()
-    else if (worldMap === 'kitchen') this.buildThemedRoom('kitchenMap', 'kitchen', 'room_kitchen')
-    else if (worldMap === 'bedroom') this.buildThemedRoom('bedroomMap', 'bedroom', 'room_bedroom')
-    else if (worldMap === 'living') this.buildThemedRoom('livingRoomMap', 'living', 'room_living')
-    else if (worldMap === 'clothing') this.buildThemedRoom('clothingMap', 'clothing', 'room_clothing')
-    else if (worldMap === 'icecream') this.buildThemedRoom('iceCreamMap', 'icecream', 'room_icecream')
+    else if (worldMap === 'kitchen') this.buildThemedRoom('kitchenMap')
+    else if (worldMap === 'bedroom') this.buildThemedRoom('bedroomMap')
+    else if (worldMap === 'living') this.buildThemedRoom('livingRoomMap')
+    else if (worldMap === 'clothing') this.buildThemedRoom('clothingMap')
+    else if (worldMap === 'icecream') this.buildThemedRoom('iceCreamMap')
+    else if (worldMap === 'museum') this.buildThemedRoom('museumMap')
+    else if (worldMap === 'bathroom') this.buildThemedRoom('bathroomMap')
+    else if (worldMap === 'gym') this.buildThemedRoom('gymMap')
     else if (worldMap === 'town') this.buildCity()
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else if (worldMap === 'osaka')
@@ -616,27 +619,57 @@ export default class Game extends Phaser.Scene {
   // share this one builder instead of a near-duplicate method each.
   // Collision: Walls and Furniture are solid; Over draws above the player and never collides
   // (that's what lets you walk behind a shelf). Made by tools/tileset/gen-<theme>.mjs.
-  private buildThemedRoom(mapKey: string, tilesetName: string, textureKey: string) {
+  // tileset NAME (as written in the map JSON) -> the texture key Bootstrap loaded it under.
+  // A themed room can therefore mix as many sheets as it likes — e.g. a gym borrowing the
+  // hospital's lockers — just by declaring them in its map. No code change per room.
+  private static readonly THEME_TEXTURES: Record<string, string> = {
+    floors: 'room_floors',
+    walls: 'room_walls',
+    sky: 'room_sky',
+    borders: 'room_borders',
+    wallpaper: 'room_wallpaper',
+    class: 'room_class',
+    hospital: 'room_hospital',
+    shop: 'room_shop',
+    kitchen: 'room_kitchen',
+    bedroom: 'room_bedroom',
+    living: 'room_living',
+    clothing: 'room_clothing',
+    icecream: 'room_icecream',
+    museum: 'room_museum',
+    bathroom: 'room_bathroom',
+    gym: 'room_gym',
+  }
+
+  private buildThemedRoom(mapKey: string) {
     this.worldColliders = []
     this.map = this.make.tilemap({ key: mapKey })
-    const floors = this.map.addTilesetImage('floors', 'room_floors')!
-    const walls = this.map.addTilesetImage('walls', 'room_walls')!
-    const sky = this.map.addTilesetImage('sky', 'room_sky')!
-    const theme = this.map.addTilesetImage(tilesetName, textureKey)!
-    this.map.createLayer('Ground', [floors, sky], 0, 0)
-    this.map.createLayer('Shadows', [floors], 0, 0)
+    // Resolve whatever tilesets the MAP declares. Every layer gets all of them; Phaser picks
+    // the right one per tile from its gid, so a layer may freely mix sheets.
+    const sets: Phaser.Tilemaps.Tileset[] = []
+    for (const t of this.map.tilesets) {
+      const tex = Game.THEME_TEXTURES[t.name]
+      if (!tex) {
+        console.warn(`[${mapKey}] no texture for tileset "${t.name}" — add it to THEME_TEXTURES`)
+        continue
+      }
+      const ts = this.map.addTilesetImage(t.name, tex)
+      if (ts) sets.push(ts)
+    }
+    this.map.createLayer('Ground', sets, 0, 0)
+    this.map.createLayer('Shadows', sets, 0, 0)
     // Decor: flat floor decals (rugs, mats) you WALK ON — drawn over the floor, under the
     // player, never colliding. Without it a rug has nowhere to live: Furniture collides
     // wholesale (an invisible wall) and Over draws above the player. Optional per map.
-    this.map.createLayer('Decor', [theme, floors], 0, 0)
-    const wallLayer = this.map.createLayer('Walls', [walls], 0, 0)!
+    this.map.createLayer('Decor', sets, 0, 0)
+    const wallLayer = this.map.createLayer('Walls', sets, 0, 0)!
     wallLayer.setCollisionByExclusion([-1, 0])
     this.worldColliders.push(wallLayer)
-    const furniture = this.map.createLayer('Furniture', [theme], 0, 0)!
+    const furniture = this.map.createLayer('Furniture', sets, 0, 0)!
     furniture.setDepth(0)
     furniture.setCollisionByExclusion([-1, 0])
     this.worldColliders.push(furniture)
-    const overLayer = this.map.createLayer('Over', [theme], 0, 0)
+    const overLayer = this.map.createLayer('Over', sets, 0, 0)
     overLayer?.setDepth(10000)
     const props = (this.map.properties as Array<{ name: string; value: number }>) || []
     const prop = (n: string) => props.find((p) => p.name === n)?.value
