@@ -94,8 +94,10 @@ const claim = (x, y, who) => {
   if (claimed.has(k)) throw new Error(`overlap: ${who} wants (${x},${y}) already used by ${claimed.get(k)}`);
   claimed.set(k, who);
 };
+const placed = [];               // every (id0,w,h) actually placed -> the variant-swatch scan
 const putRect = (x, y, w, h, id0, target = furniture, who = 'obj') => {
   if (x < 0 || y < 0 || x + w > W || y + h > H) throw new Error(`${who} out of bounds`);
+  placed.push([id0, w, h, who]);
   for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) {
     claim(x + c, y + r, who);
     target[(y + r) * W + (x + c)] = CL + id0 + r * CLCOLS + c;
@@ -104,6 +106,8 @@ const putRect = (x, y, w, h, id0, target = furniture, who = 'obj') => {
 // A tall object: its BASE row collides (Furniture); the rows above go to Over so the player
 // is occluded walking behind it and can stand in that space.
 const putTall = (x, y, w, h, id0, who = 'obj') => {
+  if (x < 0 || y < 0 || x + w > W || y + h > H) throw new Error(`${who} out of bounds`);
+  placed.push([id0, w, h, who]);
   for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) {
     claim(x + c, y + r, who);
     const tgt = r === h - 1 ? furniture : over;
@@ -114,48 +118,63 @@ const putTall = (x, y, w, h, id0, who = 'obj') => {
 // band => no floor strip behind it.  topRow = (oy+2) - (h-1)
 const backWall = (h) => (oy + 2) - (h - 1);
 
-// ---- back wall (base on the first floor row) ----
-// These sprites carry transparent BOTTOM padding inside their rect (measured: 249 art spans
-// rect rows 24-71, 486 rows 16-71, 390 rows 24-75), so their ground contact lands just inside
-// the first floor row and their body covers the wall band. Verified in the preview.
-putTall(5, backWall(3), 2, 3, 249, 'rail_blue');    // clothes rail, blue garments
-putTall(8, backWall(3), 2, 3, 486, 'rail_white');   // clothes rail, white/pink garments
-putTall(18, backWall(3), 2, 3, 390, 'shelf_shoes'); // shelf of shoes / bags
+// ---- BACK WALL: the wall-mounted things (rails with hangers, mirrors) live ONLY here ----
+// 249/486 are WALL rails: a bar + hooks + hanging garments, NO legs and no feet. Standing one
+// on the open floor makes it hang in mid-air (that is exactly what the old rail_blue_2 /
+// rail_white_2 at (5,11)/(8,11) did). Every hanger sprite is therefore on the wall band.
+// They carry transparent TOP padding inside their rect (249 art 44x44 at pad t24, 486 art
+// 52x52 at pad t14), so backWall(3) hangs the art across the band with its base on the first
+// floor row. 390 is different — a shelf WITH legs and a ground shadow — but it belongs against
+// the wall, so it uses the same formula.
+putTall(5, backWall(3), 2, 3, 249, 'rail_blue');    // wall rail, blue garments
+putTall(8, backWall(3), 2, 3, 486, 'rail_white');   // wall rail, white/pink garments
+putTall(15, backWall(3), 2, 3, 249, 'rail_blue_2'); // was floating at (5,11) -> onto the wall
+putTall(18, backWall(3), 2, 3, 390, 'shelf_shoes'); // shelf of shoes / bags (has legs)
+// wall-mounted mirrors: 1x2, art 28x42 at pad t16 => sits inside the band, never reaches the cap
+putRect(7, oy, 1, 2, 207, furniture, 'mirror_wall_silver');
+putRect(17, oy, 1, 2, 239, furniture, 'mirror_wall_gold');
 
-// ---- fitting room / changing cabin: FREE-STANDING, 4 cols x 6 rows ----
-// NOT back-wall furniture, so backWall() does NOT apply: its art is 176px tall (5.5 tiles),
-// far taller than the 2-row wall band, and hanging it at oy made the poles overdraw the wall's
-// white cap line so it read as a cubicle taller than the wall. It stands in the room instead,
-// with the whole first floor row (oy+2) as clear floor above it -> reads free-standing.
+// ---- fitting room / changing cabin: 4 cols x 6 rows, STANDING AGAINST THE BACK WALL ----
+// backWall() does NOT apply (that formula assumes a big transparent top pad + a vertical face).
+// The cabin must TOUCH the wall without climbing it. Room geometry: cap row oy = y96-127,
+// face row oy+1 = y128-159, wall base / first floor row oy+2 = y160.
+// The cabin's poles have a 12px top pad, so its art top = FR_Y*32 + 12:
+//   FR_Y = oy   -> art top y108 -> ON the white cap line   => "taller than the wall"   (bug 1)
+//   FR_Y = oy+2 -> art top y172 -> 12px BELOW the wall base => floor strip behind it    (bug 2)
+//   FR_Y = oy+1 -> art top y140 -> on the wall FACE, clear of the cap, no floor strip   <== this
+// So the sprite's own top padding, not the row index, is what makes it meet the wall — that is
+// exactly the skill's "sprites have transparent TOP PADDING" lesson. Asserted below.
 // Assembled from three pack singles that butt exactly (see header); cols FR_X+1..FR_X+2 rows
-// FR_Y..FR_Y+3 are deliberately left EMPTY — that open "U" is the cubicle's interior floor,
-// and the player can step into it (only the base row collides).
+// FR_Y..FR_Y+3 are deliberately left EMPTY — that open "U" is the cubicle's interior floor.
 // Side clearance is built in: the art spans only x+26..x+101 of the 128px rect, i.e. ~26px of
 // transparent padding inside each outer column, so neighbours at FR_X-1 / FR_X+4 stay clear.
-const FR_X = 11, FR_Y = oy + 3;                    // rows oy+3 .. oy+8, base on oy+8
+const FR_X = 11, FR_Y = oy + 1, FR_TOPPAD = 12;    // rows oy+1 .. oy+6, base on oy+6
+const capTop = oy * 32, faceTop = (oy + 1) * 32, wallBase = (oy + 2) * 32;
+const cabinArtTop = FR_Y * 32 + FR_TOPPAD;
+if (cabinArtTop <= capTop + 31) throw new Error(`cabin art top y${cabinArtTop} is on/above the wall CAP row (y${capTop}-${capTop + 31}) — it would read as taller than the wall`);
+if (cabinArtTop > wallBase) throw new Error(`cabin art top y${cabinArtTop} is below the wall base y${wallBase} — a ${cabinArtTop - wallBase}px floor strip would show behind it`);
+console.error(`  cabin: art top y${cabinArtTop} sits on the wall FACE row (y${faceTop}-${wallBase - 1}) => touches the wall, clear of the cap`);
 putTall(FR_X, FR_Y, 1, 6, 336, 'fitting_pole_l');  // 336(cap,r21-23) + 384(foot,r24-26)
 putTall(FR_X + 3, FR_Y, 1, 6, 339, 'fitting_pole_r'); // 339(cap) + 387(foot)
 putTall(FR_X + 1, FR_Y + 4, 2, 2, 401, 'fitting_curtain'); // rail + curtain across the front
 
-// ---- wall-mounted (1x2 only: spans the cap row oy + face row oy+1) ----
-putRect(7, oy, 1, 2, 207, furniture, 'mirror_wall_silver');  // between the two rails
-putRect(16, oy, 1, 2, 239, furniture, 'mirror_wall_gold');   // beside the fitting room
+// ---- shop floor: free-standing display tables ----
+// The folded-clothes shelves (890/892/922/924) and hat shelves (954/956) are GONE. Each of
+// those rects swallowed ALTERNATIVE-TEXTURE swatches: below the body, across a transparent
+// gap, the sheet parks spare colourways of the same garment (892: body y1768-1795, then
+// swatches at y1806-1807 and y1812-1819; 954: body y1890-1927, swatch at y1940-1947). They
+// cannot be cropped out — the body straddles the tile boundary and the swatches sit in the
+// SAME tile row as its bottom 4-8px, so any smaller rect clips the shelf's own frame.
+// 884/886/888/916 are the pack's display tables: ONE band (y1774-1823) ending exactly at the
+// rect's bottom edge = feet + ground contact, nothing below, and every edge navy-outlined
+// (L 32/32, R 32/32, B 52/52) => complete AND not oversized. They are 4 colourways.
+putTall(5, 8, 2, 2, 884, 'table_cream');
+putTall(8, 8, 2, 2, 886, 'table_yellow');
+putTall(15, 8, 2, 2, 888, 'table_olive');
+putTall(18, 8, 2, 2, 268, 'boxes');           // stock boxes (single band, ground contact)
 
-// ---- mid shop: shelves of folded clothes ----
-// 892/924 are the TIDY variants. 922 and 890 (the old shelf_folded_a / _c) were the pack's
-// DISARRANGED variants — correct rects, but an empty shelf slot plus a garment dropped on the
-// floor reads as a broken/split sprite beside a tidy neighbour. shelf_folded_c's slot is now
-// the fitting-room cabin, which fills the middle of the shop.
-putTall(5, 8, 2, 2, 892, 'shelf_folded_a');   // folded shirts (grey/purple/green)
-putTall(8, 8, 2, 2, 924, 'shelf_folded_b');   // folded shirts (green/red/pink)
-putTall(15, 8, 2, 2, 954, 'shelf_hats');      // hats / caps
-putTall(18, 8, 2, 2, 268, 'boxes');           // stock boxes
-
-// ---- shop floor: free-standing clothes rails (this is what says "clothes shop") ----
-putTall(5, 11, 2, 3, 249, 'rail_blue_2');
-putTall(8, 11, 2, 3, 486, 'rail_white_2');
-// (the old rail_blue_3 at (11,11) is gone: the fitting-room cabin occupies that bay)
-putTall(15, 11, 1, 3, 425, 'mirror_stand_silver');
+putTall(5, 12, 2, 2, 916, 'table_white');
+putTall(15, 11, 1, 3, 425, 'mirror_stand_silver'); // standing mirror: has a ground shadow
 putTall(17, 11, 2, 3, 496, 'counter_till');   // counter with cash register
 putTall(20, 11, 1, 3, 473, 'mirror_stand_gold');
 
@@ -165,8 +184,40 @@ putTall(7, 16, 1, 2, 162, 'mannequin_b');
 putTall(9, 16, 1, 2, 166, 'mannequin_c');
 putTall(11, 15, 1, 3, 864, 'coat_rack');
 putTall(14, 16, 2, 2, 465, 'bench');
-putTall(17, 16, 2, 2, 892, 'shelf_folded_d');
+putTall(17, 16, 2, 2, 884, 'table_cream_2');   // was shelf_folded_d (892) = swatch-swallower
 putTall(20, 16, 1, 2, 173, 'mannequin_d');
+
+// --- assertion: no rect may swallow ALTERNATIVE-TEXTURE swatches -------------------
+// "Transparency-isolated" only proves an object is NOT CLIPPED; it does NOT prove the rect is
+// not TOO BIG. This sheet parks spare colourways of a garment below an object, separated by
+// transparent rows but still inside the object's rect — a variant is isolated too. So scan the
+// SHADOWLESS sheet for every rect actually placed: split its art into horizontal bands, and
+// reject any rect whose art has a band below a >=4px transparent gap. A real object's last band
+// carries its feet; art resuming after a gap is a separate thing.
+const SHEET_SL = 'world/client/public/assets/modern_interiors/Theme_Sorter_Shadowless_32x32/21_Clothing_Store_Shadowless_32x32.png';
+try {
+  const { execFileSync } = await import('node:child_process');
+  const rects = [...new Set([...placed].map(JSON.stringify))].map(JSON.parse);
+  const script = `
+    const sharp=require('sharp');
+    (async()=>{const {data,info}=await sharp(${JSON.stringify(SHEET_SL)}).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+    const A=(x,y)=>data[(y*info.width+x)*4+3];const bad=[];
+    for(const [id0,w,h,who] of ${JSON.stringify(rects)}){
+      const c=id0%16,r=(id0/16)|0,x0=c*32,y0=r*32,x1=x0+w*32-1,y1=y0+h*32-1;
+      const rows=[];for(let y=y0;y<=y1;y++){let n=0;for(let x=x0;x<=x1;x++)if(A(x,y)>8)n++;rows.push(n);}
+      const bands=[];let cur=null;
+      rows.forEach((n,i)=>{if(n===0){if(cur){bands.push(cur);cur=null}return}if(!cur)cur={a:i,b:i};cur.b=i});
+      if(cur)bands.push(cur);
+      for(let i=1;i<bands.length;i++){const gap=bands[i].a-bands[i-1].b-1;
+        if(gap>=4)bad.push(who+' (id0='+id0+' '+w+'x'+h+'): art resumes '+gap+'px below the body at rect row '+bands[i].a+' => ALTERNATIVE TEXTURE swallowed');}
+    }
+    if(bad.length){console.error(bad.join('\\n'));process.exit(3)}
+    console.error('variant-swatch scan: '+${JSON.stringify(rects.length)}+' rects clean');})();`;
+  execFileSync(process.execPath, ['-e', script], { stdio: 'inherit' });
+} catch (e) {
+  if (e.status === 3) throw new Error('rect swallows alternative-texture swatches (see above)');
+  console.error('  (variant scan skipped: ' + e.message.split('\n')[0] + ')');
+}
 
 // --- assertions: door corridor + reachability ------------------------------------
 // Walkable = no wall tile and no COLLIDING furniture tile (Over never collides).
