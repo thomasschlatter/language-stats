@@ -684,33 +684,10 @@ export default function CharacterCreation() {
     drawAvatar();
   }, [avatarStyleIndex]);
 
-  // Skip the editor for users who already have a character: either handed off from
-  // language-stats (?avatar=<json>) or saved locally from a previous visit. Such users
-  // are dropped straight into the world — the editor only shows for genuinely new users.
-  // New users still get the full editor (minus the name field). We poll for the composite
-  // canvas to be drawn before auto-submitting, so the avatar isn't blank.
-  const autoEnteredRef = React.useRef(false);
-  React.useEffect(() => {
-    if (autoEnteredRef.current || !roomJoined) return;
-    const hasCharacter =
-      new URLSearchParams(window.location.search).has("avatar") ||
-      !!localStorage.getItem("strndd-avatar_index");
-    if (!hasCharacter) return; // new user -> let them design their character
-    let tries = 0;
-    const timer = setInterval(() => {
-      const canvas = canvasCompleteHiddenRef.current;
-      // ready once the composite canvas has non-trivial pixel data (avatar drawn)
-      const ready = !!canvas && canvas.toDataURL("image/png").length > 5000;
-      if (ready || tries++ > 40) {
-        clearInterval(timer);
-        if (autoEnteredRef.current) return;
-        autoEnteredRef.current = true;
-        formRef.current?.requestSubmit();
-      }
-    }, 100);
-    return () => clearInterval(timer);
-  }, [roomJoined]);
-
+  // NOTE: an auto-skip (drop returning users straight in) was tried here but submitted
+  // before the avatar finished compositing, so users landed with a blank/naked avatar.
+  // Reverted. If reattempted, the trigger must wait for the composite canvas to be FULLY
+  // drawn (all layer images loaded), not just non-empty — see handleSubmit's canvas read.
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     //console.log("handleSubmit");
     event.preventDefault();
