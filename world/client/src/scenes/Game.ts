@@ -142,6 +142,13 @@ export default class Game extends Phaser.Scene {
     else if (worldMap === 'room') this.buildRoom()
     else if (worldMap === 'border') this.buildBorderRoom()
     else if (worldMap === 'classroom') this.buildClassroom()
+    else if (worldMap === 'doctor') this.buildDoctorsOffice()
+    else if (worldMap === 'shop') this.buildShop()
+    else if (worldMap === 'kitchen') this.buildThemedRoom('kitchenMap', 'kitchen', 'room_kitchen')
+    else if (worldMap === 'bedroom') this.buildThemedRoom('bedroomMap', 'bedroom', 'room_bedroom')
+    else if (worldMap === 'living') this.buildThemedRoom('livingRoomMap', 'living', 'room_living')
+    else if (worldMap === 'clothing') this.buildThemedRoom('clothingMap', 'clothing', 'room_clothing')
+    else if (worldMap === 'icecream') this.buildThemedRoom('iceCreamMap', 'icecream', 'room_icecream')
     else if (worldMap === 'town') this.buildCity()
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else if (worldMap === 'osaka')
@@ -599,6 +606,72 @@ export default class Game extends Phaser.Scene {
   // items (chalkboard, desks with chairs facing the board, libraries, globe). Only the
   // Walls layer collides; furniture is walkable for now so you can step onto a chair
   // and sit (X) to check the seating lines up.
+  // Mom & Pop Shop: the same 3D-walls shell as the classroom, furnished from the LimeZu
+  // Grocery Store sheet. Walls + all furniture collide; the Over layer (the upper rows of the
+  // fridge, the gondola shelving, the crate stacks and the plants) draws above the player and
+  // never collides, so you can stand in that space and disappear behind them.
+  // A generated themed room: the 3D-walls shell (Ground/Shadows/Walls) + a Furniture layer
+  // from a theme sheet + an Over layer holding tall objects' tops. The themed rooms are
+  // structurally identical and differ only in map key / tileset name / texture key, so they
+  // share this one builder instead of a near-duplicate method each.
+  // Collision: Walls and Furniture are solid; Over draws above the player and never collides
+  // (that's what lets you walk behind a shelf). Made by tools/tileset/gen-<theme>.mjs.
+  private buildThemedRoom(mapKey: string, tilesetName: string, textureKey: string) {
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key: mapKey })
+    const floors = this.map.addTilesetImage('floors', 'room_floors')!
+    const walls = this.map.addTilesetImage('walls', 'room_walls')!
+    const sky = this.map.addTilesetImage('sky', 'room_sky')!
+    const theme = this.map.addTilesetImage(tilesetName, textureKey)!
+    this.map.createLayer('Ground', [floors, sky], 0, 0)
+    this.map.createLayer('Shadows', [floors], 0, 0)
+    const wallLayer = this.map.createLayer('Walls', [walls], 0, 0)!
+    wallLayer.setCollisionByExclusion([-1, 0])
+    this.worldColliders.push(wallLayer)
+    const furniture = this.map.createLayer('Furniture', [theme], 0, 0)!
+    furniture.setDepth(0)
+    furniture.setCollisionByExclusion([-1, 0])
+    this.worldColliders.push(furniture)
+    const overLayer = this.map.createLayer('Over', [theme], 0, 0)
+    overLayer?.setDepth(10000)
+    const props = (this.map.properties as Array<{ name: string; value: number }>) || []
+    const prop = (n: string) => props.find((p) => p.name === n)?.value
+    this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
+    this.spawnY = prop('spawnY') ?? (this.map.height / 2) * 32
+    this.botX = this.spawnX
+    this.botY = this.spawnY + 64
+  }
+
+  private buildShop() {
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key: 'shopMap' })
+    const floors = this.map.addTilesetImage('floors', 'room_floors')!
+    const walls = this.map.addTilesetImage('walls', 'room_walls')!
+    const sky = this.map.addTilesetImage('sky', 'room_sky')!
+    const shop = this.map.addTilesetImage('shop', 'room_shop')!
+    this.map.createLayer('Ground', [floors, sky], 0, 0)
+    this.map.createLayer('Shadows', [floors], 0, 0)
+    const wallLayer = this.map.createLayer('Walls', [walls], 0, 0)!
+    wallLayer.setCollisionByExclusion([-1, 0])
+    this.worldColliders.push(wallLayer)
+    const furniture = this.map.createLayer('Furniture', [shop], 0, 0)!
+    furniture.setDepth(0)
+    // ALL furniture is solid — counter, freezer, crates and shelf bases behave the same.
+    furniture.setCollisionByExclusion([-1, 0])
+    this.worldColliders.push(furniture)
+    // Tall furniture: only its BASE row is on Furniture and collides. The rows above live on
+    // Over — drawn above the player with NO collision.
+    const overLayer = this.map.createLayer('Over', [shop], 0, 0)
+    overLayer?.setDepth(10000)
+
+    const props = (this.map.properties as Array<{ name: string; value: number }>) || []
+    const prop = (n: string) => props.find((p) => p.name === n)?.value
+    this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
+    this.spawnY = prop('spawnY') ?? (this.map.height / 2) * 32
+    this.botX = this.spawnX
+    this.botY = this.spawnY + 64
+  }
+
   private buildClassroom() {
     this.worldColliders = []
     this.map = this.make.tilemap({ key: 'classroomModernMap' })
@@ -642,6 +715,37 @@ export default class Game extends Phaser.Scene {
     // The player selector doesn't exist until setupPlayerAndNetwork() runs, so stash
     // the group and let that register the overlap.
     this.chairGroup = chairGroup
+
+    const props = (this.map.properties as Array<{ name: string; value: number }>) || []
+    const prop = (n: string) => props.find((p) => p.name === n)?.value
+    this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
+    this.spawnY = prop('spawnY') ?? (this.map.height / 2) * 32
+    this.botX = this.spawnX
+    this.botY = this.spawnY + 64
+  }
+
+  // Doctor's office: same 3D-walls shell as the classroom, furnished from the LimeZu
+  // Hospital sheet. Walls + all furniture collide; the Over layer (tall shelves/lockers/
+  // screen/IV/plant tops) draws above the player and never collides, so you can stand in
+  // that space and disappear behind them.
+  private buildDoctorsOffice() {
+    this.worldColliders = []
+    this.map = this.make.tilemap({ key: 'doctorsOfficeMap' })
+    const floors = this.map.addTilesetImage('floors', 'room_floors')!
+    const walls = this.map.addTilesetImage('walls', 'room_walls')!
+    const sky = this.map.addTilesetImage('sky', 'room_sky')!
+    const hosp = this.map.addTilesetImage('hosp', 'room_hospital')!
+    this.map.createLayer('Ground', [floors, sky], 0, 0)
+    this.map.createLayer('Shadows', [floors], 0, 0)
+    const wallLayer = this.map.createLayer('Walls', [walls], 0, 0)!
+    wallLayer.setCollisionByExclusion([-1, 0])
+    this.worldColliders.push(wallLayer)
+    const furniture = this.map.createLayer('Furniture', [hosp], 0, 0)!
+    furniture.setDepth(0)
+    furniture.setCollisionByExclusion([-1, 0])
+    this.worldColliders.push(furniture)
+    const overLayer = this.map.createLayer('Over', [hosp], 0, 0)
+    overLayer?.setDepth(10000)
 
     const props = (this.map.properties as Array<{ name: string; value: number }>) || []
     const prop = (n: string) => props.find((p) => p.name === n)?.value
