@@ -1,0 +1,449 @@
+<meta charset="utf-8">
+<title>Level Creator</title>
+<script src="editor-assets.js" onerror="window.__noBundle=1"></script>
+<style>
+  :root { --bg:#161618; --panel:#1e1e22; --line:#2c2c33; --ink:#e8e8ea; --dim:#9a9aa2; --accent:#4bb3fd; --ok:#57d08a; --bad:#e8615f; --warn:#e8b04a; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:13px/1.4 ui-monospace,Menlo,Consolas,monospace; }
+  #app { display:flex; flex-direction:column; height:100%; }
+  header { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header h1 { font-size:14px; margin:0 12px 0 0; font-weight:600; }
+  button, label.btn, select, input[type=text], input[type=number] { background:#26262c; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:5px 9px; font:inherit; cursor:pointer; }
+  button:hover, label.btn:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); color:#04121f; border-color:var(--accent); font-weight:600; }
+  input[type=file] { display:none; }
+  .sp { flex:1; }
+  #main { flex:1; display:flex; min-height:0; }
+  #stage { flex:1; overflow:auto; display:grid; place-items:center; padding:20px; }
+  #board { position:relative; box-shadow:0 0 0 1px var(--line); background:repeating-conic-gradient(#202024 0% 25%, #1a1a1d 0% 50%) 0 0 / 20px 20px; image-rendering:pixelated; }
+  #board canvas { display:block; image-rendering:pixelated; position:absolute; inset:0; }
+  #side { width:312px; background:var(--panel); border-left:1px solid var(--line); display:flex; flex-direction:column; min-height:0; }
+  .side-head { padding:8px 10px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:6px; }
+  .tabs { display:flex; gap:5px; flex-wrap:wrap; }
+  .tabs button { padding:4px 8px; font-size:12px; }
+  .tabs button.on { background:var(--accent); color:#04121f; border-color:var(--accent); }
+  #search { width:100%; }
+  #palette { flex:1; overflow-y:auto; padding:8px; display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:6px; align-content:start; }
+  .chip { background:#26262c; border:1px solid var(--line); border-radius:6px; padding:4px; cursor:grab; text-align:center; user-select:none; }
+  .chip:hover { border-color:var(--accent); }
+  .chip.on { border-color:var(--ok); box-shadow:0 0 0 1px var(--ok) inset; }
+  .chip canvas { display:block; margin:0 auto 3px; image-rendering:pixelated; background:#0003; }
+  .chip .nm { font-size:10px; color:var(--dim); word-break:break-all; line-height:1.15; }
+  .chip .sz { font-size:9px; color:var(--accent); }
+  footer { padding:6px 10px; border-top:1px solid var(--line); color:var(--dim); font-size:11px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  #hint { color:var(--dim); font-size:11px; }
+  #drop { position:fixed; inset:0; background:#000a; display:none; place-items:center; z-index:9; font-size:20px; color:var(--accent); border:3px dashed var(--accent); }
+  #drop.on { display:grid; }
+  .kbd { background:#26262c; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:0 5px; }
+  .pill { padding:2px 7px; border-radius:10px; background:#26262c; border:1px solid var(--line); }
+  .legend { display:flex; gap:10px; font-size:10px; color:var(--dim); }
+  .legend b { font-weight:400; } .dot { display:inline-block; width:8px; height:8px; border-radius:2px; vertical-align:middle; margin-right:3px; }
+</style>
+
+<div id="app">
+  <header>
+    <h1>🗺️</h1>
+    <input type="text" id="mapname" value="Untitled map" title="map name" style="width:150px">
+    <select id="maps" title="my maps"></select>
+    <button id="newmap">＋ New</button>
+    <span id="savestatus" class="pill"></span>
+    <span class="sp"></span>
+    <label>zoom <input type="range" id="zoom" min="8" max="40" value="20" style="width:80px"></label>
+    <label class="pill">ground <select id="ground"></select></label>
+    <button id="eraser">🧹 Eraser</button>
+    <button id="clear">Clear</button>
+    <button id="export" class="primary">💾 Save</button>
+  </header>
+
+  <div id="main">
+    <div id="stage"><div id="board"><canvas id="cv"></canvas><canvas id="ov"></canvas></div></div>
+    <aside id="side">
+      <div class="side-head">
+        <div class="tabs" id="cats"></div>
+        <input type="text" id="search" placeholder="find objects…">
+        <div id="props"></div>
+      </div>
+      <div id="palette"></div>
+    </aside>
+  </div>
+
+  <footer>
+    <span id="cursor">—</span>
+    <span class="pill" id="count">0 objects</span>
+    <span class="sp"></span>
+    <span><span class="kbd">click</span> place · <span class="kbd">R-click</span> erase · <span class="kbd">Esc</span> cancel · <span class="kbd">Ctrl+Z</span> undo · <span class="kbd">X</span> flip</span>
+  </footer>
+</div>
+
+<script>
+const T = 32;
+const LAYERS = ['Ground','Decor','Walls','Furniture','Over'];
+const COLLIDES = { Walls:1, Furniture:1 };   // matches the game's collision model
+
+const CATS = [
+  ['Vehicles',    /^(car[\d_]|cars|truck|bus\b|tuktuk|tuk_?tuk|van[\d_]?|taxi|scooter|moto|bike|vehicle|ambulance)/i],
+  ['Buildings',   /^(bldg|seven|longlai|sh_|nb_|b_|build|shop|store|condo|house|facade|villa)/i],
+  ['Aircon',      /^(ac|aircon|acw|vent|condenser)/i],
+  ['Street Food', /^(cart|fruit|stall|vendor|dining|table|foodsign|candy|umbrella|parasol|noodle)/i],
+  ['Furniture',   /^(sofa|armchair|bench|stool|seat|chair)/i],
+  ['Street',      /^(pole|lamp|light|traffic|hydrant|mailbox|phone)/i],
+  ['Clutter',     /^(card|box|barrel|ebox|ladder|manhole|bin|cone|trash|crate|antenna|cable|debris|rubble)/i],
+  ['Terrain',     /^(pave|asph|dash|kerb|zebra|grass|sand|road|floor|ground|crack|water|dirt|city)/i],
+];
+const catOf = (key, o) => o.category || (CATS.find(([,re]) => re.test(key)) || ['Other'])[0];
+// A vehicle is a moving traffic agent, not a static object: it drives along the road, stops when
+// the player steps in front, and MAY ONLY be placed on road tiles. `kind` on the manifest wins.
+const kindOf = it => it.kind || (it.cat === 'Vehicles' ? 'vehicle' : 'static');
+const ROAD_RE = /^(asph|dash|road)/i;
+
+// AUTO LAYERING — the editor decides the layer AND splits tall props so the character walks
+// behind the top and collides with the base. Precedence:
+//  1. manifest fields {layer, solid}  (solid = # of BOTTOM rows that collide) — authoritative.
+//  2. category heuristic below.
+// Returns {base, split}: rows [0..split) go to Over (walk-behind); rows [split..h) go to `base`.
+function layering(it){
+  let base, solid;
+  if (it.layer && it.solid != null) { base = it.layer; solid = it.solid; }
+  else if (it.cat === 'Terrain')   { base = 'Ground';    solid = it.h; }
+  else if (it.cat === 'Buildings') { base = 'Walls';     solid = it.h; }   // whole facade is solid backdrop
+  else if (it.cat === 'Aircon')    { base = 'Over';      solid = 0;   }    // wall-mounted, above head, no collision
+  else                             { base = 'Furniture'; solid = 1;   }    // props: only the bottom row (feet) collide
+  solid = Math.max(0, Math.min(it.h, solid));
+  const split = (base === 'Over' || base === 'Ground' || base === 'Decor') ? 0 : (it.h - solid);
+  return { base, split };
+}
+// a placement's per-row layers — ALWAYS auto: bottom rows collide, top rows walk-behind (Over).
+function rowsFor(p){ const {base, split} = layering(p); return Array.from({length:p.h}, (_, r) => r < split ? 'Over' : base); }
+const COLLIDE_LAYER = L => L==='Walls'||L==='Furniture';
+// the cells a placement makes SOLID (used to forbid stacking two collidables on one cell)
+function collideCellsOf(p){ const rows=rowsFor(p), cells=[];
+  for(let r=0;r<p.h;r++) if(COLLIDE_LAYER(rows[r])) for(let c=0;c<p.w;c++) cells.push((p.oy+r)*S.W+(p.ox+c));
+  return cells; }
+
+// ---- INTERACTIONS ----------------------------------------------------------
+// Every object carries interaction metadata for the game. Flags below; plus `word` (the vocab
+// label — this is a language-learning app, so every object is a word) and `hp` (for breakables).
+// Precedence: session override (you, in the panel) > manifest `interactions`/`word` (authored by
+// the classification pass) > category heuristic. Exported per-placement in the map's `entities`.
+const FLAGS = ['sittable','takeable','moveable','breakable','enterable','usable','readable','container','lightSource','talkable','climbable'];
+function defaultProps(it){
+  const c=it.cat, k=it.key.toLowerCase(), p={}; const on=(...f)=>f.forEach(x=>p[x]=true);
+  if(c==='Furniture'){ (/sofa|armchair|bench|chair|stool|seat/.test(k)) ? on('sittable','moveable') : on('moveable'); }
+  else if(c==='Street Food'){
+    if(/chair|stool/.test(k)) on('sittable','moveable');
+    if(/cart|stall/.test(k)) on('moveable','usable','breakable','container');
+    if(/fruit|candy/.test(k)||/^food(?!sign)/.test(k)) on('takeable','breakable');
+    if(/table/.test(k)) on('moveable');
+    if(/sign/.test(k)) on('readable','breakable');
+    if(/umbrella|parasol/.test(k)) on('moveable'); }
+  else if(c==='Clutter'){ on('breakable');
+    if(/box|card/.test(k)) on('takeable','moveable','container');
+    if(/barrel/.test(k)) on('moveable','container');
+    if(/bin/.test(k)) on('container'); if(/ladder/.test(k)) on('climbable');
+    if(/cone/.test(k)) on('takeable','moveable'); }
+  else if(c==='Street'){ if(/lamp|light|lantern/.test(k)) on('lightSource','breakable');
+    if(/pole/.test(k)) on('breakable'); if(/phone/.test(k)) on('usable');
+    if(/mailbox|hydrant/.test(k)) on('usable'); }
+  else if(c==='Aircon') on('breakable');
+  else if(c==='Buildings') on('enterable');
+  return p;
+}
+// FIXED per object TYPE for now: manifest override (from the classification pass) else category
+// default. Not per-instance editable yet — RECONSIDER.md tracks making it editable ("lift a house").
+function resolveProps(it){
+  const base=defaultProps(it), man=it.interactions||{};
+  const flags={}; FLAGS.forEach(f=> flags[f] = (f in man)?man[f] : !!base[f]);
+  const word = it.word ?? '';
+  const hp = it.hp ?? (flags.breakable?3:undefined);
+  return {flags, word, hp};
+}
+
+const S = {
+  sheets: [], index: [], W:40, H:30, cell:20, placements:[], active:null,
+  override:'auto', flip:false, hover:null, cat:'All',
+  ground: null, groundPreset:'City street', nextId:1, collideSet:new Set(), eraser:false,
+  mapId:null, canSave:false, loading:false,
+};
+// DISPLAY-ONLY: shows the FIXED interactions/word of the picked object type. Editing them per
+// instance is a deliberate later feature (RECONSIDER.md), not exposed now.
+function renderProps(){
+  const el=$('#props'); if(!S.active){ el.innerHTML=''; return; }
+  const it=S.active, {flags,word,hp}=resolveProps(it);
+  if(kindOf(it)==='vehicle'){
+    el.innerHTML=`<div style="font-size:11px;color:var(--warn);margin:6px 0 3px">🚗 vehicle · <b style="color:var(--ink)">${it.key}</b>${word?` · ${word}`:''}</div>
+      <div style="font-size:10px;color:var(--dim);line-height:1.5">drives along the road · stops when the player is in front · road-only. dir: <b style="color:var(--ink)">${S.flip?'← west':'east →'}</b> (press X to flip)</div>`;
+    return;
+  }
+  const on=FLAGS.filter(f=>flags[f]);
+  el.innerHTML=`<div style="font-size:11px;color:var(--dim);margin:6px 0 3px">${it.key}${word?` · <b style="color:var(--ink)">${word}</b>`:''}${flags.breakable&&hp!=null?` · ${hp}hp`:''}</div>`;
+  const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-wrap:wrap;gap:3px';
+  if(!on.length){ wrap.innerHTML='<span style="font-size:10px;color:var(--dim)">no interactions</span>'; }
+  for(const f of on){ const b=document.createElement('span'); b.textContent=f;
+    b.style.cssText='padding:2px 6px;font-size:10px;border-radius:5px;background:#2b3a2f;color:var(--ok);border:1px solid var(--ok)'; wrap.appendChild(b); }
+  el.appendChild(wrap);
+}
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ov = $('#ov'), cvx = cv.getContext('2d'), ovx = ov.getContext('2d');
+cvx.imageSmoothingEnabled = ovx.imageSmoothingEnabled = false;
+
+// ---- loading ---------------------------------------------------------------
+const imgFrom = src => new Promise(r => { const im = new Image(); im.onload = () => r(im); im.src = src; });
+const readFile = (f, as) => new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; as==='data'?r.readAsDataURL(f):r.readAsText(f); });
+
+async function addSheet(meta, dataURI){
+  const img = await imgFrom(dataURI);
+  S.sheets.push({ name:meta.name, image:meta.image||('../tileset/'+meta.name+'.png'), img, cols:meta.cols||32, rows:meta.rows||0, tilecount:meta.tilecount||0, objects:meta.objects });
+  reindex(); buildGroundMenu(); resize();
+}
+function reindex(){
+  S.index = []; S.keyByTile = new Map();
+  S.sheets.forEach((sh,si)=>{ for(const key in sh.objects){ const o=sh.objects[key];
+    S.index.push({ si, key, id0:o.id0, w:o.w, h:o.h, cat:catOf(key,o), layer:o.layer, solid:o.solid,
+      kind:o.kind, interactions:o.interactions, word:o.word, hp:o.hp });
+    if(o.w===1&&o.h===1) S.keyByTile.set(si+':'+o.id0, key); } });   // reverse map for road detection
+  buildTabs(); renderPalette();
+}
+// Locked-down: assets come ONLY from the generated bundle. No user file loading — this ships on
+// the Groupifier site and end users must not swap tilesets or resize the map. (RECONSIDER.md)
+async function boot(){
+  if (window.EDITOR_ASSETS && window.EDITOR_ASSETS.length){ for (const a of window.EDITOR_ASSETS) await addSheet(a, a.dataURI); }
+  else { console.warn('editor-assets.js missing — run build-editor-assets.mjs.'); buildGroundMenu(); }
+}
+
+// ---- object lookup ---------------------------------------------------------
+function findKey(re){ return S.index.find(it => re.test(it.key)); }
+function tileGid(si,id0){ return { si, id0 }; }
+
+// ---- GROUND PRESETS --------------------------------------------------------
+// A preset fills the whole Ground layer. Each references terrain object KEYS; a preset is only
+// offered if every key it needs exists in a loaded sheet (so "Grass" stays hidden until grass
+// tiles are packed). window.GROUND_PRESETS (from the bundle) is merged in when present.
+function tileByKey(key){ const it = S.index.find(i => i.key === key); return it ? {si:it.si, id0:it.id0} : null; }
+function haveKeys(keys){ return keys.every(k => S.index.some(i => i.key === k)); }
+// Starting with just the street ground for now (grass/beach presets are packed and will be phased
+// in later). "City street" is generic — pavement + road + kerbs — not Bangkok-specific.
+const BUILTIN_PRESETS = {
+  'Empty': { needs:[], build:()=>null },
+  'City street': { needs:['pave','asph','kerb_n','kerb_s','dash','zebra_t','zebra_m','zebra_b'], build:(W,H)=>{
+      const g=new Array(W*H).fill(0);
+      const kN=Math.floor(H*0.6), road0=kN+1, road1=Math.min(H-2, road0+4), kS=road1+1, mid=Math.floor((road0+road1)/2);
+      const pav=tileByKey('pave'), pavS=tileByKey('pave_s')||tileByKey('pave'), asp=tileByKey('asph'), dash=tileByKey('dash'), kn=tileByKey('kerb_n'), ks=tileByKey('kerb_s');
+      for(let y=0;y<H;y++) for(let x=0;x<W;x++){ let t;
+        if(y<kN)t=pav; else if(y===kN)t=kn; else if(y<kS)t=(y===mid)?dash:asp; else if(y===kS)t=ks; else t=pavS;
+        g[y*W+x]={...t}; }
+      // a zebra crossing by default — 2 wide, spanning kerb→kerb (zebra tiles are 2-wide objects)
+      const zt=tileByKey('zebra_t'), zm=tileByKey('zebra_m'), zb=tileByKey('zebra_b'), zx=Math.floor(W*0.25);
+      if(zt&&zm&&zb) for(let c=0;c<2&&zx+c<W;c++){
+        g[kN*W+zx+c]={si:zt.si,id0:zt.id0+c};
+        for(let y=road0;y<=road1;y++) g[y*W+zx+c]={si:zm.si,id0:zm.id0+c};
+        g[kS*W+zx+c]={si:zb.si,id0:zb.id0+c};
+      }
+      return g; } },
+};
+// Bundled presets arrive as a DECLARATIVE spec {needs:[keys], bands:[{fill,toFrac?,scatter?}]}.
+// Turn that into the {needs, build} shape the rest of the editor uses. Bands run top→bottom;
+// `toFrac` (0..1 of map height) ends a band; the last band fills to the bottom.
+function specToPreset(spec){
+  return { needs: spec.needs||[], build:(W,H)=>{
+    const g=new Array(W*H).fill(0); let y0=0;
+    spec.bands.forEach((b,i)=>{
+      const last = i===spec.bands.length-1;
+      const y1 = last ? H : Math.min(H, Math.floor(H*(b.toFrac??1)));   // toFrac = exclusive end row = floor(H*toFrac)
+      const pool=[b.fill,...(b.scatter||[])].map(tileByKey).filter(Boolean);  // fill + scatter, picked uniformly per cell
+      for(let y=y0;y<y1;y++) for(let x=0;x<W;x++){
+        const t = pool.length>1 ? pool[Math.abs((x*73856093)^(y*19349663))%pool.length] : pool[0];
+        g[y*W+x]= t?{...t}:0; }
+      y0=y1; });
+    return g; } };
+}
+function presetsAvailable(){ const all={...BUILTIN_PRESETS};
+  // Starting with just Empty + City street for now. Grass/Beach (window.GROUND_PRESETS) are packed
+  // and interpreted (specToPreset) — re-enable by uncommenting when we phase them in.
+  // for(const [name,spec] of Object.entries(window.GROUND_PRESETS||{})) all[name]= spec.bands ? specToPreset(spec) : spec;
+  return Object.fromEntries(Object.entries(all).filter(([n,s])=>!s.needs||haveKeys(s.needs))); }
+function buildGroundMenu(){
+  const sel=$('#ground'); const av=presetsAvailable(); sel.innerHTML='';
+  for(const name of Object.keys(av)){ const o=document.createElement('option'); o.textContent=name; sel.appendChild(o); }
+  // note the ones we can't offer yet
+  const missing=Object.keys({...BUILTIN_PRESETS,...(window.GROUND_PRESETS||{})}).filter(n=>!av[n]);
+  if(missing.length){ const o=document.createElement('option'); o.disabled=true; o.textContent='— needs terrain pack: '+missing.join(', ')+' —'; sel.appendChild(o); }
+  sel.value = av[S.groundPreset] ? S.groundPreset : Object.keys(av)[0];
+  S.groundPreset=sel.value;
+}
+$('#ground').onchange=e=>{ S.groundPreset=e.target.value; const spec=presetsAvailable()[S.groundPreset];
+  S.ground = spec ? spec.build(S.W,S.H) : null; drawBoard(); markDirty(); };
+
+// ---- palette ---------------------------------------------------------------
+function crop(si,id0,w,h,box){ const sh=S.sheets[si]; const c=document.createElement('canvas'); const ctx=c.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  const sx=(id0%sh.cols)*T, sy=Math.floor(id0/sh.cols)*T, sw=w*T, sh2=h*T; const sc=Math.min(box/sw,box/sh2);
+  c.width=Math.max(1,Math.round(sw*sc)); c.height=Math.max(1,Math.round(sh2*sc)); ctx.drawImage(sh.img,sx,sy,sw,sh2,0,0,c.width,c.height); return c; }
+function buildTabs(){ const counts={All:S.index.length}; for(const it of S.index) counts[it.cat]=(counts[it.cat]||0)+1;
+  const order=['All',...CATS.map(c=>c[0]),'Other'].filter(c=>counts[c]); const tabs=$('#cats'); tabs.innerHTML='';
+  for(const c of order){ const b=document.createElement('button'); b.textContent=`${c} ${counts[c]}`; if(S.cat===c)b.classList.add('on');
+    b.onclick=()=>{S.cat=c;[...tabs.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');renderPalette();}; tabs.appendChild(b);} if(!order.includes(S.cat))S.cat='All'; }
+function renderPalette(){ const q=$('#search').value.trim().toLowerCase();
+  const items=S.index.filter(it=>(S.cat==='All'||it.cat===S.cat)&&(!q||it.key.toLowerCase().includes(q))).sort((a,b)=>(b.w*b.h)-(a.w*a.h)||a.key.localeCompare(b.key));
+  const pal=$('#palette'); pal.innerHTML='';
+  for(const it of items){ const chip=document.createElement('div'); chip.className='chip'+(S.active&&S.active.key===it.key&&S.active.si===it.si?' on':''); chip.draggable=true;
+    chip.appendChild(crop(it.si,it.id0,it.w,it.h,64)); const nm=document.createElement('div'); nm.className='nm'; nm.textContent=it.key; chip.appendChild(nm);
+    const sz=document.createElement('div'); sz.className='sz'; sz.textContent=it.w+'×'+it.h; chip.appendChild(sz);
+    chip.onclick=()=>pick(it); chip.ondragstart=()=>pick(it); pal.appendChild(chip);} }
+$('#search').oninput=renderPalette;
+function pick(it){ S.active={...it}; S.eraser=false; $('#eraser').classList.remove('primary'); renderPalette(); renderProps(); drawOverlay(); }
+
+// ---- board -----------------------------------------------------------------
+function resize(){ S.W=40; S.H=30; S.cell=+$('#zoom').value;   // map size FIXED at 40×30 (RECONSIDER.md)
+  for(const c of [cv,ov]){ c.width=S.W*S.cell; c.height=S.H*S.cell; c.style.width=cv.width+'px'; c.style.height=cv.height+'px'; }
+  $('#board').style.width=cv.width+'px'; $('#board').style.height=cv.height+'px';
+  const spec=presetsAvailable()[S.groundPreset]; S.ground = spec ? spec.build(S.W,S.H) : null;
+  drawBoard(); drawOverlay(); }
+$('#zoom').oninput=resize;
+
+function drawTile(ctx,si,id0,x,y){ const sh=S.sheets[si]; const sx=(id0%sh.cols)*T, sy=Math.floor(id0/sh.cols)*T; ctx.drawImage(sh.img,sx,sy,T,T,x*S.cell,y*S.cell,S.cell,S.cell); }
+function drawBoard(){ cvx.clearRect(0,0,cv.width,cv.height);
+  if(S.ground){ for(let y=0;y<S.H;y++) for(let x=0;x<S.W;x++){ const t=S.ground[y*S.W+x]; if(t) drawTile(cvx,t.si,t.id0,x,y); } }
+  for(const p of S.placements) blit(cvx,p);
+  cvx.strokeStyle='#ffffff12'; cvx.lineWidth=1;
+  for(let x=0;x<=S.W;x++){ cvx.beginPath(); cvx.moveTo(x*S.cell+.5,0); cvx.lineTo(x*S.cell+.5,cv.height); cvx.stroke(); }
+  for(let y=0;y<=S.H;y++){ cvx.beginPath(); cvx.moveTo(0,y*S.cell+.5); cvx.lineTo(cv.width,y*S.cell+.5); cvx.stroke(); } }
+function blit(ctx,p,alpha=1){ const sh=S.sheets[p.si]; if(!sh) return; const sx=(p.id0%sh.cols)*T, sy=Math.floor(p.id0/sh.cols)*T; ctx.globalAlpha=alpha;
+  if(p.flip){ ctx.save(); ctx.translate((p.ox+p.w)*S.cell,0); ctx.scale(-1,1); ctx.drawImage(sh.img,sx,sy,p.w*T,p.h*T,0,p.oy*S.cell,p.w*S.cell,p.h*S.cell); ctx.restore(); }
+  else ctx.drawImage(sh.img,sx,sy,p.w*T,p.h*T,p.ox*S.cell,p.oy*S.cell,p.w*S.cell,p.h*S.cell); ctx.globalAlpha=1; }
+// is every footprint cell a road tile? (vehicles only)
+function isRoad(x,y){ if(!S.ground) return false; const t=S.ground[y*S.W+x]; if(!t) return false;
+  const k=S.keyByTile.get(t.si+':'+t.id0); return !!k && ROAD_RE.test(k); }
+function onRoad(ox,oy,w,h){ for(let r=0;r<h;r++) for(let c=0;c<w;c++) if(!isRoad(ox+c,oy+r)) return false; return true; }
+function canPlace(ox,oy,it){ if(ox<0||oy<0||ox+it.w>S.W||oy+it.h>S.H) return false;
+  if(kindOf(it)==='vehicle') return onRoad(ox,oy,it.w,it.h);
+  // one collidable per cell — no stacking a thousand lamps on one tile (RECONSIDER.md)
+  for(const k of collideCellsOf({...it,ox,oy})) if(S.collideSet.has(k)) return false;
+  return true; }
+
+function drawOverlay(){ ovx.clearRect(0,0,ov.width,ov.height); if(!S.hover) return;
+  if(S.eraser){ const p=placementAt(S.hover); if(p){ ovx.fillStyle='#e8615f44'; ovx.fillRect(p.ox*S.cell,p.oy*S.cell,p.w*S.cell,p.h*S.cell);
+      ovx.strokeStyle='#e8615f'; ovx.lineWidth=2; ovx.strokeRect(p.ox*S.cell+1,p.oy*S.cell+1,p.w*S.cell-2,p.h*S.cell-2); } return; }
+  ovx.fillStyle='#4bb3fd22'; ovx.fillRect(S.hover.cx*S.cell,S.hover.cy*S.cell,S.cell,S.cell);
+  if(!S.active) return;
+  const ox=S.hover.cx, oy=S.hover.cy, w=S.active.w, h=S.active.h, fits=canPlace(ox,oy,S.active);
+  blit(ovx,{...S.active,ox,oy,flip:S.flip}, fits?0.8:0.35);
+  if(kindOf(S.active)!=='vehicle'){   // per-row layer tint so you SEE the split
+    const rows=rowsFor({...S.active,ox,oy});
+    for(let r=0;r<h;r++){ const L=rows[r]; const col = L==='Over'?'#4bb3fd33' : COLLIDES[L]?'#e8615f33' : L==='Ground'?'#9a9aa233':'#88888822';
+      ovx.fillStyle=col; ovx.fillRect(ox*S.cell,(oy+r)*S.cell,w*S.cell,S.cell); }
+  } else { ovx.fillStyle='#e8b04a22'; ovx.fillRect(ox*S.cell,oy*S.cell,w*S.cell,h*S.cell); }  // vehicle = amber
+  ovx.strokeStyle=fits?'#57d08a':'#e8615f'; ovx.lineWidth=2; ovx.strokeRect(ox*S.cell+1,oy*S.cell+1,w*S.cell-2,h*S.cell-2); }
+
+ov.onmousemove=e=>{ const r=ov.getBoundingClientRect(); const cx=Math.floor((e.clientX-r.left)/S.cell), cy=Math.floor((e.clientY-r.top)/S.cell); S.hover={cx,cy};
+  let msg='';
+  if(S.active){ if(kindOf(S.active)==='vehicle'){ msg=`🚗 ${S.active.word||S.active.key} — ${onRoad(cx,cy,S.active.w,S.active.h)?'on road ✓':'place on a road'}`; }
+    else msg=`${S.active.word||S.active.key}${S.flip?' ⟲':''}`; }
+  $('#cursor').textContent=msg; drawOverlay(); };
+ov.onmouseleave=()=>{ S.hover=null; $('#cursor').textContent='—'; drawOverlay(); };
+ov.oncontextmenu=e=>{ e.preventDefault(); eraseAt(S.hover); };
+ov.onmousedown=e=>{ if(e.button===2||!S.hover) return; if(S.eraser||!S.active){ eraseAt(S.hover); return; } place(S.hover.cx,S.hover.cy); };
+ov.ondragover=e=>e.preventDefault(); ov.ondrop=e=>{ e.preventDefault(); if(S.active&&S.hover) place(S.hover.cx,S.hover.cy); };
+
+function place(ox,oy){ const a=S.active; if(!a || !canPlace(ox,oy,a)) return;
+  S.placements.push({id:S.nextId++,si:a.si,key:a.key,id0:a.id0,w:a.w,h:a.h,ox,oy,cat:a.cat,layer:a.layer,solid:a.solid,
+    kind:a.kind,interactions:a.interactions,word:a.word,hp:a.hp,dir:S.flip?-1:1,flip:S.flip}); refresh(); }
+function placementAt(hv){ if(!hv) return null; for(let i=S.placements.length-1;i>=0;i--){ const p=S.placements[i];
+  if(hv.cx>=p.ox&&hv.cx<p.ox+p.w&&hv.cy>=p.oy&&hv.cy<p.oy+p.h) return p; } return null; }
+function eraseAt(hv){ const p=placementAt(hv); if(p){ S.placements.splice(S.placements.indexOf(p),1); refresh(); } }
+function refresh(){ S.collideSet=new Set();
+  for(const p of S.placements){ if(kindOf(p)==='vehicle') continue; for(const k of collideCellsOf(p)) S.collideSet.add(k); }
+  drawBoard(); drawOverlay(); $('#count').textContent=S.placements.length+' objects'; markDirty(); }
+
+$('#eraser').onclick=()=>{ S.eraser=!S.eraser; if(S.eraser) S.active=null; $('#eraser').classList.toggle('primary',S.eraser); renderPalette(); renderProps(); drawOverlay(); };
+$('#clear').onclick=()=>{ if(S.placements.length&&confirm('Clear all placed objects?')){ S.placements=[]; refresh(); } };
+addEventListener('keydown',e=>{ if(e.key==='Escape'){S.active=null;S.eraser=false;$('#eraser').classList.remove('primary');renderPalette();drawOverlay();}
+  else if(e.key==='x'||e.key==='X'){S.flip=!S.flip;drawOverlay();}
+  else if((e.ctrlKey||e.metaKey)&&e.key==='z'){S.placements.pop();refresh();} });
+
+// ---- build the exported map (Tiled layers + entities) ----------------------
+function buildMap(){
+  const usedSi=new Set(S.placements.map(p=>p.si)); if(S.ground) S.ground.forEach(t=>t&&usedSi.add(t.si));
+  if(!usedSi.size) return null;
+  const used=[...usedSi].sort((a,b)=>a-b), firstgid={}; let g=1;
+  const tilesets=used.map(si=>{ const sh=S.sheets[si]; firstgid[si]=g;
+    const ts={ name:sh.name, firstgid:g, image:sh.image, imagewidth:sh.img.width, imageheight:sh.img.height, tilewidth:T, tileheight:T, columns:sh.cols, tilecount:sh.tilecount||(sh.cols*Math.ceil(sh.img.height/T)) };
+    g+=ts.tilecount; return ts; });
+  const FLIP=0x80000000, data={}; for(const L of LAYERS) data[L]=new Array(S.W*S.H).fill(0);
+  // ground preset first
+  if(S.ground) for(let i=0;i<S.ground.length;i++){ const t=S.ground[i]; if(t) data.Ground[i]=firstgid[t.si]+t.id0; }
+  // objects, per-row split
+  for(const p of S.placements){ const sh=S.sheets[p.si]; const rows=rowsFor(p);
+    for(let r=0;r<p.h;r++){ const arr=data[rows[r]]||data.Furniture;
+      for(let c=0;c<p.w;c++){ const sc=p.flip?p.w-1-c:c; const gid=firstgid[p.si]+p.id0+r*sh.cols+sc; arr[(p.oy+r)*S.W+(p.ox+c)]=p.flip?(gid|FLIP)>>>0:gid; } } }
+  // ENTITIES — per-instance metadata the game reads for behaviour. Each has a stable `id` so a
+  // wrong one can be fixed individually. Tile layers above stay standard Tiled (render/collision);
+  // this is an extra top-level array render-map.mjs ignores.
+  const entities = S.placements.map(p=>{ const {flags,word,hp}=resolveProps(p); const kind=kindOf(p);
+    const e={ id:p.id, key:p.key, kind, x:p.ox, y:p.oy, w:p.w, h:p.h, flip:!!p.flip };
+    if(word) e.word=word;
+    if(kind==='vehicle'){ e.dir = p.dir||1; e.moves=true; e.stopsForPlayer=true; e.placeOn='road'; }
+    else { const on=FLAGS.filter(f=>flags[f]); if(on.length) e.interactions=on; if(flags.breakable&&hp!=null) e.hp=hp;
+      e.layer = rowsFor(p)[p.h-1]; }
+    return e; });
+
+  return { type:'map', version:'1.10', orientation:'orthogonal', renderorder:'right-down', width:S.W, height:S.H, tilewidth:T, tileheight:T, infinite:false,
+    nextlayerid:LAYERS.length+1, nextobjectid:1, tilesets,
+    layers:LAYERS.map((n,i)=>({ id:i+1, name:n, type:'tilelayer', visible:true, opacity:1, x:0, y:0, width:S.W, height:S.H, data:data[n] })),
+    entities,
+    properties:[{name:'spawnX',type:'int',value:Math.floor(S.W/2)*T},{name:'spawnY',type:'int',value:(S.H-2)*T}] };
+}
+
+// ---- server persistence (autosave) -----------------------------------------
+// The map is saved to the Groupifier server per user. `data` holds both the editor state
+// (groundPreset + placements, so it re-opens editable) and `map` (the Tiled export the world loads).
+const setStatus = t => { const e=$('#savestatus'); if(e) e.textContent=t; };
+async function api(method, path, body){
+  const r = await fetch('/api/maps'+path, { method, credentials:'same-origin',
+    headers: body ? {'Content-Type':'application/json'} : {}, body: body ? JSON.stringify(body) : undefined });
+  if (r.status === 401){ const e=new Error('unauth'); e.unauth=true; throw e; }
+  if (!r.ok) throw new Error('http '+r.status);
+  return r.status === 204 ? null : r.json();
+}
+function snapshot(){ return { groundPreset:S.groundPreset, placements:S.placements, map:buildMap() }; }
+let saveTimer=null;
+function markDirty(){ if(!S.canSave||S.loading) return; clearTimeout(saveTimer); setStatus('…'); saveTimer=setTimeout(saveNow, 1200); }
+async function saveNow(){
+  if(!S.canSave){ setStatus('sign in to save'); return; }
+  clearTimeout(saveTimer);
+  try{ setStatus('saving…'); const data=snapshot(); const name=$('#mapname').value.trim()||'Untitled map';
+    if(!S.mapId){ const m=await api('POST','',{name,data}); S.mapId=m.id; }
+    else await api('PUT','/'+S.mapId,{name,data});
+    setStatus('saved ✓'); refreshMapList();
+  }catch(e){ setStatus(e.unauth?'sign in to save':'save failed'); }
+}
+$('#export').onclick=saveNow;
+
+async function refreshMapList(){
+  if(!S.canSave) return;
+  try{ const list=await api('GET',''); const sel=$('#maps'); sel.innerHTML='<option value="">— my maps —</option>';
+    for(const m of list){ const o=document.createElement('option'); o.value=m.id; o.textContent=m.name; if(m.id===S.mapId)o.selected=true; sel.appendChild(o); }
+  }catch{}
+}
+async function loadMap(id){
+  S.loading=true;
+  const m=await api('GET','/'+id); S.mapId=m.id; $('#mapname').value=m.name;
+  const d=m.data||{};
+  S.placements=(d.placements||[]).map(p=>({...p}));
+  S.nextId=S.placements.reduce((mx,p)=>Math.max(mx,p.id||0),0)+1;
+  if(d.groundPreset && presetsAvailable()[d.groundPreset]){ S.groundPreset=d.groundPreset; $('#ground').value=d.groundPreset; }
+  const spec=presetsAvailable()[S.groundPreset]; S.ground = spec ? spec.build(S.W,S.H) : null;
+  refresh(); S.loading=false; setStatus('loaded');
+}
+$('#maps').onchange=e=>{ if(e.target.value) loadMap(+e.target.value); };
+$('#newmap').onclick=async()=>{ S.mapId=null; S.placements=[]; $('#mapname').value='Untitled map'; refresh(); await saveNow(); };
+$('#mapname').onchange=markDirty;
+
+resize();
+boot().then(async()=>{
+  try{ await api('GET',''); S.canSave=true;
+    const wantId=+(new URL(location.href).searchParams.get('map')||0);
+    const list=await api('GET','');
+    if(wantId) await loadMap(wantId); else if(list.length) await loadMap(list[0].id); else setStatus('ready — draw & it autosaves');
+    refreshMapList();
+  }catch(e){ S.canSave=false; setStatus(e.unauth?'sign in to save':'offline — not saving'); }
+});
+</script>

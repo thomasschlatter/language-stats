@@ -26,3 +26,6 @@ yarn-error.log*
 public/assets/guttykreum/
 public/assets/modern_exteriors/
 public/assets/modern_interiors/
+
+# Paid LimeZu Modern Exteriors pack (local catalogue only; copy USED sheets into assets/tileset/)
+public/assets/modern_exteriors_pack/

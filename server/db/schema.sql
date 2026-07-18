@@ -326,3 +326,15 @@ CREATE TABLE IF NOT EXISTS lexicon (
   gender      TEXT,               -- 'm' | 'f' | 'n' | NULL (nouns only)
   PRIMARY KEY (language_id, word_lc)
 );
+
+-- Level Creator maps: a user's saved level, as exported map JSON (Tiled tile layers
+-- + the `entities` array). Autosaved by the editor; later loaded by the world.
+CREATE TABLE IF NOT EXISTS maps (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name       TEXT NOT NULL DEFAULT 'Untitled map',
+  data       TEXT NOT NULL DEFAULT '{}',          -- exported map JSON
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_maps_user ON maps(user_id, updated_at DESC);
