@@ -159,7 +159,7 @@ export default class Game extends Phaser.Scene {
     else if (worldMap === 'museum') this.buildThemedRoom('museumMap')
     else if (worldMap === 'bathroom') this.buildThemedRoom('bathroomMap')
     else if (worldMap === 'gym') this.buildThemedRoom('gymMap')
-    else if (worldMap === 'usermap') this.buildThemedRoom((this.network as any).userMapKey)
+    else if (worldMap === 'usermap') this.buildUserMap((this.network as any).userMapJson)
     else if (worldMap === 'town') this.buildCity()
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else if (worldMap === 'osaka')
@@ -692,6 +692,62 @@ export default class Game extends Phaser.Scene {
     const prop = (n: string) => props.find((p) => p.name === n)?.value
     this.spawnX = prop('spawnX') ?? (this.map.width / 2) * 32
     this.spawnY = prop('spawnY') ?? (this.map.height / 2) * 32
+    this.botX = this.spawnX
+    this.botY = this.spawnY + 64
+  }
+
+  // Build a Level-Creator map from its OBJECT PLACEMENTS + the object manifest, rather than from
+  // baked tile layers. Collision & walk-behind are derived per-object from the manifest's
+  // {layer, solid} at play time — so fixing an object type in the manifest fixes every map, with
+  // no re-save. Ground (terrain) still comes from the baked Ground layer (terrain never collides).
+  private buildUserMap(mapJson: any) {
+    this.worldColliders = []
+    const W = mapJson.width, H = mapJson.height
+    const firstgid = mapJson.tilesets?.[0]?.firstgid ?? 1
+    const man = this.cache.json.get('me_editor_manifest') as any
+    const cols = man?.cols ?? 32
+
+    this.map = this.make.tilemap({ tileWidth: 32, tileHeight: 32, width: W, height: H })
+    const ts = this.map.addTilesetImage('ME_Editor_32x32', 'room_editor', 32, 32, 0, 0, firstgid)!
+    const ground = this.map.createBlankLayer('Ground', ts, 0, 0, W, H)!
+    const decor = this.map.createBlankLayer('Decor', ts, 0, 0, W, H)!
+    const walls = this.map.createBlankLayer('Walls', ts, 0, 0, W, H)!
+    const furn = this.map.createBlankLayer('Furniture', ts, 0, 0, W, H)!
+    const over = this.map.createBlankLayer('Over', ts, 0, 0, W, H)!
+    const byName: Record<string, Phaser.Tilemaps.TilemapLayer> = { Ground: ground, Decor: decor, Walls: walls, Furniture: furn, Over: over }
+
+    // Ground (terrain) — from the baked Ground layer's gids
+    const gData = (mapJson.layers || []).find((l: any) => l.name === 'Ground')?.data
+    if (gData) for (let i = 0; i < gData.length; i++) { const gid = gData[i]; if (gid) ground.putTileAt(gid, i % W, Math.floor(i / W)) }
+
+    // Objects — placement (entity) + object type (manifest) → per-row layer split (Over walk-behind
+    // for rows above the base, the collide layer for the bottom `solid` rows). Mirrors the editor's
+    // layering() so preview and play agree.
+    for (const e of (mapJson.entities || [])) {
+      const o = man?.objects?.[e.key]
+      if (!o) continue
+      const base = byName[o.layer] ? o.layer : 'Furniture'
+      const solid = Math.max(0, Math.min(o.h, o.solid ?? 1))
+      const split = (base === 'Over' || base === 'Ground' || base === 'Decor') ? 0 : (o.h - solid)
+      for (let r = 0; r < o.h; r++) {
+        const dest = byName[r < split ? 'Over' : base]
+        for (let c = 0; c < o.w; c++) {
+          const sc = e.flip ? o.w - 1 - c : c
+          const gid = firstgid + o.id0 + r * cols + sc
+          const t = dest.putTileAt(gid, e.x + c, e.y + r)
+          if (t && e.flip) t.flipX = true
+        }
+      }
+    }
+
+    walls.setCollisionByExclusion([-1, 0]); this.worldColliders.push(walls)
+    furn.setDepth(0); furn.setCollisionByExclusion([-1, 0]); this.worldColliders.push(furn)
+    over.setDepth(10000)
+
+    const props = (mapJson.properties as Array<{ name: string; value: number }>) || []
+    const prop = (n: string) => props.find((p) => p.name === n)?.value
+    this.spawnX = prop('spawnX') ?? (W / 2) * 32
+    this.spawnY = prop('spawnY') ?? (H - 2) * 32
     this.botX = this.spawnX
     this.botY = this.spawnY + 64
   }

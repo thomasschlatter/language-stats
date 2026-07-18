@@ -108,6 +108,9 @@ export default class Bootstrap extends Phaser.Scene {
 
   preload() {
 
+    // Level Creator object manifest — the world builds user maps from placements + this (layer/solid).
+    this.load.json('me_editor_manifest', 'assets/tileset/ME_Editor_32x32.json')
+
     for (const [key, value] of Object.entries(this.ATLAS)) {
       this.load.atlas(key, value[0], value[1])
     }
@@ -241,10 +244,8 @@ export default class Bootstrap extends Phaser.Scene {
     if (!this.preloadComplete) return
     if (this.scene.isActive('game')) return
     this.scene.stop('background')
-    this.cache.tilemap.remove('userMap')
-    this.cache.tilemap.add('userMap', { format: Phaser.Tilemaps.Formats.TILED_JSON, data: mapJson })
     ;(this.network as any).worldMap = 'usermap'
-    ;(this.network as any).userMapKey = 'userMap'
+    ;(this.network as any).userMapJson = mapJson // raw editor export (layers + entities)
     if (!this.network.mySessionId) (this.network as any).mySessionId = 'local'
     this.scene.launch('game', { network: this.network })
     store.dispatch(setRoomJoined(true))
