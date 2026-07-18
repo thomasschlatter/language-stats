@@ -133,6 +133,16 @@ const WorldCard = styled.button`
     flex-shrink: 0;
   }
 
+  .thumb {
+    width: 72px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+    background: #1a1a1d;
+    image-rendering: pixelated;
+  }
+
   .info h3 {
     margin: 0 0 3px;
     font-size: 18px;
@@ -221,6 +231,22 @@ export default function RoomSelectionDialog() {
       cancelled = true;
     };
   }, []);
+
+  // The user's saved Level-Creator maps, shown as thumbnail cards above the built-in worlds.
+  const [myMaps, setMyMaps] = useState<
+    Array<{ id: number; name: string; thumb?: string }>
+  >([]);
+  useEffect(() => {
+    fetch("/api/maps", { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => setMyMaps(Array.isArray(list) ? list : []))
+      .catch(() => {
+        /* not signed in / offline — just show no maps */
+      });
+  }, []);
+  const openMap = (id: number) => {
+    (window.top ?? window).location.href = `/level-creator/?map=${id}`;
+  };
 
   const joiningRef = useRef(false);
   const handleJoinWorld = async (world: WorldInfo) => {
@@ -323,6 +349,28 @@ export default function RoomSelectionDialog() {
             </CustomRoomWrapper>
           ) : (
             <>
+              {myMaps.length > 0 && (
+                <>
+                  <Title>Your maps</Title>
+                  <PickerStack>
+                    <WorldGrid>
+                      {myMaps.map((m) => (
+                        <WorldCard key={m.id} onClick={() => openMap(m.id)}>
+                          {m.thumb ? (
+                            <img className="thumb" src={m.thumb} alt="" />
+                          ) : (
+                            <span className="emoji">🗺️</span>
+                          )}
+                          <div className="info">
+                            <h3>{m.name}</h3>
+                            <p>Open in the level creator to keep editing.</p>
+                          </div>
+                        </WorldCard>
+                      ))}
+                    </WorldGrid>
+                  </PickerStack>
+                </>
+              )}
               <Title>Choose a world</Title>
               <PickerStack>
                 <WorldGrid>

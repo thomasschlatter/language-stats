@@ -28,6 +28,10 @@ const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
 // --- lightweight column migrations (ALTER TABLE has no IF NOT EXISTS) ---
+const mapCols = db.prepare('PRAGMA table_info(maps)').all().map((c) => c.name);
+if (!mapCols.includes('thumb')) {
+  db.exec('ALTER TABLE maps ADD COLUMN thumb TEXT'); // small preview image (data URL) for the map list
+}
 const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
 if (!userCols.includes('line_user_id')) {
   db.exec('ALTER TABLE users ADD COLUMN line_user_id TEXT');

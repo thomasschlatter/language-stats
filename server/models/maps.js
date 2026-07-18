@@ -4,8 +4,9 @@
 import db from '../db/index.js';
 
 export function listMaps(userId) {
+  // includes `thumb` (small data-URL preview) so the picker can show it without loading full `data`
   return db
-    .prepare('SELECT id, name, updated_at, created_at FROM maps WHERE user_id = ? ORDER BY updated_at DESC')
+    .prepare('SELECT id, name, thumb, updated_at, created_at FROM maps WHERE user_id = ? ORDER BY updated_at DESC')
     .all(userId);
 }
 
@@ -17,20 +18,21 @@ export function getMap(id, userId) {
   return { ...row, data: safeParse(row.data) };
 }
 
-export function createMap(userId, name, data) {
+export function createMap(userId, name, data, thumb) {
   const info = db
-    .prepare('INSERT INTO maps (user_id, name, data) VALUES (?, ?, ?)')
-    .run(userId, (name || 'Untitled map').slice(0, 120), JSON.stringify(data ?? {}));
+    .prepare('INSERT INTO maps (user_id, name, data, thumb) VALUES (?, ?, ?, ?)')
+    .run(userId, (name || 'Untitled map').slice(0, 120), JSON.stringify(data ?? {}), thumb ?? null);
   return getMap(info.lastInsertRowid, userId);
 }
 
-// Partial save: update name and/or data (autosave sends `data`; rename sends `name`).
+// Partial save: update name and/or data and/or thumb (autosave sends data + thumb).
 // Returns null if the map doesn't exist or isn't the caller's.
-export function saveMap(id, userId, { name, data } = {}) {
+export function saveMap(id, userId, { name, data, thumb } = {}) {
   if (!db.prepare('SELECT 1 FROM maps WHERE id = ? AND user_id = ?').get(id, userId)) return null;
   const sets = [], vals = [];
   if (name !== undefined) { sets.push('name = ?'); vals.push(String(name).slice(0, 120)); }
   if (data !== undefined) { sets.push('data = ?'); vals.push(JSON.stringify(data)); }
+  if (thumb !== undefined) { sets.push('thumb = ?'); vals.push(thumb); }
   if (sets.length) {
     sets.push("updated_at = datetime('now')");
     db.prepare(`UPDATE maps SET ${sets.join(', ')} WHERE id = ? AND user_id = ?`).run(...vals, id, userId);

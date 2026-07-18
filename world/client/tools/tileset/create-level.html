@@ -404,14 +404,23 @@ async function api(method, path, body){
   return r.status === 204 ? null : r.json();
 }
 function snapshot(){ return { groundPreset:S.groundPreset, placements:S.placements, map:buildMap() }; }
+// A small preview image for the "my maps" list — the board canvas (ground + objects) scaled down.
+function thumbnail(){
+  const tw=256, th=Math.round(tw*S.H/S.W);
+  const c=document.createElement('canvas'); c.width=tw; c.height=th;
+  const x=c.getContext('2d'); x.imageSmoothingEnabled=false;
+  x.fillStyle='#1a1a1d'; x.fillRect(0,0,tw,th);
+  x.drawImage(cv, 0,0,tw,th);          // cv holds the rendered ground + placements
+  try{ return c.toDataURL('image/jpeg', 0.65); }catch{ return null; }
+}
 let saveTimer=null;
 function markDirty(){ if(!S.canSave||S.loading) return; clearTimeout(saveTimer); setStatus('…'); saveTimer=setTimeout(saveNow, 1200); }
 async function saveNow(){
   if(!S.canSave){ setStatus('sign in to save'); return; }
   clearTimeout(saveTimer);
-  try{ setStatus('saving…'); const data=snapshot(); const name=$('#mapname').value.trim()||'Untitled map';
-    if(!S.mapId){ const m=await api('POST','',{name,data}); S.mapId=m.id; }
-    else await api('PUT','/'+S.mapId,{name,data});
+  try{ setStatus('saving…'); const data=snapshot(); const thumb=thumbnail(); const name=$('#mapname').value.trim()||'Untitled map';
+    if(!S.mapId){ const m=await api('POST','',{name,data,thumb}); S.mapId=m.id; }
+    else await api('PUT','/'+S.mapId,{name,data,thumb});
     setStatus('saved ✓'); refreshMapList();
   }catch(e){ setStatus(e.unauth?'sign in to save':'save failed'); }
 }

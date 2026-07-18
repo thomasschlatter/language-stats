@@ -13,7 +13,7 @@ router.get('/', (req, res) => res.json(listMaps(req.user.id)));
 
 // create a new (usually empty) map
 router.post('/', (req, res) => {
-  const map = createMap(req.user.id, req.body?.name, req.body?.data);
+  const map = createMap(req.user.id, req.body?.name, req.body?.data, req.body?.thumb);
   res.status(201).json(map);
 });
 

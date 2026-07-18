@@ -334,6 +334,7 @@ CREATE TABLE IF NOT EXISTS maps (
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name       TEXT NOT NULL DEFAULT 'Untitled map',
   data       TEXT NOT NULL DEFAULT '{}',          -- exported map JSON
+  thumb      TEXT,                                -- small preview image (data URL) for the map list
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
