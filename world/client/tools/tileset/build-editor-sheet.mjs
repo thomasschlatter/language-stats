@@ -225,6 +225,7 @@ const CONDOS = [
 const THAI = [
   { key: 'thai_shophouse', single: '5', word: 'building' },
   { key: 'thai_apartment', single: '6', word: 'building' },
+  { key: 'thai_grocery', single: '7', word: 'shop' },   // ร้านชำ grocery shophouse (Gemini, downscaled to 7x18)
 ].map((s) => ({ ...s, load: thaib, category: 'Buildings', layer: 'Walls', solid: 2, interactions: ['enterable'] }));
 
 // 2d) The user's landmark shops — 7-Eleven + Longlai (5x8), re-extracted clean from their atlas.
