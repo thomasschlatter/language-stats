@@ -343,6 +343,20 @@ export default function RoomSelectionDialog() {
                       </div>
                     </WorldCard>
                   ))}
+                  {/* Opens the Level Creator (a page on the main app). The world runs in an
+                      iframe, so break out to the top window for the full-page editor. */}
+                  <WorldCard
+                    key="__create_your_own"
+                    onClick={() => {
+                      (window.top ?? window).location.href = "/level-creator/";
+                    }}
+                  >
+                    <span className="emoji">🎨</span>
+                    <div className="info">
+                      <h3>Create your own</h3>
+                      <p>Build your own map in the level creator — place buildings, streets and props, then save it.</p>
+                    </div>
+                  </WorldCard>
                 </WorldGrid>
                 {/* Solo practice + custom-room browsing removed for now
                     (see backlog); the world grid is the only entry point. */}
