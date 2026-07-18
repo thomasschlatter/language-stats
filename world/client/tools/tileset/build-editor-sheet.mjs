@@ -223,8 +223,6 @@ const CONDOS = [
 // 2c) The user's OWN custom Thai buildings (weathered Bangkok shophouse + apartment), from
 // assets/experiments/. Whole pre-isolated singles, 7x18.
 const THAI = [
-  { key: 'thai_shophouse', single: '5', word: 'building' },
-  { key: 'thai_apartment', single: '6', word: 'building' },
   { key: 'thai_grocery', single: '7', word: 'shop' },       // ร้านชำ grocery shophouse
   { key: 'longlai_green', single: '8', word: 'bar' },        // green LONGLAI bar variant
   { key: 'thai_teal_apt', single: '9', word: 'building' },   // weathered teal colonial shophouse
