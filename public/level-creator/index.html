@@ -58,6 +58,7 @@
     <span class="sp"></span>
     <label>zoom <input type="range" id="zoom" min="8" max="40" value="20" style="width:80px"></label>
     <label class="pill">ground <select id="ground"></select></label>
+    <button id="move">✋ Move</button>
     <button id="eraser">🧹 Eraser</button>
     <button id="clear">Clear</button>
     <button id="export" class="primary">💾 Save</button>
@@ -174,6 +175,7 @@ const S = {
   sheets: [], index: [], W:40, H:30, cell:20, placements:[], active:null,
   override:'auto', flip:false, hover:null, cat:'All',
   ground: null, groundPreset:'City street', nextId:1, collideSet:new Set(), eraser:false,
+  moveMode:false, held:null,   // ✋ Move: `held` is a placement picked up, following the cursor
   mapId:null, canSave:false, loading:false,
 };
 // DISPLAY-ONLY: shows the FIXED interactions/word of the picked object type. Editing them per
@@ -301,7 +303,7 @@ function renderPalette(){ const q=$('#search').value.trim().toLowerCase();
     const sz=document.createElement('div'); sz.className='sz'; sz.textContent=it.w+'×'+it.h; chip.appendChild(sz);
     chip.onclick=()=>pick(it); chip.ondragstart=()=>pick(it); pal.appendChild(chip);} }
 $('#search').oninput=renderPalette;
-function pick(it){ S.active={...it}; S.eraser=false; $('#eraser').classList.remove('primary'); renderPalette(); renderProps(); drawOverlay(); }
+function pick(it){ cancelMove(); S.moveMode=false; $('#move').classList.remove('primary'); S.active={...it}; S.eraser=false; $('#eraser').classList.remove('primary'); renderPalette(); renderProps(); drawOverlay(); }
 
 // ---- board -----------------------------------------------------------------
 function resize(){ S.W=40; S.H=30; S.cell=+$('#zoom').value;   // map size FIXED at 40×30 (RECONSIDER.md)
@@ -332,6 +334,12 @@ function canPlace(ox,oy,it){ if(ox<0||oy<0||ox+it.w>S.W||oy+it.h>S.H) return fal
   return true; }
 
 function drawOverlay(){ ovx.clearRect(0,0,ov.width,ov.height); if(!S.hover) return;
+  if(S.moveMode){
+    if(S.held){ const ox=S.hover.cx, oy=S.hover.cy, fits=canPlace(ox,oy,S.held);
+      blit(ovx,{...S.held,ox,oy}, fits?0.8:0.35);
+      ovx.strokeStyle=fits?'#57d08a':'#e8615f'; ovx.lineWidth=2; ovx.strokeRect(ox*S.cell+1,oy*S.cell+1,S.held.w*S.cell-2,S.held.h*S.cell-2); }
+    else { const p=placementAt(S.hover); if(p){ ovx.strokeStyle='#4bb3fd'; ovx.lineWidth=2; ovx.strokeRect(p.ox*S.cell+1,p.oy*S.cell+1,p.w*S.cell-2,p.h*S.cell-2); } }
+    return; }
   if(S.eraser){ const p=placementAt(S.hover); if(p){ ovx.fillStyle='#e8615f44'; ovx.fillRect(p.ox*S.cell,p.oy*S.cell,p.w*S.cell,p.h*S.cell);
       ovx.strokeStyle='#e8615f'; ovx.lineWidth=2; ovx.strokeRect(p.ox*S.cell+1,p.oy*S.cell+1,p.w*S.cell-2,p.h*S.cell-2); } return; }
   ovx.fillStyle='#4bb3fd22'; ovx.fillRect(S.hover.cx*S.cell,S.hover.cy*S.cell,S.cell,S.cell);
@@ -352,7 +360,19 @@ ov.onmousemove=e=>{ const r=ov.getBoundingClientRect(); const cx=Math.floor((e.c
   $('#cursor').textContent=msg; drawOverlay(); };
 ov.onmouseleave=()=>{ S.hover=null; $('#cursor').textContent='—'; drawOverlay(); };
 ov.oncontextmenu=e=>{ e.preventDefault(); eraseAt(S.hover); };
-ov.onmousedown=e=>{ if(e.button===2||!S.hover) return; if(S.eraser||!S.active){ eraseAt(S.hover); return; } place(S.hover.cx,S.hover.cy); };
+ov.onmousedown=e=>{ if(e.button===2||!S.hover) return;
+  if(S.moveMode){ moveClick(S.hover); return; }
+  if(S.eraser||!S.active){ eraseAt(S.hover); return; } place(S.hover.cx,S.hover.cy); };
+// ✋ Move: first click picks up the item under the cursor; second click drops it at a valid cell.
+function moveClick(hv){
+  if(S.held){
+    if(canPlace(hv.cx,hv.cy,S.held)){ S.placements.push({...S.held,ox:hv.cx,oy:hv.cy}); S.held=null; refresh(); }
+    // else: invalid target — keep holding
+  } else {
+    const p=placementAt(hv); if(!p) return;
+    S.held={...p, from:{ox:p.ox,oy:p.oy}}; S.placements.splice(S.placements.indexOf(p),1); refresh();
+  }
+}
 ov.ondragover=e=>e.preventDefault(); ov.ondrop=e=>{ e.preventDefault(); if(S.active&&S.hover) place(S.hover.cx,S.hover.cy); };
 
 function place(ox,oy){ const a=S.active; if(!a || !canPlace(ox,oy,a)) return;
@@ -365,9 +385,12 @@ function refresh(){ S.collideSet=new Set();
   for(const p of S.placements){ if(kindOf(p)==='vehicle') continue; for(const k of collideCellsOf(p)) S.collideSet.add(k); }
   drawBoard(); drawOverlay(); $('#count').textContent=S.placements.length+' objects'; markDirty(); }
 
-$('#eraser').onclick=()=>{ S.eraser=!S.eraser; if(S.eraser) S.active=null; $('#eraser').classList.toggle('primary',S.eraser); renderPalette(); renderProps(); drawOverlay(); };
+function cancelMove(){ if(S.held){ S.placements.push({...S.held,ox:S.held.from.ox,oy:S.held.from.oy}); S.held=null; refresh(); } }
+$('#move').onclick=()=>{ cancelMove(); S.moveMode=!S.moveMode; if(S.moveMode){ S.active=null; S.eraser=false; $('#eraser').classList.remove('primary'); }
+  $('#move').classList.toggle('primary',S.moveMode); renderPalette(); renderProps(); drawOverlay(); };
+$('#eraser').onclick=()=>{ cancelMove(); S.moveMode=false; $('#move').classList.remove('primary'); S.eraser=!S.eraser; if(S.eraser) S.active=null; $('#eraser').classList.toggle('primary',S.eraser); renderPalette(); renderProps(); drawOverlay(); };
 $('#clear').onclick=()=>{ if(S.placements.length&&confirm('Clear all placed objects?')){ S.placements=[]; refresh(); } };
-addEventListener('keydown',e=>{ if(e.key==='Escape'){S.active=null;S.eraser=false;$('#eraser').classList.remove('primary');renderPalette();drawOverlay();}
+addEventListener('keydown',e=>{ if(e.key==='Escape'){cancelMove();S.moveMode=false;$('#move').classList.remove('primary');S.active=null;S.eraser=false;$('#eraser').classList.remove('primary');renderPalette();drawOverlay();}
   else if(e.key==='x'||e.key==='X'){S.flip=!S.flip;drawOverlay();}
   else if((e.ctrlKey||e.metaKey)&&e.key==='z'){S.placements.pop();refresh();} });
 
