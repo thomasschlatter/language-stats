@@ -61,6 +61,7 @@ const terr = (n) => `${DIR.terr}/ME_Singles_City_Terrains_32x32_${n}.png`;
 const prop = (n) => `${DIR.prop}/ME_Singles_City_Props_32x32_${n}.png`;
 const modb = (n) => `${DIR.mod}/ME_Singles_Floor_Modular_Building_32x32_${n}.png`;
 const genb = (n) => `${DIR.genb}/ME_Singles_Generic_Building_32x32_${n}.png`;
+const thaib = (n) => `${PUB}/experiments/ME_Singles_Thai_Building_32x32_${n}.png`; // user's custom Thai buildings
 
 const PROP_THEMES = [
   { dir: DIR.prop, prefix: 'ME_Singles_City_Props_32x32_', load: (base) => prop(base) },
@@ -205,6 +206,13 @@ const CONDOS = [
   { key: 'shop_hardware', single: 'Hardware_Store', word: 'hardware store' },
 ].map((s) => ({ ...s, load: genb, category: 'Buildings', layer: 'Walls', solid: 2, interactions: ['enterable'] }));
 
+// 2c) The user's OWN custom Thai buildings (weathered Bangkok shophouse + apartment), from
+// assets/experiments/. Whole pre-isolated singles, 7x18.
+const THAI = [
+  { key: 'thai_shophouse', single: '5', word: 'building' },
+  { key: 'thai_apartment', single: '6', word: 'building' },
+].map((s) => ({ ...s, load: thaib, category: 'Buildings', layer: 'Walls', solid: 2, interactions: ['enterable'] }));
+
 // ===========================================================================================
 // 3) VEHICLES — real drivable vehicles, ONE clean static side-view frame each, cut from the
 // ANIMATED source sheets (Modern Exteriors Animated_32x32 pack, committed under modern_exteriors_pack).
@@ -272,7 +280,7 @@ for (const theme of PROP_THEMES) {
 // ===========================================================================================
 // LOAD every object, MEASURING w/h from pixels (never trusting the name).
 // ===========================================================================================
-const SPEC = [...TERRAIN, ...BUILDINGS, ...CONDOS, ...VEHICLES, ...PROPS];
+const SPEC = [...TERRAIN, ...BUILDINGS, ...CONDOS, ...THAI, ...VEHICLES, ...PROPS];
 const seen = new Set();
 for (const s of SPEC) { if (seen.has(s.key)) throw new Error(`duplicate key: ${s.key}`); seen.add(s.key); }
 
