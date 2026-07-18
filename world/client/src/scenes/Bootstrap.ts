@@ -45,6 +45,8 @@ export default class Bootstrap extends Phaser.Scene {
   
    OBJECTS = {
     tiles_wall: ['assets/map/FloorAndGround.png', {frameWidth: 32, frameHeight: 32}],
+    // Level Creator object library — the tileset user-made maps are built from.
+    room_editor: ['assets/tileset/ME_Editor_32x32.png', {frameWidth: 32, frameHeight: 32}],
     // LimeZu Room_Builder sheets for the generated indoor room (roomMap.json).
     room_floors: ['assets/tileset/Room_Builder_Floors_32x32.png', {frameWidth: 32, frameHeight: 32}],
     room_walls: ['assets/tileset/Room_Builder_3d_walls_32x32.png', {frameWidth: 32, frameHeight: 32}],
@@ -229,6 +231,25 @@ export default class Bootstrap extends Phaser.Scene {
     store.dispatch(setRoomJoined(false))
     this.launchBackground(store.getState().user.backgroundMode)
     window.dispatchEvent(new Event('world-evicted'))
+  }
+
+  // Play a user's Level-Creator map as a single-player walkable room. The map JSON (Tiled
+  // layers + entities) is injected into the tilemap cache; Game.buildThemedRoom renders it via
+  // the ME_Editor tileset. No Colyseus room is joined — the real Network is used but never joins,
+  // and updatePlayer is room?.send-guarded, so the player still walks/collides safely.
+  launchUserMap(mapJson: any) {
+    if (!this.preloadComplete) return
+    if (this.scene.isActive('game')) return
+    this.scene.stop('background')
+    this.cache.tilemap.remove('userMap')
+    this.cache.tilemap.add('userMap', { format: Phaser.Tilemaps.Formats.TILED_JSON, data: mapJson })
+    ;(this.network as any).worldMap = 'usermap'
+    ;(this.network as any).userMapKey = 'userMap'
+    if (!this.network.mySessionId) (this.network as any).mySessionId = 'local'
+    this.scene.launch('game', { network: this.network })
+    store.dispatch(setRoomJoined(true))
+    this.worldGuardCleanup?.()
+    this.worldGuardCleanup = claimWorld(() => this.evictFromWorld())
   }
 
   // Single-player word games hub — no network/Colyseus needed.

@@ -1,4 +1,4 @@
-import Peer from "peerjs";
+import Peer, { MediaConnection } from "peerjs";
 import Network from "../services/Network";
 import store from "../stores";
 import { setVideoConnected } from "../stores/UserStore";
@@ -7,11 +7,11 @@ export default class WebRTC {
   private myPeer: Peer;
   private peers = new Map<
     string,
-    { call: Peer.MediaConnection; video: HTMLVideoElement }
+    { call: MediaConnection; video: HTMLVideoElement }
   >();
   private onCalledPeers = new Map<
     string,
-    { call: Peer.MediaConnection; video: HTMLVideoElement }
+    { call: MediaConnection; video: HTMLVideoElement }
   >();
   private videoGrid = document.querySelector(".video-grid");
   private buttonGrid = document.querySelector(".button-grid");

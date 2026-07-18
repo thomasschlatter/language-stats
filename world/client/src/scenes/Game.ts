@@ -32,6 +32,7 @@ export default class Game extends Phaser.Scene {
   private static readonly INDOOR_ROOM_WORLDS = new Set([
     'room', 'border', 'classroom', 'doctor', 'shop', 'kitchen', 'bedroom',
     'living', 'clothing', 'icecream', 'museum', 'bathroom', 'gym',
+    'usermap', // Level Creator maps: no Foxy bot / ambient traffic
   ])
   network!: Network
   private cursors!: NavKeys
@@ -158,6 +159,7 @@ export default class Game extends Phaser.Scene {
     else if (worldMap === 'museum') this.buildThemedRoom('museumMap')
     else if (worldMap === 'bathroom') this.buildThemedRoom('bathroomMap')
     else if (worldMap === 'gym') this.buildThemedRoom('gymMap')
+    else if (worldMap === 'usermap') this.buildThemedRoom((this.network as any).userMapKey)
     else if (worldMap === 'town') this.buildCity()
     else if (worldMap === 'island') this.buildExteriorTiled('islandMap')
     else if (worldMap === 'osaka')
@@ -653,6 +655,7 @@ export default class Game extends Phaser.Scene {
     museum: 'room_museum',
     bathroom: 'room_bathroom',
     gym: 'room_gym',
+    ME_Editor_32x32: 'room_editor', // Level Creator maps
   }
 
   private buildThemedRoom(mapKey: string) {

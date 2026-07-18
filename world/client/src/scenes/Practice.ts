@@ -117,7 +117,7 @@ export default class Practice extends Phaser.Scene {
     const exit = this.add.text(W - 16, 16, '✕ Menu', { fontSize: '18px', color: '#9fb0d8' })
       .setOrigin(1, 0).setDepth(10).setInteractive({ useHandCursor: true })
     exit.on('pointerdown', () => this.exit())
-    this.input.keyboard.addKey('ESC').on('down', () => this.exit())
+    this.input.keyboard!.addKey('ESC').on('down', () => this.exit())
 
     this.player = this.physics.add.sprite(W / 2, H / 2, 'adam').setDepth(5)
     this.player.setCollideWorldBounds(true)
@@ -141,9 +141,9 @@ export default class Practice extends Phaser.Scene {
       this.walls.push(wall)
     }
 
-    this.cursors = this.input.keyboard.createCursorKeys()
-    this.keySpace = this.input.keyboard.addKey('SPACE')
-    this.input.keyboard.addCapture('UP,DOWN,LEFT,RIGHT,SPACE')
+    this.cursors = this.input.keyboard!.createCursorKeys()
+    this.keySpace = this.input.keyboard!.addKey('SPACE')
+    this.input.keyboard!.addCapture('UP,DOWN,LEFT,RIGHT,SPACE')
 
     // Use the player's first learning language + scale length to their level.
     let n = 10
@@ -310,7 +310,7 @@ export default class Practice extends Phaser.Scene {
       fontSize: '24px', color: '#ffffff', backgroundColor: '#2e7d32', padding: { x: 20, y: 12 },
     }).setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true })
     again.on('pointerdown', () => this.scene.restart())
-    this.input.keyboard.addKey('ENTER').once('down', () => this.scene.restart())
+    this.input.keyboard!.addKey('ENTER').once('down', () => this.scene.restart())
     const menu = this.add.text(W / 2, H * 0.64, '≡  Menu', { fontSize: '20px', color: '#9fb0d8' })
       .setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true })
     menu.on('pointerdown', () => this.scene.start('gamemenu'))

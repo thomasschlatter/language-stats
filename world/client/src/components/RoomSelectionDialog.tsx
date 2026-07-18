@@ -247,6 +247,20 @@ export default function RoomSelectionDialog() {
   const openMap = (id: number) => {
     (window.top ?? window).location.href = `/level-creator/?map=${id}`;
   };
+  // Play a saved map as a walkable single-player room.
+  const playMap = async (id: number) => {
+    try {
+      const res = await fetch(`/api/maps/${id}`, { credentials: "same-origin" });
+      if (!res.ok) return;
+      const m = await res.json();
+      const mapJson = m?.data?.map;
+      if (!mapJson) return;
+      const bootstrap = phaserGame.scene.keys.bootstrap as Bootstrap;
+      bootstrap.launchUserMap(mapJson);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const joiningRef = useRef(false);
   const handleJoinWorld = async (world: WorldInfo) => {
@@ -355,7 +369,7 @@ export default function RoomSelectionDialog() {
                   <PickerStack>
                     <WorldGrid>
                       {myMaps.map((m) => (
-                        <WorldCard key={m.id} onClick={() => openMap(m.id)}>
+                        <WorldCard key={m.id} onClick={() => playMap(m.id)}>
                           {m.thumb ? (
                             <img className="thumb" src={m.thumb} alt="" />
                           ) : (
@@ -363,7 +377,17 @@ export default function RoomSelectionDialog() {
                           )}
                           <div className="info">
                             <h3>{m.name}</h3>
-                            <p>Open in the level creator to keep editing.</p>
+                            <p>Click to play — or edit it.</p>
+                            <span
+                              className="lang"
+                              role="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openMap(m.id);
+                              }}
+                            >
+                              ✏️ Edit
+                            </span>
                           </div>
                         </WorldCard>
                       ))}
