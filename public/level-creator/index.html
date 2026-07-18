@@ -133,7 +133,7 @@ function rowsFor(p){ const {base, split} = layering(p); return Array.from({lengt
 const COLLIDE_LAYER = L => L==='Walls'||L==='Furniture';
 // the cells a placement makes SOLID (used to forbid stacking two collidables on one cell)
 function collideCellsOf(p){ const rows=rowsFor(p), cells=[];
-  for(let r=0;r<p.h;r++) if(COLLIDE_LAYER(rows[r])) for(let c=0;c<p.w;c++) cells.push((p.oy+r)*S.W+(p.ox+c));
+  for(let r=0;r<p.h;r++) if(COLLIDE_LAYER(rows[r])) for(let c=0;c<p.w;c++){ const x=p.ox+c, y=p.oy+r; if(x>=0&&x<S.W&&y>=0&&y<S.H) cells.push(y*S.W+x); }
   return cells; }
 
 // ---- INTERACTIONS ----------------------------------------------------------
@@ -309,34 +309,41 @@ $('#search').oninput=renderPalette;
 function pick(it){ cancelMove(); S.moveMode=false; $('#move').classList.remove('primary'); S.active={...it}; S.eraser=false; $('#eraser').classList.remove('primary'); renderPalette(); renderProps(); drawOverlay(); }
 
 // ---- board -----------------------------------------------------------------
-function resize(){ S.W=40; S.H=30; S.cell=+$('#zoom').value;   // map size FIXED at 40×30 (RECONSIDER.md)
-  for(const c of [cv,ov]){ c.width=S.W*S.cell; c.height=S.H*S.cell; c.style.width=cv.width+'px'; c.style.height=cv.height+'px'; }
-  $('#board').style.width=cv.width+'px'; $('#board').style.height=cv.height+'px';
+function resize(){ S.W=40; S.H=30; S.cell=+$('#zoom').value; S.PAD=12;   // map FIXED 40×30; PAD cells of off-map margin so objects can hang off any edge (partially visible)
+  const CW=(S.W+2*S.PAD)*S.cell, CH=(S.H+2*S.PAD)*S.cell;
+  for(const c of [cv,ov]){ c.width=CW; c.height=CH; c.style.width=CW+'px'; c.style.height=CH+'px'; }
+  $('#board').style.width=CW+'px'; $('#board').style.height=CH+'px';
   const spec=presetsAvailable()[S.groundPreset]; S.ground = spec ? spec.build(S.W,S.H) : null;
   drawBoard(); drawOverlay(); }
 $('#zoom').oninput=resize;
 
 function drawTile(ctx,si,id0,x,y){ const sh=S.sheets[si]; const sx=(id0%sh.cols)*T, sy=Math.floor(id0/sh.cols)*T; ctx.drawImage(sh.img,sx,sy,T,T,x*S.cell,y*S.cell,S.cell,S.cell); }
-function drawBoard(){ cvx.clearRect(0,0,cv.width,cv.height);
+function drawBoard(){ cvx.setTransform(1,0,0,1,0,0); cvx.clearRect(0,0,cv.width,cv.height);
+  const MW=S.W*S.cell, MH=S.H*S.cell;
+  cvx.setTransform(1,0,0,1,S.PAD*S.cell,S.PAD*S.cell);   // shift origin to the map (margin around it is off-map)
+  cvx.fillStyle='#0f1014'; cvx.fillRect(0,0,MW,MH);      // map area — margin stays the darker page bg
   if(S.ground){ for(let y=0;y<S.H;y++) for(let x=0;x<S.W;x++){ const t=S.ground[y*S.W+x]; if(t) drawTile(cvx,t.si,t.id0,x,y); } }
   for(const p of S.placements) blit(cvx,p);
   cvx.strokeStyle='#ffffff12'; cvx.lineWidth=1;
-  for(let x=0;x<=S.W;x++){ cvx.beginPath(); cvx.moveTo(x*S.cell+.5,0); cvx.lineTo(x*S.cell+.5,cv.height); cvx.stroke(); }
-  for(let y=0;y<=S.H;y++){ cvx.beginPath(); cvx.moveTo(0,y*S.cell+.5); cvx.lineTo(cv.width,y*S.cell+.5); cvx.stroke(); } }
+  for(let x=0;x<=S.W;x++){ cvx.beginPath(); cvx.moveTo(x*S.cell+.5,0); cvx.lineTo(x*S.cell+.5,MH); cvx.stroke(); }
+  for(let y=0;y<=S.H;y++){ cvx.beginPath(); cvx.moveTo(0,y*S.cell+.5); cvx.lineTo(MW,y*S.cell+.5); cvx.stroke(); }
+  cvx.strokeStyle='#4bb3fd99'; cvx.lineWidth=2; cvx.strokeRect(1,1,MW-2,MH-2);   // map boundary — anything past this is cut off in-game
+  cvx.setTransform(1,0,0,1,0,0); }
 function blit(ctx,p,alpha=1){ const sh=S.sheets[p.si]; if(!sh) return; const sx=(p.id0%sh.cols)*T, sy=Math.floor(p.id0/sh.cols)*T; ctx.globalAlpha=alpha;
   if(p.flip){ ctx.save(); ctx.translate((p.ox+p.w)*S.cell,0); ctx.scale(-1,1); ctx.drawImage(sh.img,sx,sy,p.w*T,p.h*T,0,p.oy*S.cell,p.w*S.cell,p.h*S.cell); ctx.restore(); }
   else ctx.drawImage(sh.img,sx,sy,p.w*T,p.h*T,p.ox*S.cell,p.oy*S.cell,p.w*S.cell,p.h*S.cell); ctx.globalAlpha=1; }
 // is every footprint cell a road tile? (vehicles only)
 function isRoad(x,y){ if(!S.ground) return false; const t=S.ground[y*S.W+x]; if(!t) return false;
   const k=S.keyByTile.get(t.si+':'+t.id0); return !!k && ROAD_RE.test(k); }
-function onRoad(ox,oy,w,h){ for(let r=0;r<h;r++) for(let c=0;c<w;c++) if(!isRoad(ox+c,oy+r)) return false; return true; }
-function canPlace(ox,oy,it){ if(ox<0||oy<0||ox+it.w>S.W||oy+it.h>S.H) return false;
+function onRoad(ox,oy,w,h){ let any=false; for(let r=0;r<h;r++) for(let c=0;c<w;c++){ const x=ox+c,y=oy+r; if(x<0||x>=S.W||y<0||y>=S.H) continue; any=true; if(!isRoad(x,y)) return false; } return any; }
+function canPlace(ox,oy,it){ if(ox+it.w<=0||oy+it.h<=0||ox>=S.W||oy>=S.H) return false;   // must overlap the map; may hang off any edge (partially visible)
   if(kindOf(it)==='vehicle') return onRoad(ox,oy,it.w,it.h);
   // one collidable per cell — no stacking a thousand lamps on one tile (RECONSIDER.md)
   for(const k of collideCellsOf({...it,ox,oy})) if(S.collideSet.has(k)) return false;
   return true; }
 
-function drawOverlay(){ ovx.clearRect(0,0,ov.width,ov.height); if(!S.hover) return;
+function drawOverlay(){ ovx.setTransform(1,0,0,1,0,0); ovx.clearRect(0,0,ov.width,ov.height); if(!S.hover) return;
+  ovx.setTransform(1,0,0,1,S.PAD*S.cell,S.PAD*S.cell);   // match drawBoard's off-map margin shift
   if(S.moveMode){
     if(S.held){ const ox=S.hover.cx, oy=S.hover.cy, fits=canPlace(ox,oy,S.held);
       blit(ovx,{...S.held,ox,oy}, fits?0.8:0.35);
@@ -356,7 +363,7 @@ function drawOverlay(){ ovx.clearRect(0,0,ov.width,ov.height); if(!S.hover) retu
   } else { ovx.fillStyle='#e8b04a22'; ovx.fillRect(ox*S.cell,oy*S.cell,w*S.cell,h*S.cell); }  // vehicle = amber
   ovx.strokeStyle=fits?'#57d08a':'#e8615f'; ovx.lineWidth=2; ovx.strokeRect(ox*S.cell+1,oy*S.cell+1,w*S.cell-2,h*S.cell-2); }
 
-ov.onmousemove=e=>{ const r=ov.getBoundingClientRect(); const cx=Math.floor((e.clientX-r.left)/S.cell), cy=Math.floor((e.clientY-r.top)/S.cell); S.hover={cx,cy};
+ov.onmousemove=e=>{ const r=ov.getBoundingClientRect(); const cx=Math.floor((e.clientX-r.left)/S.cell)-S.PAD, cy=Math.floor((e.clientY-r.top)/S.cell)-S.PAD; S.hover={cx,cy};
   let msg='';
   if(S.active){ if(kindOf(S.active)==='vehicle'){ msg=`🚗 ${S.active.word||S.active.key} — ${onRoad(cx,cy,S.active.w,S.active.h)?'on road ✓':'place on a road'}`; }
     else msg=`${S.active.word||S.active.key}${S.flip?' ⟲':''}`; }
@@ -411,7 +418,7 @@ function buildMap(){
   // objects, per-row split
   for(const p of S.placements){ const sh=S.sheets[p.si]; const rows=rowsFor(p);
     for(let r=0;r<p.h;r++){ const arr=data[rows[r]]||data.Furniture;
-      for(let c=0;c<p.w;c++){ const sc=p.flip?p.w-1-c:c; const gid=firstgid[p.si]+p.id0+r*sh.cols+sc; arr[(p.oy+r)*S.W+(p.ox+c)]=p.flip?(gid|FLIP)>>>0:gid; } } }
+      for(let c=0;c<p.w;c++){ const x=p.ox+c, y=p.oy+r; if(x<0||x>=S.W||y<0||y>=S.H) continue; const sc=p.flip?p.w-1-c:c; const gid=firstgid[p.si]+p.id0+r*sh.cols+sc; arr[y*S.W+x]=p.flip?(gid|FLIP)>>>0:gid; } } }
   // ENTITIES — per-instance metadata the game reads for behaviour. Each has a stable `id` so a
   // wrong one can be fixed individually. Tile layers above stay standard Tiled (render/collision);
   // this is an extra top-level array render-map.mjs ignores.
@@ -448,7 +455,8 @@ function thumbnail(){
   const c=document.createElement('canvas'); c.width=tw; c.height=th;
   const x=c.getContext('2d'); x.imageSmoothingEnabled=false;
   x.fillStyle='#1a1a1d'; x.fillRect(0,0,tw,th);
-  x.drawImage(cv, 0,0,tw,th);          // cv holds the rendered ground + placements
+  const o=S.PAD*S.cell;                 // cv includes the off-map margin — crop to just the map region
+  x.drawImage(cv, o,o, S.W*S.cell,S.H*S.cell, 0,0,tw,th);
   try{ return c.toDataURL('image/jpeg', 0.65); }catch{ return null; }
 }
 let saveTimer=null;

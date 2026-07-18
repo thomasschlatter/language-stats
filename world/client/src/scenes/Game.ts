@@ -732,9 +732,11 @@ export default class Game extends Phaser.Scene {
       for (let r = 0; r < o.h; r++) {
         const dest = byName[r < split ? 'Over' : base]
         for (let c = 0; c < o.w; c++) {
+          const x = e.x + c, y = e.y + r
+          if (x < 0 || x >= W || y < 0 || y >= H) continue   // objects may hang off the map edge — clip the off-map part
           const sc = e.flip ? o.w - 1 - c : c
           const gid = firstgid + o.id0 + r * cols + sc
-          const t = dest.putTileAt(gid, e.x + c, e.y + r)
+          const t = dest.putTileAt(gid, x, y)
           if (t && e.flip) t.flipX = true
         }
       }
