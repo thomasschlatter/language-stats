@@ -52,6 +52,7 @@
 
 <div id="app">
   <header>
+    <a href="/" title="Back to Groupifier" style="color:var(--accent);text-decoration:none;font-weight:600;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:#26262c;white-space:nowrap">← Groupifier</a>
     <h1>🗺️</h1>
     <input type="text" id="mapname" value="Untitled map" title="map name" style="width:150px">
     <span id="savestatus" class="pill"></span>
@@ -116,9 +117,11 @@ const ROAD_RE = /^(asph|dash|road)/i;
 // Returns {base, split}: rows [0..split) go to Over (walk-behind); rows [split..h) go to `base`.
 function layering(it){
   let base, solid;
-  if (it.layer && it.solid != null) { base = it.layer; solid = it.solid; }
+  // Buildings collide only at their BASE; the upper facade goes on Over so the character walks
+  // behind it (2.5D). This overrides the manifest's solid=full-height for buildings. (bottom 2 rows.)
+  if (it.cat === 'Buildings')      { base = 'Walls';     solid = Math.min(2, it.h); }
+  else if (it.layer && it.solid != null) { base = it.layer; solid = it.solid; }
   else if (it.cat === 'Terrain')   { base = 'Ground';    solid = it.h; }
-  else if (it.cat === 'Buildings') { base = 'Walls';     solid = it.h; }   // whole facade is solid backdrop
   else if (it.cat === 'Aircon')    { base = 'Over';      solid = 0;   }    // wall-mounted, above head, no collision
   else                             { base = 'Furniture'; solid = 1;   }    // props: only the bottom row (feet) collide
   solid = Math.max(0, Math.min(it.h, solid));
@@ -483,6 +486,7 @@ async function loadMap(id){
   if(d.groundPreset && presetsAvailable()[d.groundPreset]){ S.groundPreset=d.groundPreset; $('#ground').value=d.groundPreset; }
   const spec=presetsAvailable()[S.groundPreset]; S.ground = spec ? spec.build(S.W,S.H) : null;
   refresh(); S.loading=false; setStatus('loaded'); refreshMapList();
+  markDirty();   // re-persist with the current layering rules (upgrades maps saved under old rules)
 }
 $('#newmap').onclick=async()=>{ S.mapId=null; S.placements=[]; $('#mapname').value='Untitled map'; refresh(); await saveNow(); };
 $('#mapname').onchange=markDirty;
