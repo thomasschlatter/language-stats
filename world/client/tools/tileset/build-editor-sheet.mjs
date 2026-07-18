@@ -63,6 +63,7 @@ const modb = (n) => `${DIR.mod}/ME_Singles_Floor_Modular_Building_32x32_${n}.png
 const genb = (n) => `${DIR.genb}/ME_Singles_Generic_Building_32x32_${n}.png`;
 const thaib = (n) => `${PUB}/experiments/ME_Singles_Thai_Building_32x32_${n}.png`; // user's custom Thai buildings
 const expb = (n) => `${PUB}/experiments/ME_Singles_${n}_Building_32x32.png`;      // user's landmark shops
+const custom = (n) => `${PUB}/experiments/${n}.png`;                              // generated one-off tiles
 
 const PROP_THEMES = [
   { dir: DIR.prop, prefix: 'ME_Singles_City_Props_32x32_', load: (base) => prop(base) },
@@ -183,6 +184,10 @@ for (const s of [2, 3, 5, 6]) { const x = '_bcdef'[s - 1];
 const TERRAIN = [...TERRAIN_PRESET, ...TERRAIN_EXTRA].map((s) => ({
   ...s, load: terr, category: 'Terrain', layer: 'Ground', solid: 0,
 }));
+// Generated smooth-concrete pavement fill (no paver grid) — used by the "Concrete street" preset.
+const CUSTOM_TERRAIN = [
+  { key: 'concrete', single: 'concrete_smooth', load: custom, category: 'Terrain', layer: 'Ground', solid: 0 },
+];
 
 // ===========================================================================================
 // 2) BUILDINGS from 5_Floor. Six WHOLE buildings (front-elevation tiled roof + storey + signed
@@ -302,7 +307,7 @@ for (const theme of PROP_THEMES) {
 // ===========================================================================================
 // LOAD every object, MEASURING w/h from pixels (never trusting the name).
 // ===========================================================================================
-const SPEC = [...TERRAIN, ...BUILDINGS, ...CONDOS, ...THAI, ...LANDMARKS, ...VEHICLES, ...PROPS];
+const SPEC = [...TERRAIN, ...CUSTOM_TERRAIN, ...BUILDINGS, ...CONDOS, ...THAI, ...LANDMARKS, ...VEHICLES, ...PROPS];
 const seen = new Set();
 for (const s of SPEC) { if (seen.has(s.key)) throw new Error(`duplicate key: ${s.key}`); seen.add(s.key); }
 
