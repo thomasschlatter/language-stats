@@ -29,6 +29,20 @@
   player clips into it. When vehicle collision is implemented in the played room, scale the solid-row
   count with the sprite's size (e.g. bottom 2-3 rows for an 8×5 truck). (user, 2026-07-18)
 
+- **Vehicle turn-capability (`canTurn`) — track per vehicle type.** Some vehicles ship a TURN
+  animation (the `Car_classic_*_complete` cars have left/right + diagonal turn frames); others only
+  drive straight (trash trucks have NO turn frames — user confirmed). Store `canTurn: true|false` on
+  each vehicle object in the manifest. Future routing: at a junction/conjunction, a `canTurn` vehicle
+  may turn; a straight-only vehicle continues straight. This drives the traffic AI when maps have
+  intersections. Also record which frames are the turn frames per direction so the game can play
+  them. (user, 2026-07-18 — "keep track on which vehicles can take a turn and which not")
+- **`driveable` — player can enter & drive it (GTA-style).** A distinct vehicle property: can a
+  character get in and drive this vehicle under player control (not just autonomous traffic)? Store
+  `driveable: true|false` per vehicle. Driveable needs the vehicle's direction/turn frames so it can
+  steer, so `driveable` implies `canTurn`. Mechanic: walk up -> press E to enter -> drive with WASD,
+  the car plays the matching direction/turn animation, player rides it -> press E to exit. (user,
+  2026-07-18 — "canSteer... a character to actually drive the car GTA style")
+
 ## Smart / composite objects (collapse animation-frame pieces into ONE functional object)
 - **Traffic light.** Singles like `traffic_light_new_front_diagonal_left_up_orange` are *frames/pieces*
   of one object, not separate objects — this is the Street-tab bloat (~168 near-identical faces). Give
@@ -47,6 +61,13 @@
   (null-checks on tilemap layers), `stores/ComputerStore.ts` + `web/WebRTC.ts` (`Peer` used as
   namespace not type), `web/ShareScreenManager.ts` (`Error.type`). Clean them so `tsc` passes and
   `npm run build` works again — restores type-safety as a guard. (user, 2026-07-18)
+
+## Game ideas
+- **Zombie games.** Add a game mode with zombies (chase / survive / vocabulary-defence?). Character
+  art: `world/client/public/assets/modern_exteriors/Modern_Exteriors_RPG_Maker_MV/Characters/
+  MV_Graveyard_Zombies_Skeleton.png` (RPG Maker MV sheet — zombie + skeleton walk cycles, 3-frame
+  ×4-direction per character). Pairs with the 19_Graveyard theme tileset. Ties to
+  [[world-language-games]] (a game where the mechanic teaches vocab). (user, 2026-07-18)
 
 ## Server / site integration (in progress)
 - Serve the editor from the Groupifier site; per-user map storage; autosave; open a saved map as a

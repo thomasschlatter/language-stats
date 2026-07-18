@@ -55,10 +55,12 @@ const DIR = {
   terr: `${PACK}/2_City_Terrains_Singles_32x32`,
   prop: `${PACK}/3_City_Props_Singles_32x32`,
   mod: `${PACK}/5_Floor_Modular_Building_Singles_32x32`,
+  genb: `${PACK}/4_Generic_Building_Singles_32x32`,
 };
 const terr = (n) => `${DIR.terr}/ME_Singles_City_Terrains_32x32_${n}.png`;
 const prop = (n) => `${DIR.prop}/ME_Singles_City_Props_32x32_${n}.png`;
 const modb = (n) => `${DIR.mod}/ME_Singles_Floor_Modular_Building_32x32_${n}.png`;
+const genb = (n) => `${DIR.genb}/ME_Singles_Generic_Building_32x32_${n}.png`;
 
 const PROP_THEMES = [
   { dir: DIR.prop, prefix: 'ME_Singles_City_Props_32x32_', load: (base) => prop(base) },
@@ -69,12 +71,13 @@ const PROP_THEMES = [
 // CLASSIFY BY NAME — regex rules, not per-item judgement. Order matters: first match wins.
 // -------------------------------------------------------------------------------------------
 // Files that are fragments / duplicate variants / non-objects: never packed.
-const SKIP = /(_Modular|Modular_|_Mod$|_Mod_|_Example|_Hollow|_Empty($|_)|Shutter_Closed|Giant_Cone|Helix_Propeller|desktop)/i;
+// Trash_Truck: the 3_City_Props directional trash-truck FRAMES (Left/Right/Up/Down) are skipped —
+// the Vehicles tab is now populated by the dedicated VEHICLES pass below (whole side-view vehicles).
+const SKIP = /(_Modular|Modular_|_Mod$|_Mod_|_Example|_Hollow|_Empty($|_)|Shutter_Closed|Giant_Cone|Helix_Propeller|Trash_Truck|desktop)/i;
 
 // category (editor tab). Buildings/structures, Vehicles, Nature, Food, Street, Furniture, Clutter,
-// else "City Props". `kind:'vehicle'` only for things that drive (trash trucks).
+// else "City Props". (Vehicles are built by the dedicated VEHICLES pass, not name-classified here.)
 function categorize(name) {
-  if (/Trash_Truck/i.test(name)) return { category: 'Vehicles', kind: 'vehicle' };
   if (/Tree|Shrub|Flower|Bush|\bPot\b|Pigeon/i.test(name)) return { category: 'Nature' };
   if (/Candies_Cart|_Cart|Stall/i.test(name)) return { category: 'Food' };
   if (/Kiosk|Water_Tower|Power_House|Container_House|Junk_Shack|Wind_Turbine|Solar_Panel|Underground_Parking|Phone_Booth/i.test(name))
@@ -91,7 +94,7 @@ function categorize(name) {
 // everything else a prop -> Furniture/1 (bottom-row footprint = 2.5D walk-behind).
 function placement(name, category) {
   if (category === 'Terrain') return { layer: 'Ground', solid: 0 };
-  if (category === 'Buildings') return { layer: 'Walls', solid: 'full' };
+  if (category === 'Buildings') return { layer: 'Walls', solid: 2 }; // base collide, upper facade walk-behind
   if (/Manhole|\bGrate\b|Holes|Brake_Marks|Small_Trash_Pile|Trash_Pile_Props/i.test(name)) return { layer: 'Decor', solid: 0 };
   if (/Structure_Roof|Roof_Prop|Structure_Yellow_Light|Structure_Red_Light|Structure_Roof_Red/i.test(name)) return { layer: 'Over', solid: 0 };
   return { layer: 'Furniture', solid: 1 };
@@ -185,10 +188,68 @@ const BUILDINGS = [
   { key: 'shop_baitshop', single: 'Ground_Floor_Bait_Shop_1', word: 'shop' },
   { key: 'shop_music', single: 'Ground_Floor_Music_Store_1', word: 'music store' },
   { key: 'shop_gun', single: 'Ground_Floor_Gun_Store_1', word: 'shop' },
-].map((s) => ({ ...s, load: modb, category: 'Buildings', layer: 'Walls', solid: 'full', interactions: ['enterable'] }));
+].map((s) => ({ ...s, load: modb, category: 'Buildings', layer: 'Walls', solid: 2, interactions: ['enterable'] }));
+
+// 2b) MORE BUILDINGS from 4_Generic_Building — whole pre-isolated condo / apartment / storefront
+// singles (a taller, modern look next to the shophouses). Complete by construction (singles).
+const CONDOS = [
+  { key: 'condo_brick_a', single: 'Condo_4_38', word: 'apartment' },
+  { key: 'condo_brick_b', single: 'Condo_4_39', word: 'apartment' },
+  { key: 'condo_stone', single: 'Condo_6', word: 'building' },
+  { key: 'condo_tower', single: 'Condo_3_46', word: 'apartment' },
+  { key: 'condo_terrace', single: 'Condo_8', word: 'building' },
+  { key: 'condo_round', single: 'Condo_9', word: 'building' },
+  { key: 'condo_teal', single: 'Condo_4_40', word: 'building' },
+  { key: 'shop_grey_a', single: 'Condo_5_1', word: 'shop' },
+  { key: 'shop_grey_b', single: 'Condo_5_2', word: 'shop' },
+  { key: 'shop_hardware', single: 'Hardware_Store', word: 'hardware store' },
+].map((s) => ({ ...s, load: genb, category: 'Buildings', layer: 'Walls', solid: 2, interactions: ['enterable'] }));
 
 // ===========================================================================================
-// 3) PROPS — generated from the singles directory by the name rules above.
+// 3) VEHICLES — real drivable vehicles, ONE clean static side-view frame each, cut from the
+// ANIMATED source sheets (Modern Exteriors Animated_32x32 pack, committed under modern_exteriors_pack).
+// These are NOT ME_Theme_Sorter singles: each crop rect below was derived by opaque-BBOX MEASUREMENT
+// on the source sheet's side-view driving band and verified by rendering the frame ×N on magenta
+// (scratch renders), so it is one whole vehicle — not clipped, not two overlapping, no neighbour.
+// This REPLACES the old 8 directional trash-truck frames that used to fill the Vehicles tab.
+//
+//   kind:'vehicle'  — dynamic road agent (placed on roads; runtime, not static collision).
+//   canTurn         — the source sheet HAS turn/rotation frames, so the agent can round junctions.
+//                     Cars: yes (left/right/diagonal turn rows w/ red arrows). Buses: yes (same turn
+//                     rows + diagonal frames — verified on Buses_32x32_1). Trash trucks: NO — the
+//                     sheet is straight-drive frames only, zero turn/rotation rows.
+//   driveable       — a player can enter + steer it GTA-style; needs turn frames, so it implies
+//                     canTurn. Cars/buses: yes. Trash trucks: no (can't steer without turn frames).
+//
+// Crop rects (px, whole tiles) — verified extents (opaque bbox inside the crop):
+//   car_*   Car_classic_<color>_complete: cols1-4 rows4-6  (128x96, bbox x34-159 y150-223) — all 5
+//           colours share ONE template (identical alpha mask + 7264 opaque px each, measured).
+//   bus_N   Buses_32x32_N:                cols1-7 rows7-10 (224x128, bbox x32-255 y228-351) — all 6
+//           sheets share ONE template (identical mask + 26720 opaque px each, measured).
+//   trash*  Trash_Truck[_2]_32x32:        cols0-7 rows10-14 (256x160, bbox x20-255 y328-479).
+// ===========================================================================================
+const AVEH = `${PUB}/modern_exteriors_pack/Animated_32x32/Vehicles_32x32`;
+const carVeh = (color) => ({
+  key: `car_${color}`, word: 'car', canTurn: true, driveable: true,
+  crop: { file: `${AVEH}/Cars_32x32/Car_classic_${color}_complete_32x32.png`, left: 32, top: 128, w: 128, h: 96 },
+});
+const busVeh = (n) => ({
+  key: `bus_${n}`, word: 'bus', canTurn: true, driveable: true,
+  crop: { file: `${AVEH}/Buses_32x32/Buses_32x32_${n}.png`, left: 32, top: 224, w: 224, h: 128 },
+});
+const trashVeh = (key, file) => ({
+  key, word: 'truck', canTurn: false, driveable: false,
+  crop: { file: `${AVEH}/Trash_Truck_32x32/${file}`, left: 0, top: 320, w: 256, h: 160 },
+});
+const VEHICLES = [
+  ...['blue', 'green', 'grey', 'orange', 'red'].map(carVeh),
+  ...[1, 2, 3, 4, 5, 6].map(busVeh),
+  trashVeh('trash_truck', 'Trash_Truck_32x32.png'),
+  trashVeh('trash_truck_orange', 'Trash_Truck_2_32x32.png'),
+].map((s) => ({ ...s, category: 'Vehicles', kind: 'vehicle', layer: 'Furniture', solid: 1 }));
+
+// ===========================================================================================
+// 4) PROPS — generated from the singles directory by the name rules above.
 // ===========================================================================================
 const PROPS = [];
 for (const theme of PROP_THEMES) {
@@ -211,7 +272,7 @@ for (const theme of PROP_THEMES) {
 // ===========================================================================================
 // LOAD every object, MEASURING w/h from pixels (never trusting the name).
 // ===========================================================================================
-const SPEC = [...TERRAIN, ...BUILDINGS, ...PROPS];
+const SPEC = [...TERRAIN, ...BUILDINGS, ...CONDOS, ...VEHICLES, ...PROPS];
 const seen = new Set();
 for (const s of SPEC) { if (seen.has(s.key)) throw new Error(`duplicate key: ${s.key}`); seen.add(s.key); }
 
@@ -245,6 +306,17 @@ for (const s of SPEC) {
     buf = await sharp({ create: { width: w * 32, height: h * 32, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
       .composite(Array.from({ length: n }, (_, i) => ({ input: one.buf, left: i * one.w * 32, top: 0 }))).png().toBuffer();
     src = `${shortSrc(s.load(name))} x${n}`;
+  } else if (s.crop) {
+    // VEHICLE FRAME — extract a measured, tile-aligned rect from an animated source sheet. The rect
+    // is whole tiles by construction; guard alignment + in-bounds so a bad rect fails loudly (never
+    // silently slices a vehicle in half — the recurring clipped-object bug).
+    const { file, left, top, w: pw, h: ph } = s.crop;
+    if (left % 32 || top % 32 || pw % 32 || ph % 32) throw new Error(`${s.key}: crop ${left},${top} ${pw}x${ph} not tile-aligned`);
+    const m = await sharp(file).metadata();
+    if (left + pw > m.width || top + ph > m.height) throw new Error(`${s.key}: crop ${left},${top} ${pw}x${ph} out of ${m.width}x${m.height}`);
+    buf = await sharp(file).extract({ left, top, width: pw, height: ph }).png().toBuffer();
+    w = pw / 32; h = ph / 32;
+    src = `${file.slice(file.indexOf('Animated_32x32'))} @${left},${top} ${w}x${h}`;
   } else if (s.vstack) {
     // WHOLE BUILDING = equal-width singles composited top-to-bottom. Each is a complete band by
     // construction, so there is no rect to slice; the guard just enforces one width and tile-align.
@@ -290,7 +362,9 @@ for (const o of objs) {
   manifest.objects[o.key] = {
     id0: o.ty * COLS + o.tx, w: o.w, h: o.h, category: o.category, layer: o.layer, solid,
     ...(o.interactions?.length ? { interactions: o.interactions } : {}),
-    ...(o.word ? { word: o.word } : {}), ...(o.kind ? { kind: o.kind } : {}), src: o.src,
+    ...(o.word ? { word: o.word } : {}), ...(o.kind ? { kind: o.kind } : {}),
+    ...(o.canTurn !== undefined ? { canTurn: o.canTurn } : {}),
+    ...(o.driveable !== undefined ? { driveable: o.driveable } : {}), src: o.src,
   };
 }
 // GUARD: the "City street" preset addresses each fill key as a 1x1 ground cell (id0 only) and each
@@ -318,3 +392,5 @@ console.error('per category: ' + Object.entries(byCat).sort((a, b) => b[1] - a[1
 console.error(`preset terrain keys present: ${['pave', 'pave_s', 'asph', 'dash', 'kerb_n', 'kerb_s', 'zebra_t', 'zebra_m', 'zebra_b'].every((k) => manifest.objects[k]) ? 'ALL 9 OK' : 'MISSING'}`);
 if (bleedWarnings.length) console.error(`edge-bleed suspects (${bleedWarnings.length}): ${bleedWarnings.slice(0, 20).join(' | ')}${bleedWarnings.length > 20 ? ' …' : ''}`);
 else console.error('edge-bleed suspects: none (all singles padded/flush)');
+const veh = Object.entries(manifest.objects).filter(([, o]) => o.kind === 'vehicle');
+console.error(`vehicles (${veh.length}): ` + veh.map(([k, o]) => `${k} ${o.w}x${o.h} turn=${o.canTurn} drive=${o.driveable}`).join(', '));
