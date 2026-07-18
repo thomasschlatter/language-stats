@@ -242,6 +242,8 @@ function haveKeys(keys){ return keys.every(k => S.index.some(i => i.key === k));
 // in later). "City street" is generic — pavement + road + kerbs — not Bangkok-specific.
 const BUILTIN_PRESETS = {
   'Empty': { needs:[], build:()=>null },
+  // Smooth concrete plaza — uniform fill, no paver grid (answer to "a floor that isn't squares").
+  'Concrete (smooth)': { needs:['asph'], build:(W,H)=>{ const t=tileByKey('asph'); const g=new Array(W*H); for(let i=0;i<W*H;i++) g[i]={...t}; return g; } },
   'City street': { needs:['pave','asph','kerb_n','kerb_s','dash','zebra_t','zebra_m','zebra_b'], floor:true, build:(W,H)=>{
       const g=new Array(W*H).fill(0);
       const kN=Math.floor(H*0.6), road0=kN+1, road1=Math.min(H-2, road0+4), kS=road1+1, mid=Math.floor((road0+road1)/2);
