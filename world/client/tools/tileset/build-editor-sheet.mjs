@@ -62,6 +62,7 @@ const prop = (n) => `${DIR.prop}/ME_Singles_City_Props_32x32_${n}.png`;
 const modb = (n) => `${DIR.mod}/ME_Singles_Floor_Modular_Building_32x32_${n}.png`;
 const genb = (n) => `${DIR.genb}/ME_Singles_Generic_Building_32x32_${n}.png`;
 const thaib = (n) => `${PUB}/experiments/ME_Singles_Thai_Building_32x32_${n}.png`; // user's custom Thai buildings
+const expb = (n) => `${PUB}/experiments/ME_Singles_${n}_Building_32x32.png`;      // user's landmark shops
 
 const PROP_THEMES = [
   { dir: DIR.prop, prefix: 'ME_Singles_City_Props_32x32_', load: (base) => prop(base) },
@@ -213,6 +214,12 @@ const THAI = [
   { key: 'thai_apartment', single: '6', word: 'building' },
 ].map((s) => ({ ...s, load: thaib, category: 'Buildings', layer: 'Walls', solid: 2, interactions: ['enterable'] }));
 
+// 2d) The user's landmark shops — 7-Eleven + Longlai (5x8), re-extracted clean from their atlas.
+const LANDMARKS = [
+  { key: 'seven_eleven', single: '711', word: '7-Eleven' },
+  { key: 'longlai', single: 'longlai', word: 'Longlai' },
+].map((s) => ({ ...s, load: expb, category: 'Buildings', layer: 'Walls', solid: 2, interactions: ['enterable'] }));
+
 // ===========================================================================================
 // 3) VEHICLES — real drivable vehicles, ONE clean static side-view frame each, cut from the
 // ANIMATED source sheets (Modern Exteriors Animated_32x32 pack, committed under modern_exteriors_pack).
@@ -280,7 +287,7 @@ for (const theme of PROP_THEMES) {
 // ===========================================================================================
 // LOAD every object, MEASURING w/h from pixels (never trusting the name).
 // ===========================================================================================
-const SPEC = [...TERRAIN, ...BUILDINGS, ...CONDOS, ...THAI, ...VEHICLES, ...PROPS];
+const SPEC = [...TERRAIN, ...BUILDINGS, ...CONDOS, ...THAI, ...LANDMARKS, ...VEHICLES, ...PROPS];
 const seen = new Set();
 for (const s of SPEC) { if (seen.has(s.key)) throw new Error(`duplicate key: ${s.key}`); seen.add(s.key); }
 
