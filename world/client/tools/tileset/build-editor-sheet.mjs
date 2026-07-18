@@ -165,7 +165,20 @@ const ASPH_USED = new Set([2, 16]);
 const TERRAIN_EXTRA = [];
 for (let i = 1; i <= 54; i++) if (!SW1_USED.has(i)) TERRAIN_EXTRA.push({ key: `sw1_${i}`, single: `Sidewalk_1_${i}` });
 for (let i = 1; i <= 27; i++) if (!ASPH_USED.has(i)) TERRAIN_EXTRA.push({ key: `asphv_${i}`, single: `Asphalt_1_Variation_${i}` });
-for (let s = 2; s <= 6; s++) TERRAIN_EXTRA.push({ key: `pave_${'_bcdef'[s - 1]}`, single: `Sidewalk_${s}_25` });
+// Full pavement KIT per colourway (2..6) so the floor-colour picker can recolour the whole street
+// — fill + both kerbs + all three zebra tiles — not just the fill (asphalt/road stays shared).
+// Same tile indices colourway 1 uses (pave=_9, kerb_n=_6, kerb_s=_2, zebra_t/m/b=_29/_30/_32);
+// the Sidewalk_2..6 sheets are identical layouts recoloured, so these line up. Zebra tiles are 2-wide.
+// Colourway 4 is skipped: its zebra singles were exported at a broken 96x48 trim (not tile-aligned),
+// and it's a near-duplicate pale grey anyway. Colourways 2,3,5,6 → suffixes b,c,e,f.
+for (const s of [2, 3, 5, 6]) { const x = '_bcdef'[s - 1];
+  TERRAIN_EXTRA.push({ key: `pave_${x}`,  single: `Sidewalk_${s}_9` });
+  TERRAIN_EXTRA.push({ key: `kerbn_${x}`, single: `Sidewalk_${s}_6` });
+  TERRAIN_EXTRA.push({ key: `kerbs_${x}`, single: `Sidewalk_${s}_2` });
+  TERRAIN_EXTRA.push({ key: `zebt_${x}`,  single: `Sidewalk_${s}_29` });
+  TERRAIN_EXTRA.push({ key: `zebm_${x}`,  single: `Sidewalk_${s}_30` });
+  TERRAIN_EXTRA.push({ key: `zebb_${x}`,  single: `Sidewalk_${s}_32` });
+}
 
 const TERRAIN = [...TERRAIN_PRESET, ...TERRAIN_EXTRA].map((s) => ({
   ...s, load: terr, category: 'Terrain', layer: 'Ground', solid: 0,

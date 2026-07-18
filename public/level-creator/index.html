@@ -245,12 +245,13 @@ const BUILTIN_PRESETS = {
   'City street': { needs:['pave','asph','kerb_n','kerb_s','dash','zebra_t','zebra_m','zebra_b'], floor:true, build:(W,H)=>{
       const g=new Array(W*H).fill(0);
       const kN=Math.floor(H*0.6), road0=kN+1, road1=Math.min(H-2, road0+4), kS=road1+1, mid=Math.floor((road0+road1)/2);
-      const pav=tileByKey(S.floorColor)||tileByKey('pave'), pavS=pav, asp=tileByKey('asph'), dash=tileByKey('dash'), kn=tileByKey('kerb_n'), ks=tileByKey('kerb_s');
+      const K=FLOOR_KIT[S.floorColor]||FLOOR_KIT.pave;
+      const pav=tileByKey(K.fill)||tileByKey('pave'), pavS=pav, asp=tileByKey('asph'), dash=tileByKey('dash'), kn=tileByKey(K.kerbN)||tileByKey('kerb_n'), ks=tileByKey(K.kerbS)||tileByKey('kerb_s');
       for(let y=0;y<H;y++) for(let x=0;x<W;x++){ let t;
         if(y<kN)t=pav; else if(y===kN)t=kn; else if(y<kS)t=(y===mid)?dash:asp; else if(y===kS)t=ks; else t=pavS;
         g[y*W+x]={...t}; }
       // a zebra crossing by default — 2 wide, spanning kerb→kerb (zebra tiles are 2-wide objects)
-      const zt=tileByKey('zebra_t'), zm=tileByKey('zebra_m'), zb=tileByKey('zebra_b'), zx=Math.floor(W*0.25);
+      const zt=tileByKey(K.zebT)||tileByKey('zebra_t'), zm=tileByKey(K.zebM)||tileByKey('zebra_m'), zb=tileByKey(K.zebB)||tileByKey('zebra_b'), zx=Math.floor(W*0.25);
       if(zt&&zm&&zb) for(let c=0;c<2&&zx+c<W;c++){
         g[kN*W+zx+c]={si:zt.si,id0:zt.id0+c};
         for(let y=road0;y<=road1;y++) g[y*W+zx+c]={si:zm.si,id0:zm.id0+c};
@@ -292,7 +293,12 @@ $('#ground').onchange=e=>{ S.groundPreset=e.target.value; const spec=presetsAvai
   S.ground = spec ? spec.build(S.W,S.H) : null; syncFloorColors(); drawBoard(); markDirty(); };
 
 // ---- floor colour (which pavement colourway fills a street preset) ---------
-const FLOOR_COLORS=['pave','pave_b','pave_c','pave_d','pave_e','pave_f'];
+// colourway 4 (pave_d) dropped — its zebra tiles are broken in the source; b,c,e,f remain.
+const FLOOR_COLORS=['pave','pave_b','pave_c','pave_e','pave_f'];
+// Each colour swaps the WHOLE pavement kit (fill + kerbs + zebra caps) to one colourway; the
+// asphalt road (asph/dash) is shared and stays dark. Colourway 1 uses the original preset keys.
+const FLOOR_KIT={ pave:{fill:'pave',kerbN:'kerb_n',kerbS:'kerb_s',zebT:'zebra_t',zebM:'zebra_m',zebB:'zebra_b'} };
+for(const x of ['b','c','e','f']) FLOOR_KIT['pave_'+x]={fill:'pave_'+x,kerbN:'kerbn_'+x,kerbS:'kerbs_'+x,zebT:'zebt_'+x,zebM:'zebm_'+x,zebB:'zebb_'+x};
 function buildFloorColors(){ const box=$('#floorcolors'); box.querySelectorAll('button').forEach(b=>b.remove());
   for(const k of FLOOR_COLORS){ const t=tileByKey(k); if(!t) continue;
     const b=document.createElement('button'); b.className='swatch'+(k===S.floorColor?' primary':'');
